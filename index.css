@@ -4,7 +4,10 @@ body{
 #top-menu{	
 	background-color: #002A4E;
 	    border-radius: 0em;
-}	
+}
+#top-menu a {
+	color: white;
+}
 #title{	
 	font-family: 'Josefin Sans', sans-serif;	
 	text-shadow: 1px 1.5px 4px #000000;

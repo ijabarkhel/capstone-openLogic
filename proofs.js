@@ -1,18 +1,5 @@
 //class to hold the proof information
 class Proof{
-   id;
-   entryType
-   userSubmitted;
-   proofName;
-   proofType;
-   Premise;
-   Logic;
-   Rules;
-   proofCompleted;
-   conclusion;
-   timeSubmitted;
-   repoProblem;
-
    constructor(id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, conclusion, timeSubmitted, repoProblem){
       this.id = id;
       this.entryType = entryType;
@@ -28,8 +15,6 @@ class Proof{
       this.repoProblem = repoProblem;
    }
 }
-
-
 
 var proofBeingChecked = false;
 var proofCompleted = false;
@@ -452,14 +437,7 @@ function makeProof(pardiv, pstart, conc) {
       location.reload();
    }
 
-
-
-
-      var url_string =window.location.href;
-      var url = new URL(url_string);
-      var c = url.searchParams.get("mode");
-      
-        if(c=="insert" && sessionStorage.getItem("administrator") === "true")
+        if(insertMode && sessionStorage.getItem("administrator") === "true")
         {
             
                p.pushToDBButton = document.createElement("button");
@@ -470,76 +448,64 @@ function makeProof(pardiv, pstart, conc) {
                p.pushToDBButton.myPardiv = pardiv;
                p.pushToDBButton.conc = conc;
                p.pushToDBButton.myP = p;
-            
-      
-            
-      p.pushToDBButton.onclick = function() { console.log(predicateSettings.toString());
-      
-      var pd = this.start;
-      var wc = this.conc;
-        //putting the proof items into arrays
-               var Premise = [];
-               var Logic = [];
-               var Rules = [];
-               for(var i = 0; i < pd.length; i++){
-                  if(pd[i].jstr == "Pr"){
-                     Premise.push(pd[i].wffstr);
-                  }else{
-                     Logic.push(pd[i].wffstr);
-                     Rules.push(pd[i].jstr);
-                  }
-               }
-               //creating object to send over to database server
-               var id = null; //no need to set this, will be set at server
-               var entryType = "proof";
-               if($("#proofName").val() === ""){
-                  var proofName = "n/a";
-               }
-               else{
-                  var proofName = "Repository - " + $("#proofName").val();
-               }
-               var userSubmitted = sessionStorage.getItem("userlogged"); 
-               var proofType;
-               if(document.getElementById("tflradio").checked){
-                  proofType = "prop";
-               }
-               else{
-                  proofType = "fol";
-               }
-               var timeSubmitted = new Date();
-               var conclusion = wc;
-               //repo problem var
-               var repoProblem = "true";
-               var bool = "false"; //problem not completed
-               var postData = new Proof(id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, bool, conclusion, timeSubmitted, repoProblem );
-               
-               console.log(postData);
-               $.ajax({
-                  type: "POST",
-                  url: "https://proofsdb.herokuapp.com/saveproof",
-                  contentType: "application/json",
-                  dataType: "json",
-                  data: JSON.stringify(postData),
-                  success: function(data,status) {
-                     console.log("proof saved");
-                     loadSelect();
-                  },
-                  error: function(data,status) { //optional, used for debugging purposes
-                     
+
+               p.pushToDBButton.onclick = function() {
+                  console.log(predicateSettings.toString());
+                  var pd = this.start;
+                  var wc = this.conc;
+                  //putting the proof items into arrays
+                  var Premise = [];
+                  var Logic = [];
+                  var Rules = [];
+                  for(var i = 0; i < pd.length; i++){
+                     if(pd[i].jstr == "Pr"){
+                        Premise.push(pd[i].wffstr);
+                     }else{
+                        Logic.push(pd[i].wffstr);
+                        Rules.push(pd[i].jstr);
                      }
-               });//ajax
-      
-      
-      
-   }
-            
-            
-            
-            
-   
+                  }
+                  //creating object to send over to database server
+                  var id = null; //no need to set this, will be set at server
+                  var entryType = "proof";
+                  if($("#proofName").val() === ""){
+                     var proofName = "n/a";
+                  }
+                  else{
+                     var proofName = "Repository - " + $("#proofName").val();
+                  }
+                  var userSubmitted = sessionStorage.getItem("userlogged"); 
+                  var proofType;
+                  if(document.getElementById("tflradio").checked){
+                     proofType = "prop";
+                  }
+                  else{
+                     proofType = "fol";
+                  }
+                  var timeSubmitted = new Date();
+                  var conclusion = wc;
+                  //repo problem var
+                  var repoProblem = "true";
+                  var bool = "false"; //problem not completed
+                  var postData = new Proof(id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, bool, conclusion, timeSubmitted, repoProblem );
+                  
+                  console.log(postData);
+                  $.ajax({
+                     type: "POST",
+                     url: "/backend/saveproof",
+                     contentType: "application/json",
+                     dataType: "json",
+                     data: JSON.stringify(Object.assign({id_token: sessionStorage.getItem("id_token")}, postData)),
+                     success: function(data,status) {
+                        console.log("proof saved");
+                        loadSelect();
+                     },
+                     error: function(data,status) { //optional, used for debugging purposes
+                        
+                        }
+                  });//ajax
+            }
         }
-
-
 
    //delete line from to proof
    p.deleteLine = function(n) {
@@ -699,7 +665,7 @@ function makeProof(pardiv, pstart, conc) {
             "proofData" : JSON.stringify(this.proofdata),
             "wantedConc" : this.wantedConc,
             "numPrems" : this.numPrems
-         }, 
+         },
          success: function(data,status) {
             console.log(data);
             if (!(proofBeingChecked)){
@@ -722,12 +688,7 @@ function makeProof(pardiv, pstart, conc) {
             proofBeingChecked = false;
 
             ///saving proof to db only in user is logged in
-               var url_string =window.location.href;
-               var url = new URL(url_string);
-               var c = url.searchParams.get("mode");
-            
-   
-            if(sessionStorage.getItem("userlogged") !== null && c!="insert"){
+            if(sessionStorage.getItem("userlogged") !== null && insertMode) {
                //putting the proof items into arrays
                var Premise = [];
                var Logic = [];
@@ -771,10 +732,10 @@ function makeProof(pardiv, pstart, conc) {
                console.log(postData);
                $.ajax({
                   type: "POST",
-                  url: "https://proofsdb.herokuapp.com/saveproof",
+                  url: "/backend/saveproof",
                   contentType: "application/json",
                   dataType: "json",
-                  data: JSON.stringify(postData),
+                  data: JSON.stringify(Object.assign({id_token: sessionStorage.getItem('id_token')}, postData)),
                   success: function(data,status) {
                      console.log("proof saved");
                      loadSelect();
