@@ -37,6 +37,8 @@
     crossorigin="anonymous">
     </script>
     <script src="semantic/semantic.min.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="171509471210-8d883n4nfjebkqvkp29p50ijqmt6c5nd.apps.googleusercontent.com">
     <style>
       body {font-family: "Noto Sans";}
       a, a:hover, a:visited, a:focus, a:active {color: #0c1c8c; text-decoration: none; font-weight: bold ;}
@@ -62,7 +64,7 @@
           Logic Rules
         </a>
         <div class="right menu">
-            <p id="log-sign" class="item" style = "color : white;">
+            <div class="g-signin2" data-onsuccess="onSignIn"></div>
           </p>
           </div>
     </div>
@@ -268,6 +270,13 @@
   <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
   <script type="text/javascript" src="index.js"></script>
   <script>
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+    }
         //checking if there is a user logged in
         if(sessionStorage.getItem("userlogged") === null){
         $("#load-container").hide();
