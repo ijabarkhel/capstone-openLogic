@@ -34,7 +34,7 @@ var (
 		"cohunter@csumb.edu": true,
 	}
 
-	database_uri = "./db.sqlite3"
+	database_uri = "../db.sqlite3"
 )
 
 type Proof struct {
