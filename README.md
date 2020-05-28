@@ -8,7 +8,25 @@ There are three components of this web app:
 
 - Backend part #2 (database/user accounts, used by front-end)
 
-### Original README.md below
+## Deployment
+
+Recommended deployment strategy (optimizing for simplicity, low-cost, and minimal required maintenance) is to use a VPS running Ubuntu 20.04 LTS to host all components of the app.
+
+Suggested VPS size:
+
+- Minimum:
+-- 1 CPU core, 512 MB ram.
+- Recommenced:
+-- 1 high-performance CPU core, or 2 standard CPU cores per 50 concurrent users.
+-- 1 GB ram
+-- NVME local storage
+
+VPS meeting these specs should not cost more than $6-10/month.
+
+Hosting provider suggestions:
+
+
+### Original README.md (outdated) below
 -----
 ## Capstone Spring 2019: Logic Proof Checker
 This project was created for the Spring 2019 Capstone Class at California State University, Monterey Bay. The proof checking done in the project is derived from [OpenLogicProject](https://github.com/OpenLogicProject/fitch-checker).
