@@ -8,6 +8,31 @@ There are three components of this web app:
 
 - Backend part #2 (database/user accounts, used by front-end)
 
+## Installation
+
+_todo: create install script_
+
+The install script will interactively guide you through setup of the web app, including:
+
+- Installation and configuration of Nginx (web server)
+
+- Installation of php7-fpm and the multibyte extension
+
+- Installation of service configuration files for the backend part #2, and for receiving webhooks from GitHub
+
+After completion of the install script, the VPS/server will have been configured to start all necessary services automatically on reboot.
+
+
+## Making code changes
+
+Your repository should have two branches: _dev_ and _master_. When prompted by the install script, create web hooks via the GitHub website. Then, to make changes:
+
+- Test your changes by pushing new commits to the _dev_ branch.
+
+If your site is example.com, then the dev branch will deploy to dev.example.com.
+
+- When satisfied with the changes, deploy them to the live site by pushing new commits to the _master_ branch.
+
 ## Deployment
 
 Recommended deployment strategy (optimizing for simplicity, low-cost, and minimal required maintenance) is to use a VPS running Ubuntu 20.04 LTS to host all components of the app.
@@ -49,7 +74,7 @@ https://www.cloudflare.com/
 
 By using Cloudflare, or any similar CDN/security service, you gain greatly improved front-end load times and prevent most common types of attacks, including DoS/DDoS, with no additional effort. You also get the easiest, lowest-maintenance/hassle-free option for enabling HTTPS. Their free plan is more than sufficient for this web app, even if it were to be used by many classes/universities.
 
-### Scaling
+### Scaling and/or migrating
 
 The front-end and backend part #1 (php7) are stateless. They store no data and have no special requirements (php7 and the multibyte extension for backend part #1). Therefore, moving them or scaling them can be done by copying the files to any suitably configured webserver.
 
