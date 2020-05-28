@@ -21,11 +21,39 @@ Suggested VPS size:
 -- 1 GB ram
 -- NVME local storage
 
-VPS meeting these specs should not cost more than $6-10/month.
+VPS meeting or exceeding these specs should not cost more than $6-10/month.
 
-Hosting provider suggestions:
+Hosting suggestions for a single class:
 
+Vultr - $6/month
 
+https://www.vultr.com/products/high-frequency-compute/#pricing
+
+OVH - $6/month
+
+https://www.ovhcloud.com/en/vps/
+
+Linode - $5/month
+
+https://www.linode.com/pricing/
+
+AWS Lightsail - $5/month
+
+https://aws.amazon.com/lightsail/pricing/
+
+### Along with a hosting provider, it is recommended to use a CDN
+
+Cloudflare - free
+
+https://www.cloudflare.com/
+
+By using Cloudflare, or any similar CDN/security service, you gain greatly improved front-end load times and prevent most common types of attacks, including DoS/DDoS, with no additional effort. You also get the easiest, lowest-maintenance/hassle-free option for enabling HTTPS. Their free plan is more than sufficient for this web app, even if it were to be used by many classes/universities.
+
+### Scaling
+
+The front-end and backend part #1 (php7) are stateless. They store no data and have no special requirements (php7 and the multibyte extension for backend part #1). Therefore, moving them or scaling them can be done by copying the files to any suitably configured webserver.
+
+All of the application state is managed by backend part #2. The data is stored in an SQLite database, which consists of a single file. The database can be transferred to a different server by standard Unix utilities such as scp. After ensuring correct filesystem permissions, the backend part #2 can be run on a new server and will use the copy of the database.
 ### Original README.md (outdated) below
 -----
 ## Capstone Spring 2019: Logic Proof Checker
