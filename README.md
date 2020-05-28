@@ -1,4 +1,16 @@
-# Capstone Spring 2019: Logic Proof Checker
+# Logic Proof Check: Web App
+
+There are three components of this web app:
+
+- Front-end (static HTML/JavaScript)
+
+- Backend part #1 (open logic proof checker, php7)
+
+- Backend part #2 (database/user accounts, used by front-end)
+
+### Original README.md below
+-----
+## Capstone Spring 2019: Logic Proof Checker
 This project was created for the Spring 2019 Capstone Class at California State University, Monterey Bay. The proof checking done in the project is derived from [OpenLogicProject](https://github.com/OpenLogicProject/fitch-checker).
 
 ## Deployment
