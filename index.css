@@ -1,7 +1,10 @@
-body{	
+a, a:hover, a:visited, a:focus, a:active {color: #0c1c8c; text-decoration: none; font-weight: bold ;}
+label, legend { display: inline-block; } 
+body {
+	font-family: "Noto Sans";
 	background-color: #f4f1de;	
 }	
-#top-menu{	
+#top-menu {	
 	background-color: #002A4E;
 	    border-radius: 0em;
 }

@@ -13,40 +13,38 @@
     <meta property="og:image" content="sample.png" />
     <meta property="og:description" content="Fitch-style proof proof editor and checker" />
 
-    <!-- if mobile ready
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" /> -->
+    <meta name="mobile-web-app-capable" content="yes" />
 
     <!-- web icon -->
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/assets/logicproofchecker.png">
 
     <title>proof checker</title>
 
-    <!-- page style from https://github.com/dhg/Skeleton -->
-    <link rel="stylesheet" href="normalize.css">
-    <link rel="stylesheet" href="skeleton.css">
-    <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet" type="text/css">
-    <link rel="icon" href="/assets/logicproofchecker.png">
-    <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">    
-    <script 
-    src="https://code.jquery.com/jquery-3.1.1.min.js" 
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" 
-    crossorigin="anonymous">
-    </script>
-    <script src="semantic/semantic.min.js"></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="171509471210-8d883n4nfjebkqvkp29p50ijqmt6c5nd.apps.googleusercontent.com">
-    <style>
-      body {font-family: "Noto Sans";}
-      a, a:hover, a:visited, a:focus, a:active {color: #0c1c8c; text-decoration: none; font-weight: bold ;}
-      label, legend { display: inline-block; } 
-    </style>
-    <!-- css file -->
+    <!-- CSS & Fonts, via CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- CSS, local -->
+    <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="proofs.css" />
 
+    <!-- Scripts, via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    <!-- Sign in with Google Client ID -->
+    <meta name="google-signin-client_id" content="171509471210-8d883n4nfjebkqvkp29p50ijqmt6c5nd.apps.googleusercontent.com">
+    
+    <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
+    <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
+    <script type="text/javascript" src="index.js"></script>
   </head>
   <body>
   <div id="top-menu" class="ui menu" style = "height : 60px;">
@@ -62,7 +60,7 @@
         <a href="rules.html" class="item">
           Logic Rules
         </a>
-        <a id="adminLink" href="admin.html" class="item" style="display: none;">
+        <a id="adminLink" class="item" style="display: none;">
           Admin
         </a>
         <div class="right menu">
@@ -72,30 +70,30 @@
     </div>
 
   <!-- middle stuff -->
-      <div id="load-container" >
+      <div id="load-container" style="display: none;">
         <div style="float: left;"> 
-          <label for="loadproof">load unfinished proofs: </label>
-          <select id="loadproof">
+          <label for="userProofSelect">load unfinished proofs: </label>
+          <select id="userProofSelect" class="proofSelect">
             <option> waiting for server...</option>
           </select>
         </div>
         <!--  -->
         <div style="float: left; padding-left: .9rem;"> 
-          <label for="loadrepo">load repository problems: </label>
-          <select id="loadrepo" data-content="Loading repository problems will lock the 'name your proof', 'Premise', and 'Conclusion' inputs. To resart press the 'resart proof checking from scratch' button or refesh the page.">
+          <label for="repoProofSelect">load repository problems: </label>
+          <select id="repoProofSelect" class="proofSelect" data-content="Loading repository problems will lock the 'name your proof', 'Premise', and 'Conclusion' inputs. To resart press the 'resart proof checking from scratch' button or refesh the page.">
             <option> waiting for server...</option>
           </select>
         </div>
          <!--  -->
          <div style="float: left; padding-left: .9rem;"> 
-          <label for="loadfinshedrepo">finished repository problems: </label>
-          <select id="loadfinishedrepo" data-content="Finished repository problems will lock the 'name your proof', 'Premise', and 'Conclusion' inputs. To resart press the 'resart proof checking from scratch' button or refesh the page.">
+          <label for="userCompletedProofSelect">finished repository problems: </label>
+          <select id="userCompletedProofSelect" class="proofSelect" data-content="Finished repository problems will lock the 'name your proof', 'Premise', and 'Conclusion' inputs. To resart press the 'resart proof checking from scratch' button or refesh the page.">
             <option> waiting for server...</option>
           </select>
         </div>
       </div>
       
-      <div class="ui vertically divided grid" style="clear: both;">
+      <div class="ui stackable vertically divided grid" style="clear: both;">
           <div class="two column row" style="padding:1.5rem;padding-top:1rem;">
             <div class="column">
               
@@ -104,7 +102,7 @@
                     </h3>
                     <div id="textarea-container" class="ui attached segment">
 
-                        <div id="nameyourproof" style="padding-bottom: 14px;">
+                        <div id="nameyourproof" style="padding-bottom: 14px; display: none;">
                           <label>name your proof:</label>
                           <div class="ui input" >
                             <input id="proofName" type="text" placeholder="proof name" data-content="Naming your proof will allow you to finish it later if it is incomplete 👍🏽">
@@ -172,50 +170,22 @@
         <p id="bottom">Jay Arellano / Mustafa Al Asadi / Gautam Tata / Ben Lenz</p>
         <br>
       </div>
-  <script>
-    // work with existing code
-    const adminUsers = ["gbruns@csumb.edu"];
-    const insertMode = (window.location.search.indexOf("mode=insert") > -1);
 
-    function onSignIn(googleUser) {
-      var profile = googleUser.getBasicProfile();
-      let email = profile.getEmail();
-      let name = profile.getName();
-
-      let id_token = googleUser.getAuthResponse().id_token;
-      sessionStorage.setItem("id_token", id_token);
-
-      // work with existing code
-      sessionStorage.setItem("userlogged", email);
-
-      $('#user-email').text(email);
-
-      // show admin links
-      if ( adminUsers.indexOf(email) > -1 ) {
-        sessionStorage.setItem("administrator", true);
-        console.log("you are an administrator");
-
-        $('#adminLink').show();
-
-        if ( insertMode ) {
-          $('#nameyourproof').show();
-          $("#textarea-header").html("Add new proof to problem repository");
-        } else {
-          $('#nameyourproof').hide();
-        }
-      }
-
-      $("#load-container").show();
-      $("#nameyourproof").show();
-
-      loadSelect();
-      repoloadSelect();
-      finishedrepoloadSelect();
-    }
-  </script>
-  <script type="text/javascript" charset="utf-8" src="ajax.js"></script>
-  <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
-  <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
-  <script type="text/javascript" src="index.js"></script>
+      <!-- Administration Interface -->
+      <div class="ui modal">
+        <i class="close icon"></i>
+        <div class="header">
+          Administrator Options
+        </div>
+        <div class="content">
+          <button class="changeInsertMode">Enter Insert Mode</button>
+          <button class="downloadCSV">Download Student Problems as CSV</button>
+        </div>
+        <div class="actions">
+          <div class="ui black deny button">
+            Close
+          </div>
+        </div>
+      </div>
   </body>
 </html>
