@@ -6,27 +6,21 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
+	tokenauth "./google-token-auth"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
 	// Set allowed domains here.
-	authorized_domains = map[string]bool{
-		"csumb.edu": true,
+	authorized_domains = []string{
+		"csumb.edu",
 	}
 
 	// Client-side client ID from your Google Developer Console
 	// Same as in the front-end index.php
-	authorized_client_ids = map[string]bool{
-		"171509471210-8d883n4nfjebkqvkp29p50ijqmt6c5nd.apps.googleusercontent.com": true,
-	}
-
-	// This shouldn't be changed.
-	authorized_issuers = map[string]bool{
-		"accounts.google.com":         true,
-		"https://accounts.google.com": true,
+	authorized_client_ids = []string{
+		"171509471210-8d883n4nfjebkqvkp29p50ijqmt6c5nd.apps.googleusercontent.com",
 	}
 
 	admin_users = map[string]bool{
@@ -41,14 +35,12 @@ type Proof struct {
 	Id_token       string   // Google Auth token
 	Id             string   // mongo ID
 	EntryType      string   // ?
-	UserSubmitted  string   // ?
 	ProofName      string   // ?
 	ProofType      string   // ?
 	Premise        []string // ?
 	Logic          []string // ?
 	Rules          []string // ?
 	ProofCompleted string   // ?
-	TimeSubmitted  string   // date
 	Conclusion     string   // ?
 	RepoProblem    string   // ?
 }
@@ -68,73 +60,9 @@ type ProofSQLite struct {
 	RepoProblem    string
 }
 
-type TokenData struct {
-	Iss            string // "accounts.google.com"
-	Azp            string
-	Aud            string
-	Sub            string
-	Hd             string
-	Email          string
-	Email_verified string
-	At_hash        string
-	Name           string // "Corey Hunter"
-	Picture        string // "https://lh4.googleusercontent.com/-qvtvJDBlbvU/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucnRE4tpBC_h0n7AR6XRU-zmL0W8_w/s96-c/photo.jpg"
-	Given_name     string // "Corey"
-	Family_name    string // "Hunter"
-	Locale         string // "en"
-	Iat            string // "1590043835"
-	Exp            string // "1590047435"
-	Jti            string
-	Alg            string
-	Kid            string
-	Type           string // "JWT"
-}
-
-// Verify a Google-issued JWT token
-// return the token data and whether it is valid
-func verifyToken(token string) (TokenData, bool) {
-	log.Println("start")
-	var td TokenData
-	var client = &http.Client{Timeout: 5 * time.Second}
-	r, err := client.Get("https://oauth2.googleapis.com/tokeninfo?id_token=" + token)
-	if err != nil {
-		log.Println(err)
-		return td, false
-	}
-	defer r.Body.Close()
-	if err = json.NewDecoder(r.Body).Decode(&td); err != nil {
-		log.Printf("JSON decode error: %#v", err)
-		return td, false
-	}
-	log.Printf("%#v", td)
-
-	// Validate domain
-	if !authorized_domains[td.Hd] {
-		log.Printf("Unauthorized domain: %#v", td.Hd)
-		return td, false
-	}
-
-	// Validate Aud(ience)
-	if !authorized_client_ids[td.Aud] {
-		log.Printf("Unauthorized client ID: %#v", td.Aud)
-		return td, false
-	}
-
-	// Validate Iss(uer)
-	if !authorized_issuers[td.Iss] {
-		log.Printf("Unauthorized issuer: %#v", td.Iss)
-		return td, false
-	}
-
-	// Validate Exp(iration)
-	// TODO - Google does this anyways
-
-	return td, true
-}
-
 func saveProof(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" || req.Body == nil {
-		http.NotFound(w, req)
+		http.Error(w, "Request not accepted.", 400)
 		return
 	}
 
@@ -153,7 +81,7 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tok, valid := verifyToken(submittedProof.Id_token)
+	tok, valid := tokenauth.Verify(submittedProof.Id_token)
 	log.Printf("%+v, %+v", valid, tok)
 
 	if !valid {
@@ -214,7 +142,7 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Rules marshal error", 500)
 		return
 	}
-	_, err = stmt.Exec(submittedProof.EntryType, submittedProof.UserSubmitted, submittedProof.ProofName, submittedProof.ProofType,
+	_, err = stmt.Exec(submittedProof.EntryType, tok.Email, submittedProof.ProofName, submittedProof.ProofType,
 		PremiseJSON, LogicJSON, RulesJSON, submittedProof.ProofCompleted, submittedProof.Conclusion, submittedProof.RepoProblem,
 		submittedProof.EntryType, submittedProof.ProofType, PremiseJSON, LogicJSON, RulesJSON, submittedProof.ProofCompleted,
 		submittedProof.Conclusion, submittedProof.RepoProblem)
@@ -225,10 +153,36 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 	}
 	tx.Commit()
 
-	io.WriteString(w, "success")
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
 }
 
 func getProofs(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" || req.Body == nil {
+		http.Error(w, "Request not accepted.", 400)
+		return
+	}
+
+	// Accepted JSON fields must be defined here
+	type getProofRequest struct {
+		Token     string `json:"id_token"`
+		Selection string `json:"selection"`
+	}
+
+	var requestData getProofRequest
+
+	decoder := json.NewDecoder(req.Body)
+
+	// Will cause error if fields not defined in getProofRequest are sent
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&requestData); err != nil {
+		http.Error(w, "Unable to decode request body.", 400)
+		return
+	}
+
+	log.Printf("%+v", requestData)
+
 	db, err := sql.Open("sqlite3", database_uri)
 	if err != nil {
 		http.Error(w, "Database open error", 500)
@@ -236,15 +190,17 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 	}
 	defer db.Close()
 
-	queryParams := req.URL.Query()
-
-	token, found := queryParams["token"]
-	if !found {
+	if len(requestData.Token) == 0 {
 		http.Error(w, "Token required", 400)
 		return
 	}
 
-	tok, valid := verifyToken(token[0])
+	if len(requestData.Selection) == 0 {
+		http.Error(w, "Selection required", 400)
+		return
+	}
+
+	tok, valid := tokenauth.Verify(requestData.Token)
 	if !valid {
 		http.Error(w, "Token not valid", 400)
 		return
@@ -253,19 +209,10 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 	user := tok.Email
 	log.Printf("USER: %q", user)
 
-	// What do we want?
-	// User's own proofs, Repo Proofs, Completed Repo Proofs, or all repo problems
-
-	selection, found := queryParams["selection"]
-	if !found {
-		http.Error(w, "Selection required", 400)
-		return
-	}
-
 	var stmt *sql.Stmt
 	var rows *sql.Rows
 
-	switch selection[0] {
+	switch requestData.Selection {
 	case "user":
 		log.Println("user selection")
 		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE userSubmitted = ? AND proofCompleted = 'false' AND proofName != 'n/a'")
@@ -298,6 +245,19 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 		}
 		defer stmt.Close()
 		rows, err = stmt.Query(user)
+
+	case "downloadrepo":
+		log.Println("downloadrepo selection")
+		//'id,entryType,userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion\n';
+
+		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs")
+		if err != nil {
+			http.Error(w, "Statement prepare error", 500)
+			log.Fatal(err)
+			return
+		}
+		defer stmt.Close()
+		rows, err = stmt.Query()
 
 	default:
 		http.Error(w, "invalid selection", 400)
@@ -361,6 +321,7 @@ func testFunc(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Test Func")
 }
 func main() {
+	log.Println("Server initializing")
 	db, err := sql.Open("sqlite3", database_uri)
 	if err != nil {
 		log.Fatal(err)
@@ -393,11 +354,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Initialize token auth/cache
+	tokenauth.SetAuthorizedDomains(authorized_domains)
+	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
+
 	// method saveproof : POST : JSON <- id_token, proof
 	http.HandleFunc("/saveproof", saveProof)
 
 	// method user : GET : JSON -> [proof, proof]
 	http.HandleFunc("/proofs", getProofs)
 
+	log.Println("Server started")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
 }
