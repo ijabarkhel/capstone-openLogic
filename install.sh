@@ -46,6 +46,8 @@ function check_dependencies {
     check_command awk || MISSING_DEPS="$MISSING_DEPS gawk"
 
     check_command openssl || MISSING_DEPS="$MISSING_DEPS openssl"
+
+    check_command gcc || MISSING_DEPS="$MISSING_DEPS gcc"
     if [[ -z "$MISSING_DEPS" ]]; then
         return 0
     fi
@@ -197,6 +199,8 @@ function configureNginx {
     mkdir -p /var/www/live/public_html
     mkdir -p /var/www/dev/public_html
 
+    chown -R www-data:www-data /var/www
+
     echo "Configuring default nginx site to drop requests without a recognized 'Host' header."
     sed -i 's/^/#/' /etc/nginx/sites-enabled/default
     cat <<EOT >>/etc/nginx/sites-enabled/default
@@ -213,11 +217,11 @@ EOT
     echo "Configuring 'live' and 'dev' nginx sites."
 
     LIVE_NGINX_CONFIG=/etc/nginx/sites-enabled/live
-    cat <<EOT >>$LIVE_NGINX_CONFIG
+    cat <<EOT >$LIVE_NGINX_CONFIG
 server {
     #LISTEN_HERE
 
-    server_name $LIVE_DOMAIN
+    server_name $LIVE_DOMAIN;
 
     #SSL_CERT_HERE
     #SSL_CERT_KEY_HERE
@@ -249,11 +253,11 @@ server {
 }
 EOT
     DEV_NGINX_CONFIG=/etc/nginx/sites-enabled/dev
-    cat <<EOT >>$DEV_NGINX_CONFIG
+    cat <<EOT >$DEV_NGINX_CONFIG
 server {
     #LISTEN_HERE
 
-    server_name $DEV_DOMAIN
+    server_name $DEV_DOMAIN;
 
     #SSL_CERT ssl_certificate /etc/nginx/certs/cf.pem;
     #SSL_CERT_KEY ssl_certificate_key /etc/nginx/certs/cf.key;
@@ -266,7 +270,7 @@ server {
     # The dev instance runs on port 8081 instead of 8080
     location /backend/ {
         proxy_set_header Proxy "";
-        proxy_pass http://127.0.0.1:8081/
+        proxy_pass http://127.0.0.1:8081/;
     }
 
     # This is the only php file the site needs to run.
@@ -285,6 +289,20 @@ server {
 EOT
 }
 configureNginx
+
+# Copy the files to the webserver directories
+function copyWebFiles {
+    echo "Copying files to the web directories..."
+    git checkout master
+    cp *.html *.css *.js *.php /var/www/live/public_html;
+    cp -r assets /var/www/live/public_html;
+
+    git checkout dev
+
+    cp *.html *.css *.js *.php /var/www/dev/public_html;
+    cp -r assets /var/www/dev/public_html;
+}
+copyWebFiles
 
 function configureNginxHTTP {
     sed -i 's/\#LISTEN_HERE/listen 80;/' $LIVE_NGINX_CONFIG
@@ -399,15 +417,19 @@ function getTLSCerts {
         case "$CHOICE" in
             "$OPT1")
                 getCloudflareCerts
+                break
+                ;;
             "$OPT2")
                 echo "Starting LetsEncrypt certbot to get a free certificate and key."
                 getLetsEncryptCerts
+                break
                 ;;
             "$OPT3")
                 configureNginxHTTPS
                 echo "Please save your certificate in the following path: /etc/nginx/certs/cf.pem"
                 echo "Please save your private key in the following path: /etc/nginx/certs/cf.key"
                 read -p "Press enter to continue."
+                break
                 ;;
         esac
     done
@@ -417,9 +439,12 @@ getTLSCerts
 nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
 nginx -s reload
 
+
+
 function configureBackend {
     echo "Compiling backend (live)..."
     git checkout master
+    go get github.com/mattn/go-sqlite3
     go build backend.go
 
     if [[ $? -ne 0 ]]; then
@@ -429,7 +454,7 @@ function configureBackend {
     mkdir -p /usr/local/bin
     cp backend /usr/local/bin
 
-    cat <<EOT >>/etc/systemd/system/backend.service
+    cat <<EOT >/etc/systemd/system/backend.service
 [Unit]
 Description=Logic App Backend Service (Go)
 After=network.target
@@ -458,7 +483,7 @@ EOT
 
     cp backend /usr/local/bin/backend-dev
 
-    cat <<EOT >>/etc/systemd/system/backend-dev.service
+    cat <<EOT >/etc/systemd/system/backend-dev.service
 [Unit]
 Description=Logic App Backend Service (Go) Dev Branch
 After=network.target
@@ -478,3 +503,4 @@ EOT
 
 }
 configureBackend
+

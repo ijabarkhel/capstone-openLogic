@@ -29,7 +29,8 @@ var (
 		"cohunter@csumb.edu": true,
 	}
 
-	database_uri = "file:../db.sqlite3?cache=shared&mode=rwc&_journal_mode=WAL"
+	// When started via systemd, WorkingDirectory is set to one level above the public_html directory
+	database_uri = "file:db.sqlite3?cache=shared&mode=rwc&_journal_mode=WAL"
 )
 
 type Proof struct {
@@ -381,7 +382,8 @@ func main() {
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
 
-	// Get admin users
+	// Get admin users -- this is a public endpoint, no token required
+	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
 	log.Println("Server started")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
