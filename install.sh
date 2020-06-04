@@ -247,7 +247,7 @@ server {
         fastcgi_pass unix:/var/run/php/php-fpm.sock;
 
         # Specify SCRIPT_FILENAME
-        fastcgi_param SCRIPT_FILENAME $document_root/checkproof.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root/checkproof.php;
         include fastcgi_params;
     }
 }
@@ -282,7 +282,7 @@ server {
         fastcgi_pass unix:/var/run/php/php-fpm.sock;
 
         # Specify SCRIPT_FILENAME
-        fastcgi_param SCRIPT_FILENAME $document_root/checkproof.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root/checkproof.php;
         include fastcgi_params;
     }
 }
