@@ -1,9 +1,5 @@
 'use strict';
 
-// work with existing code
-const adminUsers = ["gbruns@csumb.edu"];
-const insertMode = (window.location.search.indexOf("mode=insert") > -1);
-
 const repositoryData = {
   'userProofs': [],
   'repoProofs': [],
@@ -16,9 +12,20 @@ const repositoryData = {
  */
 function onSignIn(googleUser) {
   console.log("onSignIn", googleUser);
-  new User(googleUser)
+
+  // This response will be cached after the first page load
+  $.getJSON('/backend/admins', (admins) => {
+    let adminUsers = [];
+    try {
+      adminUsers = admins['Admins'];
+    } catch(e) {
+      console.error('Unable to load admin users', e);
+    }
+
+    new User(googleUser, adminUsers)
     .initializeDisplay()
     .loadProofs();
+  });
 }
 
 /**
@@ -26,13 +33,14 @@ function onSignIn(googleUser) {
  */
 class User {
   /** Constructor is called from User.onSignIn - not intended for direct use. */
-  constructor(googleUser) {
+  constructor(googleUser, adminUsers) {
+    this.adminUsers = adminUsers;
     this.profile = googleUser.getBasicProfile();
     this.domain = googleUser.getHostedDomain();
     this.email = this.profile.getEmail();
     this.name = this.profile.getName();
 
-    if ( adminUsers.indexOf(this.email) > -1 ) {
+    if ( this.adminUsers.indexOf(this.email) > -1 ) {
       console.log('Logged in as an administrator.');
       this.showAdminFunctionality();
     }
@@ -79,7 +87,7 @@ class User {
   }
 
   static isAdministrator() {
-    return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
+    return this.adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
   }
 
   // Check if the current time (in unix timestamp) is after the token's expiration
@@ -368,8 +376,6 @@ $(document).ready(function() {
   });
 
   $('.downloadCSV').click( () => getCSV() );
-
-  $('.changeInsertMode').click( () => console.log('TODO: enter insert mode') );
   // End admin modal
 });
 
