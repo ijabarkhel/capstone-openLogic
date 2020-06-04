@@ -42,8 +42,8 @@
     <!-- Sign in with Google Client ID -->
     <meta name="google-signin-client_id" content="171509471210-8d883n4nfjebkqvkp29p50ijqmt6c5nd.apps.googleusercontent.com">
     
-    <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
-    <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
+    <script type="text/javascript" charset="utf-8" src="syntax_upstream.js"></script>
+    <script type="text/javascript" charset="utf-8" src="proofs_upstream.js"></script>
     <script type="text/javascript" src="index.js"></script>
   </head>
   <body>
@@ -80,14 +80,14 @@
         <!--  -->
         <div style="float: left; padding-left: .9rem;"> 
           <label for="repoProofSelect">load repository problems: </label>
-          <select id="repoProofSelect" class="proofSelect" data-content="Loading repository problems will lock the 'name your proof', 'Premise', and 'Conclusion' inputs. To resart press the 'resart proof checking from scratch' button or refesh the page.">
+          <select id="repoProofSelect" class="proofSelect" data-content="Checking a repository problem will overwrite any past attempts of the selected problem.">
             <option> waiting for server...</option>
           </select>
         </div>
          <!--  -->
          <div style="float: left; padding-left: .9rem;"> 
           <label for="userCompletedProofSelect">finished repository problems: </label>
-          <select id="userCompletedProofSelect" class="proofSelect" data-content="Finished repository problems will lock the 'name your proof', 'Premise', and 'Conclusion' inputs. To resart press the 'resart proof checking from scratch' button or refesh the page.">
+          <select id="userCompletedProofSelect" class="proofSelect" data-content="Finished repository problems can be edited.">
             <option> waiting for server...</option>
           </select>
         </div>
@@ -96,12 +96,11 @@
       <div class="ui stackable vertically divided grid" style="clear: both;">
           <div class="two column row" style="padding:1.5rem;padding-top:1rem;">
             <div class="column">
-              
                     <h3 id="textarea-header" class="ui top attached header">
                       Check Your Proof:
                     </h3>
                     <div id="textarea-container" class="ui attached segment">
-
+                      <div class="createProof">
                         <div id="nameyourproof" style="padding-bottom: 14px; display: none;">
                           <label>name your proof:</label>
                           <div class="ui input" >
@@ -109,22 +108,24 @@
                           </div>
                         </div>
 
-                      <input type="radio" name="tflfol" id="tflradio" checked /> <label for="tflradio">Propositional </label>
-                      <input type="radio" name="tflfol" id="folradio" /> <label for="folradio">First-Order</label><br /><br />
-                      Premises (separate with “,” or “;”):<br />
-                      <input id="probpremises" /><br /><br />
-                      Conclusion:<br />
-                      <input id="probconc" /><br /><br />
-                      <button type="button" id="createProb">create problem</button><br /><br />
-                        
-                      <h3 id="problabel" style="display: none;">Proof:</h3>
-                      <p id="proofdetails" style="display: none;"></p>
-                      <div id="theproof"></div>
-                      <br>
-                      <br>
+                        <input type="radio" name="tflfol" id="tflradio" checked /> <label for="tflradio">Propositional </label>
+                        <input type="radio" name="tflfol" id="folradio" /> <label for="folradio">First-Order</label><br /><br />
+                        Premises (separate with “,” or “;”):<br />
+                        <input id="probpremises" type="text" /><br /><br />
+                        Conclusion:<br />
+                        <input id="probconc" type="text" /><br /><br />
+                        <input type="hidden" id="repoProblem" value="false" />
+                        <button type="button" id="createProb">create problem</button><br /><br />
+                      </div>
+                      <div class="proofContainer" style="display: none;">
+                        <h3 id="problabel">Proof: <span class="proofNameSpan"></span></h3>
+                        <p id="proofdetails"></p>
+                        <div id="theproof"></div>
+                        <br>
+                        <br>
+                        <button type="button" class="newProof">Clear & Start a new Proof</button>
+                      </div>
                       
-                      
-                           
                     </div>
 
             </div>
@@ -178,7 +179,6 @@
           Administrator Options
         </div>
         <div class="content">
-          <button class="changeInsertMode">Enter Insert Mode</button>
           <button class="downloadCSV">Download Student Problems as CSV</button>
         </div>
         <div class="actions">
