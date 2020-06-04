@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"flag"
 
 	tokenauth "./google-token-auth"
 	_ "github.com/mattn/go-sqlite3"
@@ -28,10 +29,7 @@ var (
 		"cohunter@csumb.edu": true,
 	}
 
-
-	database_uri_rw = "file:../db.sqlite3?cache=shared&mode=rw&_journal_mode=WAL" // mode=rw -- can read and write
-	database_uri_create = "file:../db.sqlite3?cache=shared&mode=rw&_journal_mode=WAL" // mode=rwc -- can read, write, and create database
-	database_uri_ro = "file:../db.sqlite3?cache=shared&mode=ro&_journal_mode=WAL" // mode=ro -- can only read
+	database_uri = "file:../db.sqlite3?cache=shared&mode=rwc&_journal_mode=WAL"
 )
 
 type Proof struct {
@@ -49,8 +47,30 @@ type Proof struct {
 	TimeSubmitted  string
 }
 
+type Env struct {
+	db *sql.DB
+}
 
-func saveProof(w http.ResponseWriter, req *http.Request) {
+func getAdmins(w http.ResponseWriter, req *http.Request) {
+	type adminUsers struct {
+		Admins []string
+	}
+	var admins adminUsers
+	for adminEmail := range admin_users {
+		admins.Admins = append(admins.Admins, adminEmail)
+	}
+	output, err := json.Marshal(admins)
+	if err != nil {
+		http.Error(w, "Error returning admin users.", 500)
+		return
+	}
+
+	// Allow browsers and intermediaries to cache this response for up to a day (86400 seconds)
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	io.WriteString(w, string(output))
+}
+
+func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	tok := req.Context().Value("tok").(tokenauth.TokenData)
 	
 	var submittedProof Proof
@@ -68,11 +88,7 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	db, err := sql.Open("sqlite3", database_uri_rw)
-	if err != nil {
-		http.Error(w, "Database open error", 500)
-		log.Fatal(err)
-	}
+	db := env.db
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -137,7 +153,7 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, `{"success": "true"}`)
 }
 
-func getProofs(w http.ResponseWriter, req *http.Request) {
+func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	tok := req.Context().Value("tok").(tokenauth.TokenData)
 
 	if req.Method != "POST" || req.Body == nil {
@@ -161,12 +177,7 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", requestData)
 
-	db, err := sql.Open("sqlite3", database_uri_ro)
-	if err != nil {
-		http.Error(w, "Database open error", 500)
-		log.Fatal(err)
-	}
-	defer db.Close()
+	db := env.db
 
 	if len(requestData.Selection) == 0 {
 		http.Error(w, "Selection required", 400)
@@ -178,6 +189,7 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 
 	var stmt *sql.Stmt
 	var rows *sql.Rows
+	var err error
 
 	switch requestData.Selection {
 	case "user":
@@ -289,16 +301,11 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func testFunc(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Test Func")
-}
-func main() {
-	log.Println("Server initializing")
-	db, err := sql.Open("sqlite3", database_uri_create)
+func initializeDatabase() (*sql.DB) {
+	db, err := sql.Open("sqlite3", database_uri)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	// Initialize database tables
 	// proofs : [Premise, Logic, Rules] are JSON fields
@@ -326,16 +333,56 @@ func main() {
 		log.Fatal(err)
 	}
 
+	return db
+}
+
+// This will delete all rows, but not reset the auto_increment id
+func (env *Env) clearDatabase() {
+	_, err := env.db.Exec(`DELETE FROM proofs`)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (env *Env) populateTestData() {
+	_, err := env.db.Exec(`INSERT INTO proofs (entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem) VALUES ('proof', 'gbruns@csumb.edu', 'Repository - Problem 2', 'prop', '[ "P", "P -> Q", "Q -> R", "R -> S", "S -> T", "T -> U", "V -> W", "W -> X", "X -> Y", "Y -> X" ]', '[]', '[]', 'false', '2019-04-29T01:45:44.452+0000', 'Y', 'true');`)
+	
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func main() {
+	log.Println("Server initializing")
+
+	db := initializeDatabase() // Get an instance of *sql.DB
+	defer db.Close() // When the server exits, close the db handle
+	Env := &Env{db} // Put the instance into a struct to share between threads
+
+	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
+	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")
+
+	flag.Parse() // Check for command-line arguments
+	if *doClearDatabase {
+		Env.clearDatabase()
+	}
+	if *doPopulateDatabase {
+		Env.populateTestData()
+	}
+
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
 
 	// method saveproof : POST : JSON <- id_token, proof
-	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(saveProof)))
+	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
 	// method user : POST : JSON -> [proof, proof, ...]
-	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(getProofs)))
+	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
 
+	// Get admin users
+	http.Handle("/admins", http.HandlerFunc(getAdmins))
 	log.Println("Server started")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
 }
