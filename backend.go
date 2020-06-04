@@ -28,44 +28,31 @@ var (
 		"cohunter@csumb.edu": true,
 	}
 
-	database_uri = "../db.sqlite3"
+
+	database_uri_rw = "file:../db.sqlite3?cache=shared&mode=rw&_journal_mode=WAL" // mode=rw -- can read and write
+	database_uri_create = "file:../db.sqlite3?cache=shared&mode=rw&_journal_mode=WAL" // mode=rwc -- can read, write, and create database
+	database_uri_ro = "file:../db.sqlite3?cache=shared&mode=ro&_journal_mode=WAL" // mode=ro -- can only read
 )
 
 type Proof struct {
-	Id_token       string   // Google Auth token
-	Id             string   // mongo ID
-	EntryType      string   // ?
-	ProofName      string   // ?
-	ProofType      string   // ?
-	Premise        []string // ?
+	Id             string   // SQL ID
+	EntryType      string   // 'proof'
+	UserSubmitted  string	// Used for results, ignored on user input
+	ProofName      string   // user-chosen name (repo problems start with 'Repository - ')
+	ProofType      string   // 'prop' (propositional/tfl) or 'fol' (first order logic)
+	Premise        []string // Array of 
 	Logic          []string // ?
 	Rules          []string // ?
-	ProofCompleted string   // ?
+	ProofCompleted string   // 'true', 'false', or 'error'
 	Conclusion     string   // ?
-	RepoProblem    string   // ?
+	RepoProblem    string   // 'true' if problem started from a repo problem, else 'false'
+	TimeSubmitted  string
 }
 
-type ProofSQLite struct {
-	Id             int
-	EntryType      string
-	UserSubmitted  string
-	ProofName      string
-	ProofType      string
-	Premise        []string
-	Logic          []string
-	Rules          []string
-	ProofCompleted string
-	TimeSubmitted  string
-	Conclusion     string
-	RepoProblem    string
-}
 
 func saveProof(w http.ResponseWriter, req *http.Request) {
-	if req.Method != "POST" || req.Body == nil {
-		http.Error(w, "Request not accepted.", 400)
-		return
-	}
-
+	tok := req.Context().Value("tok").(tokenauth.TokenData)
+	
 	var submittedProof Proof
 
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
@@ -81,14 +68,7 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tok, valid := tokenauth.Verify(submittedProof.Id_token)
-	log.Printf("%+v, %+v", valid, tok)
-
-	if !valid {
-		http.Error(w, "Invalid token", 400)
-	}
-
-	db, err := sql.Open("sqlite3", database_uri)
+	db, err := sql.Open("sqlite3", database_uri_rw)
 	if err != nil {
 		http.Error(w, "Database open error", 500)
 		log.Fatal(err)
@@ -158,6 +138,8 @@ func saveProof(w http.ResponseWriter, req *http.Request) {
 }
 
 func getProofs(w http.ResponseWriter, req *http.Request) {
+	tok := req.Context().Value("tok").(tokenauth.TokenData)
+
 	if req.Method != "POST" || req.Body == nil {
 		http.Error(w, "Request not accepted.", 400)
 		return
@@ -165,16 +147,12 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 
 	// Accepted JSON fields must be defined here
 	type getProofRequest struct {
-		Token     string `json:"id_token"`
 		Selection string `json:"selection"`
 	}
 
 	var requestData getProofRequest
 
 	decoder := json.NewDecoder(req.Body)
-
-	// Will cause error if fields not defined in getProofRequest are sent
-	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&requestData); err != nil {
 		http.Error(w, "Unable to decode request body.", 400)
@@ -183,26 +161,15 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", requestData)
 
-	db, err := sql.Open("sqlite3", database_uri)
+	db, err := sql.Open("sqlite3", database_uri_ro)
 	if err != nil {
 		http.Error(w, "Database open error", 500)
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	if len(requestData.Token) == 0 {
-		http.Error(w, "Token required", 400)
-		return
-	}
-
 	if len(requestData.Selection) == 0 {
 		http.Error(w, "Selection required", 400)
-		return
-	}
-
-	tok, valid := tokenauth.Verify(requestData.Token)
-	if !valid {
-		http.Error(w, "Token not valid", 400)
 		return
 	}
 
@@ -248,6 +215,11 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 
 	case "downloadrepo":
 		log.Println("downloadrepo selection")
+		if !admin_users[tok.Email] {
+			http.Error(w, "Insufficient privileges", 403)
+			return
+		}
+
 		//'id,entryType,userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion\n';
 
 		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs")
@@ -270,9 +242,9 @@ func getProofs(w http.ResponseWriter, req *http.Request) {
 	}
 	defer rows.Close()
 
-	var userProofs []ProofSQLite
+	var userProofs []Proof
 	for rows.Next() {
-		var userProof ProofSQLite
+		var userProof Proof
 		var PremiseJSON string
 		var LogicJSON string
 		var RulesJSON string
@@ -322,7 +294,7 @@ func testFunc(w http.ResponseWriter, req *http.Request) {
 }
 func main() {
 	log.Println("Server initializing")
-	db, err := sql.Open("sqlite3", database_uri)
+	db, err := sql.Open("sqlite3", database_uri_create)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -359,10 +331,10 @@ func main() {
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
 
 	// method saveproof : POST : JSON <- id_token, proof
-	http.HandleFunc("/saveproof", saveProof)
+	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(saveProof)))
 
-	// method user : GET : JSON -> [proof, proof]
-	http.HandleFunc("/proofs", getProofs)
+	// method user : POST : JSON -> [proof, proof, ...]
+	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(getProofs)))
 
 	log.Println("Server started")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))

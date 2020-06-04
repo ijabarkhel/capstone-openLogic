@@ -1,6 +1,7 @@
 package tokenauth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -90,6 +91,29 @@ func Verify(token string) (TokenData, bool) {
 	return tok, valid
 }
 
+// Middleware to validate a Google-issued JWT before processing the request
+// Assumes the request is NOT cross-origin, and so does not send CORS headers
+func WithValidToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
+		if req.Method != "POST" || req.Body == nil {
+			http.Error(w, "Request not authorized.", 401);
+			return
+		}
+
+		log.Println(req.Header.Get("X-Auth-Token"))
+		
+		tok, valid := Verify(req.Header.Get("X-Auth-Token"))
+		if !valid {
+			http.Error(w, "Token not valid.", 401)
+			return
+		}
+
+		ctx := context.WithValue(req.Context(), "tok", tok)
+
+		next.ServeHTTP(w, req.WithContext(ctx))
+	})
+}
+
 func getFromCache(token string) (*cachedTokenData, error) {
 	token_cache.RLock()
 	defer token_cache.RUnlock()
@@ -114,7 +138,7 @@ func addToCache(token string, data TokenData, valid bool) {
 func init() {
 	// Launch goroutine to periodically remove expired cache entries
 	go func() {
-		for range time.NewTicker(5 * time.Second).C {
+		for range time.NewTicker(500 * time.Second).C {
 			pruneCache()
 		}
 	}()
