@@ -10,7 +10,37 @@ There are three components of this web app:
 
 ## Installation
 
-_todo: create install script_
+### Prerequisites
+
+#### Domain Name or Subdomain
+
+- In order to use Sign-in with Google, you will need a domain name or subdomain.
+
+- Websites like https://tld-list.com are useful if choosing a domain name.
+
+- Once you've decided on which domain and/or subdomains you will use, a later step will be to choose a server to run the web app. This can be a hosted server, or any other server that is internet-reachable. See _Deployment_ for more.
+
+#### Sign-in with Google
+
+- You need a Google OAUTH client ID for Web Application
+
+Obtain one by following the instructions here: https://developers.google.com/identity/sign-in/web/sign-in#create_authorization_credentials
+
+*The client secret is not needed, as this application uses Google accounts only for authentication.*
+
+- After obtaining a client ID, ensure that you have edited `index.html` (meta tag, around line 43) and `backend.go` (authorized_client_ids) to contain your client ID.
+
+*Without a Google OAUTH client ID which has been configured via the Google Developer Console with your selected domain name(s), the app can be installed and configured but sign in will not be available.*
+
+#### Server setup
+
+1. Log in via ssh as root to your server instance.
+
+2. Clone your repository, for example: `git clone https://github.com/cohunter/capstone-openLogic.git` (but use your repo's URL).
+
+3. Change into the 'capstone-openLogic' directory: `cd capstone-openLogic`
+
+4. Run the install script: `bash install.sh`
 
 The install script will interactively guide you through setup of the web app, including:
 
