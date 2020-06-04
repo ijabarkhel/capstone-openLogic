@@ -6,6 +6,8 @@ const repositoryData = {
   'completedUserProofs': []
 }
 
+let adminUsers = [];
+
 /**
  * This function is called by the Google Sign-in Button
  * @param {*} googleUser 
@@ -15,14 +17,13 @@ function onSignIn(googleUser) {
 
   // This response will be cached after the first page load
   $.getJSON('/backend/admins', (admins) => {
-    let adminUsers = [];
     try {
       adminUsers = admins['Admins'];
     } catch(e) {
       console.error('Unable to load admin users', e);
     }
 
-    new User(googleUser, adminUsers)
+    new User(googleUser)
     .initializeDisplay()
     .loadProofs();
   });
@@ -33,14 +34,13 @@ function onSignIn(googleUser) {
  */
 class User {
   /** Constructor is called from User.onSignIn - not intended for direct use. */
-  constructor(googleUser, adminUsers) {
-    this.adminUsers = adminUsers;
+  constructor(googleUser) {
     this.profile = googleUser.getBasicProfile();
     this.domain = googleUser.getHostedDomain();
     this.email = this.profile.getEmail();
     this.name = this.profile.getName();
 
-    if ( this.adminUsers.indexOf(this.email) > -1 ) {
+    if ( adminUsers.indexOf(this.email) > -1 ) {
       console.log('Logged in as an administrator.');
       this.showAdminFunctionality();
     }
@@ -87,7 +87,7 @@ class User {
   }
 
   static isAdministrator() {
-    return this.adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
+    return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
   }
 
   // Check if the current time (in unix timestamp) is after the token's expiration
