@@ -17,10 +17,10 @@ body {
 	transition: .5s;	
 	letter-spacing: .03em;
 	font-size: 2.2em;
-}	
-#logo{
+}
+.logo {
 	display: block;
-  margin-left: auto;
+	margin-left: auto;
 	margin-right: auto;
 	width: 100px;
 	margin-bottom: 5px;
@@ -59,10 +59,17 @@ hr{
     border-radius: 0 0 .28571429rem .28571429rem;	
     max-width: 100%;	
 } 	
-#bottom{
+.bottom{
 	text-align: center;
 	margin: 0;
 	color: #002A4E;
+	padding-bottom: 15px;
+}
+.bottom p {
+	margin-bottom: 0;
+}
+.bottom p:last-child {
+	padding-top: 15px;
 }
 textarea{	
 	width: 100%;	
