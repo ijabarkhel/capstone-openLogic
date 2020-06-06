@@ -1,0 +1,7 @@
+# sudoers file to allow the git-hook user to stop/start the backend
+# Install path: /etc/sudoers.d/03-git-hook
+
+git-hook ALL=NOPASSWD: /usr/bin/systemctl stop backend
+git-hook ALL=NOPASSWD: /usr/bin/systemctl start backend
+git-hook ALL=NOPASSWD: /usr/bin/systemctl stop backend-dev
+git-hook ALL=NOPASSWD: /usr/bin/systemctl start backend-dev
