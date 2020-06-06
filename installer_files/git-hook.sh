@@ -53,14 +53,15 @@ function updateBackend {
 function runGitHook {
     touch "$TS_FILE"
     >>$LOG_FILE echo "[Git-Hook]: Started at `date`"
-    git pull
     git checkout master
+    git pull
 
     updatePublicHtml "/var/www/live/public_html"
     updateBackend "backend"
 
     git checkout dev
-
+    git pull
+    
     updatePublicHtml "/var/www/dev/public_html"
     updateBackend "backend-dev"
 }

@@ -251,10 +251,10 @@ EOT
     echo "Configuring 'live' and 'dev' nginx sites."
 
     LIVE_NGINX_CONFIG=/etc/nginx/sites-enabled/live
-    cat installer_files/live.conf >$LIVE_NGINX_CONFIG
+    sed "s/LIVE_DOMAIN/$LIVE_DOMAIN/" installer_files/live.conf >$LIVE_NGINX_CONFIG
 
     DEV_NGINX_CONFIG=/etc/nginx/sites-enabled/dev
-    cat installer_files/dev.conf >$DEV_NGINX_CONFIG
+    sed "s/DEV_DOMAIN/$DEV_DOMAIN/" installer_files/dev.conf >$DEV_NGINX_CONFIG
 }
 configureNginx
 
