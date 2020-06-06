@@ -450,7 +450,6 @@ function configureBackend {
     popd
 
     cat installer_files/backend.service >/etc/systemd/system/backend.service
-    chmod +x /etc/systemd/system/backend.service
 
     echo "Compiling backend (dev)..."
     git checkout dev
@@ -468,7 +467,6 @@ function configureBackend {
     popd
 
     cat installer_files/backend-dev.service >/etc/systemd/system/backend-dev.service
-    chmod +x /etc/systemd/system/backend-dev.service
 
     echo "Configuring services to start at boot..."
     systemctl enable backend
@@ -527,7 +525,6 @@ function installGitHookService {
     chmod +x /usr/local/bin/git-hook.sh
 
     cp installer_files/git-hook.service /etc/systemd/system/git-hook.service
-    chmod +x /etc/systemd/system/git-hook.service
 
     echo "Configuring git-hook service to start at boot."
     systemctl enable git-hook.service

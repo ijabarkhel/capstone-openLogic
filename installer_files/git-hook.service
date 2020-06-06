@@ -12,6 +12,7 @@ Type=simple
 Restart=always
 RestartSec=15
 User=git-hook
+Group=www-data
 ExecStart=/usr/local/bin/git-hook.sh
 
 [Install]

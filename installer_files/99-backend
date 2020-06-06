@@ -12,6 +12,10 @@
 
 # Install path: /etc/update-motd.d/99-backend
 
+echo "[ Git-Hook ]"
+systemctl status git-hook || true
+[[ -f /home/git-hook/git-hook-service.log ]] && tail /home/git-hook/git-hook-service.log
+
 echo "[ Backend ]"
 systemctl status backend || true
 [[ -f /tmp/backend.motd ]] && cat -vet /tmp/backend.motd
