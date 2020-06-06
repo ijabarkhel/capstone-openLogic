@@ -181,6 +181,7 @@ function check_cloudflare {
         USES_CLOUDFLARE=1
     fi
 }
+check_cloudflare
 
 # Check if the entered domain/subdomains are resolvable and resolve to this IP
 function checkDNS {
