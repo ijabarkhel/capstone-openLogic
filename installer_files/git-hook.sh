@@ -35,6 +35,7 @@ function updateBackend {
     rm backend/backend
     pushd .
     cd backend
+    go get github.com/mattn/go-sqlite3
     go build backend
     if [[ -x ./backend ]]; then
         cp backend /usr/local/bin/$1

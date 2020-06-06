@@ -242,6 +242,8 @@ server {
     return 444;
 }
 EOT
+    unlink /etc/nginx/sites-enabled/{live,dev}
+    
     nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver cannot start."
     nginx -s reload
 
@@ -259,13 +261,18 @@ configureNginx
 function copyWebFiles {
     echo "Copying files to the web directories..."
     git checkout master
+    pushd .
+    cd frontend
     cp *.html *.css *.js *.php /var/www/live/public_html;
     cp -r assets /var/www/live/public_html;
+    popd
 
     git checkout dev
-
+    pushd .
+    cd frontend
     cp *.html *.css *.js *.php /var/www/dev/public_html;
     cp -r assets /var/www/dev/public_html;
+    popd
 }
 copyWebFiles
 
@@ -287,6 +294,8 @@ function configureNginxHTTPS {
 }
 
 function getCloudFlareCertsFromUser {
+    configureNginxHTTPS
+
     echo "Please follow these directions to generate a certificate."
     echo "1. Log in to Cloudflare."
     echo "2. Select the appropriate account for the domain requiring an Origin CA certificate."
@@ -312,8 +321,6 @@ function getCloudFlareCertsFromUser {
     cat > /etc/nginx/certs/cf.key
 
     echo "File written to /etc/nginx/certs/cf.key"
-
-    configureNginxHTTPS
 }
 
 function configureAuthenticatedOriginPulls {
