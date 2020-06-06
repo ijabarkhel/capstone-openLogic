@@ -515,10 +515,10 @@ function configureGitHook {
         read -p "Press enter to continue..."
     fi
 
-    pushd "$(pwd)"
-
+    pushd .
     cd /home/git-hook/
     sudo -u git-hook git clone "$GIT_ORIGIN"
+    popd
 }
 configureGitHook
 
