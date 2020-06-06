@@ -536,3 +536,17 @@ function installGitHookService {
     systemctl start git-hook
 }
 installGitHookService
+
+# Set permissions on /var/www to allow group writes
+function setPermissionsWeb {
+    echo "Settings filesystem permissions..."
+    chown -R www-data:www-data /var/www
+    chmod -R g+w /var/www
+
+    # Allow git-hook to update backend binaries
+    chown git-hook /usr/local/bin/backend
+    chown git-hook /usr/local/bin/backend-dev
+}
+setPermissionsWeb
+
+echo "Installation complete"

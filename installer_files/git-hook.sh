@@ -5,7 +5,7 @@
 cd /home/git-hook/capstone-openLogic
 
 # This file is used to keep track of when the git-hook was last run
-TS_FILE="/var/run/git-hook.timestamp"
+TS_FILE="/home/git-hook/git-hook.timestamp"
 
 # The minimum number of seconds between runs of the git-hook script
 MIN_INTERVAL=60
