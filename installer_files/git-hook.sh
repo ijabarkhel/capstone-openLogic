@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Install path: /usr/local/bin/git-hook.sh
+# Working Directory: /home/git-hook/capstone-openLogic
+cd /home/git-hook/capstone-openLogic
 
 # This file is used to keep track of when the git-hook was last run
 TS_FILE="/var/run/git-hook.timestamp"
