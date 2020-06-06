@@ -363,6 +363,7 @@ func main() {
 
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")
+	portPtr := flag.String("port", "8080", "Port to listen on")
 
 	flag.Parse() // Check for command-line arguments
 	if *doClearDatabase {
@@ -386,5 +387,5 @@ func main() {
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
 	log.Println("Server started")
-	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
+	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }
