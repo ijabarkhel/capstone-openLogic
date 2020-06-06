@@ -333,7 +333,7 @@ function configureAuthenticatedOriginPulls {
 }
 
 function getCloudflareCerts {
-    local OPT1="Use 'flexible SSL' and configure the local webserver for HTTP only (least secure)"
+    local OPT1="Use 'flexible SSL' and configure the local webserver for HTTP only (least secure, not recommended)"
     local OPT2="Use a Cloudflare-generated certificate, accept all requests"
     local OPT3="Use a Cloudflare-generated certificate, accept only Cloudflare-signed requests (most secure)"
 
