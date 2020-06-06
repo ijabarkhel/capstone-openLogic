@@ -21,6 +21,7 @@ function getCurrentBranch {
 
 # Function that updates a public_html folder, given a path as first argument
 function updatePublicHtml {
+    CID=$(git rev-parse HEAD)
     pushd .
     cd frontend
     cp *.html *.css *.js *.php "$1/"

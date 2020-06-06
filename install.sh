@@ -242,8 +242,8 @@ server {
     return 444;
 }
 EOT
-    unlink /etc/nginx/sites-enabled/{live,dev}
-    
+    rm -f /etc/nginx/sites-enabled/{live,dev}
+
     nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver cannot start."
     nginx -s reload
 
@@ -327,8 +327,8 @@ function configureAuthenticatedOriginPulls {
     echo "Configuring authenticated origin pulls."
     curl "https://support.cloudflare.com/hc/en-us/article_attachments/360044928032/origin-pull-ca.pem" > /etc/nginx/certs/origin-pull-ca.pem
 
-    sed -i 's/\#AUTHENTICATED_ORIGIN_CERT_HERE/ssl_client_certificate \/etc\/nginx\/certs\/cloudflare.crt;\n\tssl_verify_client on;/' $LIVE_NGINX_CONFIG
-    sed -i 's/\#AUTHENTICATED_ORIGIN_CERT_HERE/ssl_client_certificate \/etc\/nginx\/certs\/cloudflare.crt;\n\tssl_verify_client on;/' $DEV_NGINX_CONFIG
+    sed -i 's/\#AUTHENTICATED_ORIGIN_CERT_HERE/ssl_client_certificate \/etc\/nginx\/certs\/origin-pull-ca.pem;\n\tssl_verify_client on;/' $LIVE_NGINX_CONFIG
+    sed -i 's/\#AUTHENTICATED_ORIGIN_CERT_HERE/ssl_client_certificate \/etc\/nginx\/certs\/origin-pull-ca.pem;\n\tssl_verify_client on;/' $DEV_NGINX_CONFIG
 }
 
 function getCloudflareCerts {
@@ -431,6 +431,8 @@ configureNginxGitHook
 function configureBackend {
     echo "Compiling backend (live)..."
     git checkout master
+    pushd .
+    cd backend
     go get github.com/mattn/go-sqlite3
     go build backend.go
 
@@ -441,6 +443,8 @@ function configureBackend {
     mkdir -p /usr/local/bin
     cp backend /usr/local/bin
 
+    popd
+
     cat installer_files/backend.service >/etc/systemd/system/backend.service
     chmod +x /etc/systemd/system/backend.service
 
@@ -448,12 +452,16 @@ function configureBackend {
     git checkout dev
     git stash
 
+    pushd .
+    cd backend
     go build backend.go
     if [[ $? -ne 0 ]]; then
         errorConfirm "Could not compile backend (dev)."
     fi
 
     cp backend /usr/local/bin/backend-dev
+
+    popd
 
     cat installer_files/backend-dev.service >/etc/systemd/system/backend-dev.service
     chmod +x /etc/systemd/system/backend-dev.service
@@ -514,9 +522,13 @@ function installGitHookService {
     cp installer_files/git-hook.sh /usr/local/bin/git-hook.sh
     chmod +x /usr/local/bin/git-hook.sh
 
+    cp installer_files/git-hook.service /etc/systemd/system/git-hook.service
+    chmod +x /etc/systemd/system/git-hook.service
+
     echo "Configuring git-hook service to start at boot."
     systemctl enable git-hook.service
 
     echo "Starting git-hook service..."
     systemctl start git-hook
 }
+installGitHookService
