@@ -507,6 +507,10 @@ function configureGitHook {
         errorConfirm "The git-hook user and www-data user do not have matching group IDs. Git hook updates may not work as expected."
     fi
 
+    echo "Adding git-hook user to sudoers for backend stop/start commands..."
+    cat installer_files/03-git-hook > /etc/sudoers.d/03-git-hook
+    chmod 0440 /etc/sudoers.d/03-git-hook
+
     if [[ $GIT_ORIGIN =~ "git@github.com" ]]; then
         echo "This git repository was cloned using ssh. Please copy your private key to /home/git-hook/.ssh/ so that the git-hook user can clone it."
         echo "Alternatively, if the repository is public, use the HTTPS origin instead of SSH."
