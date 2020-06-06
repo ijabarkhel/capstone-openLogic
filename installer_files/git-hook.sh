@@ -24,33 +24,33 @@ function getCurrentBranch {
 # Function that updates a public_html folder, given a path as first argument
 function updatePublicHtml {
     CID=$(git rev-parse HEAD)
-    pushd .
     cd frontend
     cp *.html *.css *.js *.php "$1/"
     cp -r assets "$1/"
     <index.html sed "s/GIT_VERSION_TAG/$CID/" >"$1/index.html"
-    popd
+    cd ..
 }
 
 # Function that updates backend and restarts service, given file/service name as first argument
 function updateBackend {
     # Delete previous build of backend
     rm backend/backend
-    pushd .
     cd backend
     go get github.com/mattn/go-sqlite3
     go build backend
     if [[ -x ./backend ]]; then
         cp backend /usr/local/bin/$1
         systemctl restart $1
+        >$LOG_FILE echo "[$1]: Backend recompiled and restarted."
     else
         >$LOG_FILE echo "[$1]: Backend did not build successfully."
     fi
-    popd
+    cd ..
 }
 
 function runGitHook {
     touch "$TS_FILE"
+    >$LOG_FILE echo "[Git-Hook]: Started at `date`"
     git pull
     git checkout master
 
