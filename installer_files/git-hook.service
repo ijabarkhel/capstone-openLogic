@@ -1,0 +1,18 @@
+# Systemd service file for git-hook
+# Install path: /etc/systemd/system/git-hook.service
+
+[Unit]
+Description=Logic App Git-Hook Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/home/git-hook/capstone-openLogic
+Type=simple
+Restart=always
+RestartSec=15
+User=git-hook
+ExecStart=/usr/local/bin/git-hook.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,12 @@
 #!/bin/bash
+
+# This script installs all necessary components of the web app.
+# Requires: Ubuntu 20.04, 64-bit, IPv4 connectivity
+
+# See INSTALL.md for documentation and manual install instructions.
+
+# Function to display an error message and an option to continue anyways.
+# This function cannot be used from within subshells $(...)
 function errorConfirm {
     echo -e "$1"
     if [[ -z $2 ]]; then
@@ -21,10 +29,12 @@ function errorConfirm {
     done
 }
 
+# Check that a given command exists, and is executable
 function check_command {
-    command -v $1 >/dev/null 2>&1
+    command -v $1 >/dev/null 2>&1 && [[ -x $(command -v $1) ]]
 }
 
+# Check that the script is being run as root
 function check_privileges {
     if [[ $EUID -ne 0 ]]; then
         echo "This script must be run as root."
@@ -32,6 +42,13 @@ function check_privileges {
     fi
 }
 check_privileges
+
+# Check that the script is being run on Ubuntu 20.04 LTS, x86_64
+function check_host_os {
+    grep -q -s 'DISTRIB_RELEASE=20.04' /etc/lsb-release || errorConfirm "This script is intended for use only on Ubuntu 20.04 LTS. You may encounter issues on another OS."
+    [[ $(uname -m) = 'x86_64' ]] || errorConfirm "This script is intended for use only on 64-bit x86 servers. You may encounter issues on other architectures."
+}
+check_host_os
 
 # Check dependencies before running the script
 function check_dependencies {
@@ -48,33 +65,45 @@ function check_dependencies {
     check_command openssl || MISSING_DEPS="$MISSING_DEPS openssl"
 
     check_command gcc || MISSING_DEPS="$MISSING_DEPS gcc"
+
+    check_command git || MISSING_DEPS="$MISSING_DEPS git"
+
     if [[ -z "$MISSING_DEPS" ]]; then
         return 0
     fi
 
     echo "This script requires some additional software to run."
-    errorConfirm "May I run the following command to install the dependencies?" "    apt install $MISSING_DEPS"
-    apt update && apt install $MISSING_DEPS
+    errorConfirm "May I run the following command to install the dependencies?" "    apt install -y $MISSING_DEPS"
+    apt update && apt install -y $MISSING_DEPS
 }
 check_dependencies
 
-# GET the contents of a URL using either curl or wget
+function checkLocalGitRepository {
+    GIT_ORIGIN=$(git config --get remote.origin.url)
+    if [[ -z $GIT_ORIGIN ]]; then
+        echo "This script must be run from within a git repository."
+        exit 1
+    fi
+}
+checkLocalGitRepository
+
+# Warn the user if they have uncommited changes to the git repository
+function checkGitUncommitedChanges {
+    git diff-index --quiet HEAD -- || errorConfirm "Your local git repository has uncommited changes that will be lost. Please commit your changes if you would like to keep them."
+}
+checkGitUncommitedChanges
+
+# GET the contents of a URL using curl, timeout after 5 seconds
+# This function is used by subshells, e.g. CONTENTS=$(getUrl http://example.org/)
 function getUrl {
-    check_command curl
-    if [[ $? -eq 0 ]]; then
-        timeout 5 curl "$1" 2>/dev/null
-        return
+    timeout 5 curl "$1" 2>/dev/null
+    if [[ $? -ne 0 ]]; then
+        >>/dev/stderr echo "curl $1 timed out. retrying one time."
+        timeout 5 curl "$1"
+        if [[ $? -ne 0 ]]; then
+            >>/dev/stderr echo "Could not retrieve URL after 2 attempts. The script may not be able to complete as intended."
+        fi
     fi
-
-    check_command wget
-    if [[ $? -eq 0 ]]; then
-        timeout 5 wget -qO- "$1" 2>/dev/null
-        return
-    fi
-
-    echo "Please install either curl or wget to run this script."
-    echo "Try: apt install curl"
-    exit 1
 }
 
 # Set LOCAL_IP to the local IP address(es)
@@ -86,7 +115,7 @@ function getInternalIP {
         echo "Multiple local IP addresses found: $LOCAL_IP"
     fi
 }
-#getInternalIP
+getInternalIP
 
 # Set EXTERNAL_IP to the external IPv4 address
 function getExternalIP {
@@ -102,7 +131,7 @@ function getExternalIP {
 
     echo "External IPv4: $EXTERNAL_IP"
 }
-#getExternalIP
+getExternalIP
 
 # Set PUBLIC_IP to the matching internal and external IP
 function findLocalExternalIP {
@@ -116,8 +145,9 @@ function findLocalExternalIP {
     
     return errorConfirm "Could not find a matching local and external IP address.\nYou may need to configure port forwarding."
 }
-#findLocalExternalIP
+findLocalExternalIP
 
+# Get domain names from user input, set LIVE_DOMAIN and DEV_DOMAIN
 function getDomainNames {
     echo "Please provide your chosen domain (or subdomain) names for the web app."
 
@@ -144,8 +174,9 @@ function verifyDomainNames {
 }
 verifyDomainNames
 
+# Check if an IP address belongs to Cloudflare
 function check_cloudflare {
-    ORG=$(whois "$1" | awk '/Organization/{ print }')
+    ORG=$(timeout 5 whois "$1" | awk '/Organization/{ print }')
     if [[ "$ORG" =~ "Cloudflare " ]]; then
         USES_CLOUDFLARE=1
     fi
@@ -158,13 +189,13 @@ function checkDNS {
 
     if [[ -z $LIVE_DNS ]]; then
         echo 'The "live" address failed to resolve.'
-        errorConfirm "Please confirm that you have configured your DNS settings for $LIVE_DNS to point to: $PUBLIC_IP"
+        errorConfirm "Please confirm that you have configured your DNS settings for $LIVE_DOMAIN to point to: $PUBLIC_IP"
         FAILED_RESOLVE=1
     fi
     
     if [[ -z $DEV_DNS ]]; then
         echo 'The "dev" address failed to resolve.'
-        errorConfirm "Please confirm that you have configured your DNS settings for $DEV_DNS to point to: $PUBLIC_IP"
+        errorConfirm "Please confirm that you have configured your DNS settings for $DEV_DOMAIN to point to: $PUBLIC_IP"
         FAILED_RESOLVE=1
     fi
 
@@ -217,76 +248,10 @@ EOT
     echo "Configuring 'live' and 'dev' nginx sites."
 
     LIVE_NGINX_CONFIG=/etc/nginx/sites-enabled/live
-    cat <<EOT >$LIVE_NGINX_CONFIG
-server {
-    #LISTEN_HERE
+    cat installer_files/live.conf >$LIVE_NGINX_CONFIG
 
-    server_name $LIVE_DOMAIN;
-
-    #SSL_CERT_HERE
-    #SSL_CERT_KEY_HERE
-
-    #AUTHENTICATED_ORIGIN_CERT_HERE
-
-    root /var/www/live/public_html;
-    index index.html;
-
-    location /backend/ {
-        proxy_set_header Proxy "";
-
-        # Note the trailing / means nginx will remove '/backend' from the URL
-        proxy_pass http://127.0.0.1:8080/;
-    }
-
-    # This is the only php file the site needs to run.
-    location = /checkproof.php {
-        # Prevent HTTPoxy
-        fastcgi_param HTTP_PROXY "";
-
-        # Pass to php-fpm via unix socket
-        fastcgi_pass unix:/var/run/php/php-fpm.sock;
-
-        # Specify SCRIPT_FILENAME
-        fastcgi_param SCRIPT_FILENAME \$document_root/checkproof.php;
-        include fastcgi_params;
-    }
-}
-EOT
     DEV_NGINX_CONFIG=/etc/nginx/sites-enabled/dev
-    cat <<EOT >$DEV_NGINX_CONFIG
-server {
-    #LISTEN_HERE
-
-    server_name $DEV_DOMAIN;
-
-    #SSL_CERT ssl_certificate /etc/nginx/certs/cf.pem;
-    #SSL_CERT_KEY ssl_certificate_key /etc/nginx/certs/cf.key;
-
-    #AUTHENTICATED_ORIGIN_CERT_HERE
-
-    root /var/www/dev/public_html;
-    index index.html;
-
-    # The dev instance runs on port 8081 instead of 8080
-    location /backend/ {
-        proxy_set_header Proxy "";
-        proxy_pass http://127.0.0.1:8081/;
-    }
-
-    # This is the only php file the site needs to run.
-    location = /checkproof.php {
-        # Prevent HTTPoxy
-        fastcgi_param HTTP_PROXY "";
-
-        # Pass to php-fpm via unix socket
-        fastcgi_pass unix:/var/run/php/php-fpm.sock;
-
-        # Specify SCRIPT_FILENAME
-        fastcgi_param SCRIPT_FILENAME \$document_root/checkproof.php;
-        include fastcgi_params;
-    }
-}
-EOT
+    cat installer_files/dev.conf >$DEV_NGINX_CONFIG
 }
 configureNginx
 
@@ -439,7 +404,22 @@ getTLSCerts
 nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
 nginx -s reload
 
+function configureNginxGitHook {
+    echo "Configuring git-hook URL."
+    RAND_PATH=$(</dev/urandom tr -cd '[:alnum:]' | head -c32)
+    sed -i "s/RAND_PATH_HERE/$RAND_PATH/" "$DEV_NGINX_CONFIG"
 
+    nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
+    nginx -s reload
+
+    echo "IMPORTANT: Your unique git-hook Payload URL:"
+    echo
+    echo "https://$DEV_DOMAIN/$RAND_PATH/git-hook"
+    echo
+    echo "Add to your GitHub repository by clicking 'Settings', then 'Webhooks', then 'Add Webhook' on the GitHub website."
+    read -p "Enter the URL into your GitHub settings, then press enter to continue..."
+}
+configureNginxGitHook
 
 function configureBackend {
     echo "Compiling backend (live)..."
@@ -454,23 +434,8 @@ function configureBackend {
     mkdir -p /usr/local/bin
     cp backend /usr/local/bin
 
-    cat <<EOT >/etc/systemd/system/backend.service
-[Unit]
-Description=Logic App Backend Service (Go)
-After=network.target
-StartLimitIntervalSec=0
-
-[Service]
-WorkingDirectory=/var/www/live
-Type=simple
-Restart=always
-RestartSec=3
-User=www-data
-ExecStart=/usr/local/bin/backend
-
-[Install]
-WantedBy=multi-user.target
-EOT
+    cat installer_files/backend.service >/etc/systemd/system/backend.service
+    chmod +x /etc/systemd/system/backend.service
 
     echo "Compiling backend (dev)..."
     git checkout dev
@@ -483,24 +448,68 @@ EOT
 
     cp backend /usr/local/bin/backend-dev
 
-    cat <<EOT >/etc/systemd/system/backend-dev.service
-[Unit]
-Description=Logic App Backend Service (Go) Dev Branch
-After=network.target
-StartLimitIntervalSec=0
+    cat installer_files/backend-dev.service >/etc/systemd/system/backend-dev.service
+    chmod +x /etc/systemd/system/backend-dev.service
 
-[Service]
-WorkingDirectory=/var/www/dev
-Type=simple
-Restart=always
-RestartSec=3
-User=www-data
-ExecStart=/usr/local/bin/backend-dev
+    echo "Configuring services to start at boot..."
+    systemctl enable backend
+    systemctl enable backend-dev
 
-[Install]
-WantedBy=multi-user.target
-EOT
-
+    echo "Starting services..."
+    systemctl start backend
+    systemctl start backend-dev
 }
 configureBackend
 
+# Set up the server to report backend status during login
+function configureMotd {
+    [[ -d /etc/update-motd.d ]] || errorConfirm "The directory /etc/update-motd.d does not exist."
+    [[ -d /etc/update-motd.d ]] || mkdir -p /etc/update-motd.d
+
+    cat installer_files/99-backend > /etc/update-motd.d/99-backend
+    chmod +x /etc/update-motd.d/99-backend
+}
+configureMotd
+
+# Configure the server to automatically install security updates
+function configureUnattendedUpgrades {
+    echo "Configuring unattended-upgrades to automatically install security updates."
+    apt install -y unattended-upgrades && dpkg-reconfigure unattended-upgrades
+
+    echo "Configuring server to reboot automatically after updates."
+    echo 'Unattended-Upgrade::Automatic-Reboot "false";' >>/etc/apt/apt.conf.d/50unattended-upgrades
+}
+configureUnattendedUpgrades
+
+# Add a "git-hook" user and clone the repository in that user's home dir
+function configureGitHook {
+    echo "Creating user 'git-hook' to run Git-Hook..."
+    adduser --ingroup www-data --disabled-password --gecos 'User for running Git-Hook' git-hook || true
+
+    if [[ $(id -g git-hook) -ne $(id -g www-data) ]]; then
+        errorConfirm "The git-hook user and www-data user do not have matching group IDs. Git hook updates may not work as expected."
+    fi
+
+    if [[ $GIT_ORIGIN =~ "git@github.com" ]]; then
+        echo "This git repository was cloned using ssh. Please copy your private key to /home/git-hook/.ssh/ so that the git-hook user can clone it."
+        echo "Alternatively, if the repository is public, use the HTTPS origin instead of SSH."
+        read -p "Press enter to continue..."
+    fi
+
+    pushd "$(pwd)"
+
+    cd /home/git-hook/
+    sudo -u git-hook git clone "$GIT_ORIGIN"
+}
+configureGitHook
+
+function installGitHookService {
+    cp installer_files/git-hook.sh /usr/local/bin/git-hook.sh
+    chmod +x /usr/local/bin/git-hook.sh
+
+    echo "Configuring git-hook service to start at boot."
+    systemctl enable git-hook.service
+
+    echo "Starting git-hook service..."
+    systemctl start git-hook
+}

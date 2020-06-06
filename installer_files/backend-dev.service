@@ -1,0 +1,17 @@
+# Install path: /etc/systemd/system/backend-dev.service
+
+[Unit]
+Description=Logic App Backend Service (Go) Dev Branch
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/var/www/dev
+Type=simple
+Restart=always
+RestartSec=3
+User=www-data
+ExecStart=/usr/local/bin/backend-dev
+
+[Install]
+WantedBy=multi-user.target

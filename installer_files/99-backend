@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# This file is used to provide status updates during SSH login
+# In particular, it displays the status of the last deployment
+# for both the "live" and "dev" branches, and the status of the
+# backend services.
+
+# IMPORTANT:
+# This script must never return a 'negative' exit code, else
+# the motd will not include it. For simplicity, I've made use
+# of '|| true' after external commands and at the script end.
+
+# Install path: /etc/update-motd.d/99-backend
+
+echo "[ Backend ]"
+systemctl status backend || true
+[[ -f /tmp/backend.motd ]] && cat -vet /tmp/backend.motd
+
+echo "[ Backend-Dev ]"
+systemctl status backend-dev || true
+[[ -f /tmp/backend-dev.motd ]] && cat -vet /tmp/backend-dev.motd
+
+true

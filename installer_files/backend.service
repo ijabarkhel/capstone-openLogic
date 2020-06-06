@@ -1,0 +1,21 @@
+# Systemd service file for backend
+# Install path: /etc/systemd/system/backend.service
+
+# How to start automatically on boot: systemctl enable backend
+# How to check status: systemctl status backend
+
+[Unit]
+Description=Logic App Backend Service (Go)
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/var/www/live
+Type=simple
+Restart=always
+RestartSec=3
+User=www-data
+ExecStart=/usr/local/bin/backend
+
+[Install]
+WantedBy=multi-user.target
