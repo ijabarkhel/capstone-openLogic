@@ -333,7 +333,7 @@ function configureAuthenticatedOriginPulls {
 }
 
 function getCloudflareCerts {
-    local OPT1="Use 'flexible SSL' and configure the local webserver for HTTP only (least secure)"
+    local OPT1="Use 'flexible SSL' and configure the local webserver for HTTP only (least secure, not recommended)"
     local OPT2="Use a Cloudflare-generated certificate, accept all requests"
     local OPT3="Use a Cloudflare-generated certificate, accept only Cloudflare-signed requests (most secure)"
 
@@ -506,6 +506,10 @@ function configureGitHook {
     if [[ $(id -g git-hook) -ne $(id -g www-data) ]]; then
         errorConfirm "The git-hook user and www-data user do not have matching group IDs. Git hook updates may not work as expected."
     fi
+
+    echo "Adding git-hook user to sudoers for backend stop/start commands..."
+    cat installer_files/03-git-hook > /etc/sudoers.d/03-git-hook
+    chmod 0440 /etc/sudoers.d/03-git-hook
 
     if [[ $GIT_ORIGIN =~ "git@github.com" ]]; then
         echo "This git repository was cloned using ssh. Please copy your private key to /home/git-hook/.ssh/ so that the git-hook user can clone it."

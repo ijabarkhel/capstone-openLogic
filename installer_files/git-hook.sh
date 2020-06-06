@@ -8,7 +8,7 @@ cd /home/git-hook/capstone-openLogic
 TS_FILE="/home/git-hook/git-hook.timestamp"
 
 # The minimum number of seconds between runs of the git-hook script
-MIN_INTERVAL=60
+MIN_INTERVAL=15
 
 # The log file for the git-hook service
 LOG_FILE=/home/git-hook/git-hook-service.log
@@ -34,23 +34,25 @@ function updatePublicHtml {
 # Function that updates backend and restarts service, given file/service name as first argument
 function updateBackend {
     # Delete previous build of backend
-    rm backend/backend
+    [[ -f backend/backend ]] && rm backend/backend
     cd backend
     go get github.com/mattn/go-sqlite3
-    go build backend
+    go build backend.go
     if [[ -x ./backend ]]; then
+        sudo systemctl stop $1
+        sleep 1
         cp backend /usr/local/bin/$1
-        systemctl restart $1
-        >$LOG_FILE echo "[$1]: Backend recompiled and restarted."
+        sudo systemctl start $1
+        >>$LOG_FILE echo "[$1]: Backend recompiled and restarted."
     else
-        >$LOG_FILE echo "[$1]: Backend did not build successfully."
+        >>$LOG_FILE echo "[$1]: Backend did not build successfully."
     fi
     cd ..
 }
 
 function runGitHook {
     touch "$TS_FILE"
-    >$LOG_FILE echo "[Git-Hook]: Started at `date`"
+    >>$LOG_FILE echo "[Git-Hook]: Started at `date`"
     git pull
     git checkout master
 
