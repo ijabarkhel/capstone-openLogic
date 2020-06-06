@@ -341,15 +341,18 @@ function getCloudflareCerts {
             "$OPT1")
                 echo "Selected 'flexible SSL' -- will configure webserver for HTTP only"
                 configureNginxHTTP
+                break
                 ;;
             "$OPT2")
                 getCloudFlareCertsFromUser
+                break
                 ;;
             "$OPT3")
                 echo "Configuring the webserver to accept only Cloudflare-signed requests."
                 echo "For authenticated origin pulls to work, use 'Full SSL' in the Cloudflare dashboard SSL/TLS app."
                 getCloudFlareCertsFromUser
                 configureAuthenticatedOriginPulls
+                break
                 ;;
             esac
     done
