@@ -78,6 +78,7 @@ function updateChangedBranches {
     if [[ "$MASTER_REV" != "$MASTER_DEPLOYED_REV" ]]; then
         >>$LOG_FILE echo "[Git-Hook]: Updating LIVE from ($MASTER_DEPLOYED_REV) to ($MASTER_REV)."
         git checkout master
+        git reset --hard HEAD
         updatePublicHtml "$LIVE_PATH"
         updateBackend "$LIVE_BACKEND"
     fi
@@ -85,6 +86,7 @@ function updateChangedBranches {
     if [[ "$DEV_REV" != "$DEV_DEPLOYED_REV" ]]; then
         >>$LOG_FILE echo "[Git-Hook]: Updating DEV from ($DEV_DEPLOYED_REV) to ($DEV_REV)."
         git checkout dev
+        git reset --hard HEAD
         updatePublicHtml "$DEV_PATH"
         updateBackend "$DEV_BACKEND"
     fi
