@@ -81,6 +81,8 @@ function updateChangedBranches {
         git reset --hard HEAD
         updatePublicHtml "$LIVE_PATH"
         updateBackend "$LIVE_BACKEND"
+
+        echo "$MASTER_REV" > "$LIVE_PATH/revision.txt"
     fi
 
     if [[ "$DEV_REV" != "$DEV_DEPLOYED_REV" ]]; then
@@ -89,6 +91,8 @@ function updateChangedBranches {
         git reset --hard HEAD
         updatePublicHtml "$DEV_PATH"
         updateBackend "$DEV_BACKEND"
+
+        echo "$DEV_REV" > "$DEV_PATH/revision.txt"
     fi
 }
 
