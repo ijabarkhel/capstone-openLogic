@@ -58,8 +58,6 @@ function check_dependencies {
 
     check_command curl || MISSING_DEPS="$MISSING_DEPS curl"
 
-    check_command whois || MISSING_DEPS="$MISSING_DEPS whois"
-
     check_command awk || MISSING_DEPS="$MISSING_DEPS gawk"
 
     check_command openssl || MISSING_DEPS="$MISSING_DEPS openssl"
@@ -387,70 +385,6 @@ getTLSCerts
 nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
 nginx -s reload
 
-function configureNginxGitHook {
-    echo "Configuring git-hook URL."
-    RAND_PATH=$(</dev/urandom tr -cd '[:alnum:]' | head -c32)
-    GIT_HOOK_URL="https://$DEV_DOMAIN/$RAND_PATH/git-hook"
-    sed -i "s/RAND_PATH_HERE/$RAND_PATH/" "$DEV_NGINX_CONFIG"
-
-    nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
-    nginx -s reload
-
-    echo "IMPORTANT: Your unique git-hook Payload URL:"
-    echo
-    echo $GIT_HOOK_URL
-    echo
-    echo "Add to your GitHub repository by clicking 'Settings', then 'Webhooks', then 'Add Webhook' on the GitHub website."
-    read -p "Enter the URL into your GitHub settings, then press enter to continue..."
-}
-configureNginxGitHook
-
-function configureBackend {
-    echo "Compiling backend (live)..."
-    git checkout master
-    pushd .
-    cd backend
-    go get github.com/mattn/go-sqlite3
-    go build backend.go
-
-    if [[ $? -ne 0 ]]; then
-        errorConfirm "Could not compile backend (live)."
-    fi
-
-    mkdir -p /usr/local/bin
-    cp backend /usr/local/bin
-
-    popd
-
-    cat installer_files/backend.service >/etc/systemd/system/backend.service
-
-    echo "Compiling backend (dev)..."
-    git checkout dev
-    git stash
-
-    pushd .
-    cd backend
-    go build backend.go
-    if [[ $? -ne 0 ]]; then
-        errorConfirm "Could not compile backend (dev)."
-    fi
-
-    cp backend /usr/local/bin/backend-dev
-
-    popd
-
-    cat installer_files/backend-dev.service >/etc/systemd/system/backend-dev.service
-
-    echo "Configuring services to start at boot..."
-    systemctl enable backend
-    systemctl enable backend-dev
-
-    echo "Starting services..."
-    systemctl start backend
-    systemctl start backend-dev
-}
-configureBackend
-
 # Set up the server to report backend status during login
 function configureMotd {
     [[ -d /etc/update-motd.d ]] || errorConfirm "The directory /etc/update-motd.d does not exist."
@@ -502,9 +436,46 @@ function configureGitHook {
     pushd .
     cd /home/git-hook/
     sudo -u git-hook git clone "$GIT_ORIGIN"
+    chown -R git-hook /home/git-hook
     popd
 }
 configureGitHook
+
+function configureNginxGitHook {
+    echo "Configuring git-hook URL."
+    RAND_PATH=$(</dev/urandom tr -cd '[:alnum:]' | head -c32)
+    GIT_HOOK_URL="https://$DEV_DOMAIN/$RAND_PATH/git-hook"
+    sed -i "s/RAND_PATH_HERE/$RAND_PATH/" "$DEV_NGINX_CONFIG"
+
+    nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
+    nginx -s reload
+
+    echo "IMPORTANT: Your unique git-hook Payload URL:"
+    echo
+    echo $GIT_HOOK_URL
+    echo
+    echo "Add to your GitHub repository by clicking 'Settings', then 'Webhooks', then 'Add Webhook' on the GitHub website."
+    read -p "Enter the URL into your GitHub settings, then press enter to continue..."
+}
+configureNginxGitHook
+
+function configureBackend {
+    echo "Installing backend service..."
+    cat installer_files/backend.service >/etc/systemd/system/backend.service
+
+    echo "Installing backend-dev service..."
+    cat installer_files/backend-dev.service >/etc/systemd/system/backend-dev.service
+
+    echo "Configuring services to start at boot..."
+    systemctl enable backend
+    systemctl enable backend-dev
+
+    # The services will fail at first due to the first deployment not having been done yet
+    echo "Starting services..."
+    systemctl start backend >/dev/null 2>&1
+    systemctl start backend-dev >/dev/null 2>&1
+}
+configureBackend
 
 function installGitHookService {
     cp installer_files/git-hook.sh /usr/local/bin/git-hook.sh
@@ -528,4 +499,5 @@ function setPermissionsWeb {
 }
 setPermissionsWeb
 
-echo "Installation complete"
+echo
+echo "Installation complete!"
