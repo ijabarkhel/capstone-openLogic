@@ -79,6 +79,7 @@ function updateChangedBranches {
         >>$LOG_FILE echo "[Git-Hook]: Updating LIVE from ($MASTER_DEPLOYED_REV) to ($MASTER_REV)."
         git checkout master
         git reset --hard HEAD
+        git pull origin master
         updatePublicHtml "$LIVE_PATH"
         updateBackend "$LIVE_BACKEND"
 
@@ -89,6 +90,7 @@ function updateChangedBranches {
         >>$LOG_FILE echo "[Git-Hook]: Updating DEV from ($DEV_DEPLOYED_REV) to ($DEV_REV)."
         git checkout dev
         git reset --hard HEAD
+        git pull origin dev
         updatePublicHtml "$DEV_PATH"
         updateBackend "$DEV_BACKEND"
 
