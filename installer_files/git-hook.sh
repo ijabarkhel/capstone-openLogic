@@ -77,12 +77,14 @@ function updateChangedBranches {
     # Compare current commit ids and deployed commit ids
     if [[ "$MASTER_REV" != "$MASTER_DEPLOYED_REV" ]]; then
         >>$LOG_FILE echo "[Git-Hook]: Updating LIVE from ($MASTER_DEPLOYED_REV) to ($MASTER_REV)."
+        git checkout master
         updatePublicHtml "$LIVE_PATH"
         updateBackend "$LIVE_BACKEND"
     fi
 
     if [[ "$DEV_REV" != "$DEV_DEPLOYED_REV" ]]; then
         >>$LOG_FILE echo "[Git-Hook]: Updating DEV from ($DEV_DEPLOYED_REV) to ($DEV_REV)."
+        git checkout dev
         updatePublicHtml "$DEV_PATH"
         updateBackend "$DEV_BACKEND"
     fi
