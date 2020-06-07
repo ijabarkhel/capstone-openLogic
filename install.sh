@@ -436,6 +436,7 @@ function configureGitHook {
     pushd .
     cd /home/git-hook/
     sudo -u git-hook git clone "$GIT_ORIGIN"
+    chown -R git-hook /home/git-hook
     popd
 }
 configureGitHook
