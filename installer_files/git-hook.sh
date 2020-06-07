@@ -59,8 +59,11 @@ function updateBackend {
 # Update only branches which have changed
 function updateChangedBranches {
     # Pull both branches
-    git pull origin master
-    git pull origin dev
+    git fetch --all
+    git checkout master
+    git pull
+    git checkout dev
+    git pull
 
     # Get latest commit id from both branches
     MASTER_REV=$(git rev-parse refs/heads/master)
