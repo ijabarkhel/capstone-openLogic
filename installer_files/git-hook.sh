@@ -16,6 +16,12 @@ LOG_FILE=/home/git-hook/git-hook-service.log
 # The nginx log file for the git-hook URL
 TAIL_FILE=/var/log/nginx/git-hook.log
 
+LIVE_PATH="/var/www/live/public_html"
+LIVE_BACKEND="backend"
+
+DEV_PATH="/var/www/dev/public_html"
+DEV_BACKEND="backend-dev"
+
 # Get the currently checked-out branch of a git repository
 function getCurrentBranch {
     git branch | awk '/^\*/{print $2}'
@@ -50,20 +56,43 @@ function updateBackend {
     cd ..
 }
 
+# Update only branches which have changed
+function updateChangedBranches {
+    # Pull both branches
+    git pull origin master
+    git pull origin dev
+
+    # Get latest commit id from both branches
+    MASTER_REV=$(git rev-parse refs/heads/master)
+    DEV_REV=$(git rev-parse refs/heads/dev)
+
+    # If the revision.txt has not been created previously, create it now.
+    [[ ! -f "$LIVE_PATH/revision.txt" ]] && touch "$LIVE_PATH/revision.txt"
+    [[ ! -f "$DEV_PATH/revision.txt" ]] && touch "$DEV_PATH/revision.txt"
+
+    # Get the deployed commit ids
+    MASTER_DEPLOYED_REV=$(<"$LIVE_PATH/revision.txt")
+    DEV_DEPLOYED_REV=$(<"$DEV_PATH/revision.txt")
+
+    # Compare current commit ids and deployed commit ids
+    if [[ "$MASTER_REV" != "$MASTER_DEPLOYED_REV" ]]; then
+        >>$LOG_FILE echo "[Git-Hook]: Updating LIVE from ($MASTER_DEPLOYED_REV) to ($MASTER_REV)."
+        updatePublicHtml "$LIVE_PATH"
+        updateBackend "$LIVE_BACKEND"
+    fi
+
+    if [[ "$DEV_REV" != "$DEV_DEPLOYED_REV" ]]; then
+        >>$LOG_FILE echo "[Git-Hook]: Updating DEV from ($DEV_DEPLOYED_REV) to ($DEV_REV)."
+        updatePublicHtml "$DEV_PATH"
+        updateBackend "$DEV_BACKEND"
+    fi
+}
+
 function runGitHook {
     touch "$TS_FILE"
     >>$LOG_FILE echo "[Git-Hook]: Started at `date`"
-    git checkout master
-    git pull
 
-    updatePublicHtml "/var/www/live/public_html"
-    updateBackend "backend"
-
-    git checkout dev
-    git pull
-    
-    updatePublicHtml "/var/www/dev/public_html"
-    updateBackend "backend-dev"
+    updateChangedBranches
 }
 
 # Check if it has been at least 
@@ -76,6 +105,15 @@ function shouldRunGitHook {
         runGitHook
     fi
 }
+
+# Check for initial deploy
+if [[ ! -f "$TS_FILE" ]]; then
+    runGitHook
+fi
+
+# Use tail to monitor the nginx log file for the git-hook URL
+# Important: follow by name, rather than by inode. This means
+# that the hook can continue working after log rotation.
 
 tail --follow=name --retry $TAIL_FILE | while read; do
     shouldRunGitHook && runGitHook
