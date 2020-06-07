@@ -84,6 +84,11 @@ function checkLocalGitRepository {
         echo "This script must be run from within a git repository."
         exit 1
     fi
+
+    if [[ ! $GIT_ORIGIN =~ ^http ]]; then
+        echo "The git-hook configuration is easiest to use with an HTTP(s) origin and a public repository."
+        errorConfirm "Please clone the repository using HTTP(s) and start again."
+    fi
 }
 checkLocalGitRepository
 
@@ -174,15 +179,6 @@ function verifyDomainNames {
 }
 verifyDomainNames
 
-# Check if an IP address belongs to Cloudflare
-function check_cloudflare {
-    ORG=$(timeout 5 whois "$1" | awk '/Organization/{ print }')
-    if [[ "$ORG" =~ "Cloudflare " ]]; then
-        USES_CLOUDFLARE=1
-    fi
-}
-check_cloudflare
-
 # Check if the entered domain/subdomains are resolvable and resolve to this IP
 function checkDNS {
     LIVE_DNS=$(host -t A "$LIVE_DOMAIN" 16777217 | awk '/has address/{ print $(NF) }' | head -1)
@@ -199,16 +195,11 @@ function checkDNS {
         errorConfirm "Please confirm that you have configured your DNS settings for $DEV_DOMAIN to point to: $PUBLIC_IP"
         FAILED_RESOLVE=1
     fi
-
-    if [[ $FAILED_RESOLVE -ne 1 ]]; then
-        # check for cloudflare
-        check_cloudflare $LIVE_DNS
-    fi
 }
 
 # Check for a previously installed/running webserver
 function checkExistingWebserver {
-    LPORTS=$(ss -tlnp '( sport = :http or sport = :https )' | wc -l)
+    LPORTS=$(ss -tlnp '( sport = :http or sport = :https )' | grep -v nginx | wc -l)
     if [[ LPORTS -gt 1 ]]; then
         echo "A webserver is already listening on ports 80 and/or 443."
         echo "Please terminate and/or uninstall the existing webserver to proceed."
@@ -257,25 +248,6 @@ EOT
     sed "s/DEV_DOMAIN/$DEV_DOMAIN/" installer_files/dev.conf >$DEV_NGINX_CONFIG
 }
 configureNginx
-
-# Copy the files to the webserver directories
-function copyWebFiles {
-    echo "Copying files to the web directories..."
-    git checkout master
-    pushd .
-    cd frontend
-    cp *.html *.css *.js *.php /var/www/live/public_html;
-    cp -r assets /var/www/live/public_html;
-    popd
-
-    git checkout dev
-    pushd .
-    cd frontend
-    cp *.html *.css *.js *.php /var/www/dev/public_html;
-    cp -r assets /var/www/dev/public_html;
-    popd
-}
-copyWebFiles
 
 function configureNginxHTTP {
     sed -i 's/\#LISTEN_HERE/listen 80;/' $LIVE_NGINX_CONFIG
@@ -333,13 +305,13 @@ function configureAuthenticatedOriginPulls {
 }
 
 function getCloudflareCerts {
-    local OPT1="Use 'flexible SSL' and configure the local webserver for HTTP only (least secure, not recommended)"
+    local OPT3="Use 'flexible SSL' and configure the local webserver for HTTP only (least secure, not recommended)"
     local OPT2="Use a Cloudflare-generated certificate, accept all requests"
-    local OPT3="Use a Cloudflare-generated certificate, accept only Cloudflare-signed requests (most secure)"
+    local OPT1="Use a Cloudflare-generated certificate, accept only Cloudflare-signed requests (most secure)"
 
     select CHOICE in "$OPT1" "$OPT2" "$OPT3"; do
         case "$CHOICE" in
-            "$OPT1")
+            "$OPT3")
                 echo "Selected 'flexible SSL' -- will configure webserver for HTTP only"
                 configureNginxHTTP
                 break
@@ -348,7 +320,7 @@ function getCloudflareCerts {
                 getCloudFlareCertsFromUser
                 break
                 ;;
-            "$OPT3")
+            "$OPT1")
                 echo "Configuring the webserver to accept only Cloudflare-signed requests."
                 echo "For authenticated origin pulls to work, use 'Full SSL' in the Cloudflare dashboard SSL/TLS app."
                 getCloudFlareCertsFromUser
@@ -418,6 +390,7 @@ nginx -s reload
 function configureNginxGitHook {
     echo "Configuring git-hook URL."
     RAND_PATH=$(</dev/urandom tr -cd '[:alnum:]' | head -c32)
+    GIT_HOOK_URL="https://$DEV_DOMAIN/$RAND_PATH/git-hook"
     sed -i "s/RAND_PATH_HERE/$RAND_PATH/" "$DEV_NGINX_CONFIG"
 
     nginx -t || errorConfirm "The nginx configuration is not valid, and the webserver will not be able to start."
@@ -425,7 +398,7 @@ function configureNginxGitHook {
 
     echo "IMPORTANT: Your unique git-hook Payload URL:"
     echo
-    echo "https://$DEV_DOMAIN/$RAND_PATH/git-hook"
+    echo $GIT_HOOK_URL
     echo
     echo "Add to your GitHub repository by clicking 'Settings', then 'Webhooks', then 'Add Webhook' on the GitHub website."
     read -p "Enter the URL into your GitHub settings, then press enter to continue..."
@@ -507,11 +480,20 @@ function configureGitHook {
         errorConfirm "The git-hook user and www-data user do not have matching group IDs. Git hook updates may not work as expected."
     fi
 
+    mkdir -p /usr/local/bin
+
+    # Install dummy binaries to enable write permissions for git-hook user
+    cp /bin/true /usr/local/bin/backend
+    cp /bin/true /usr/local/bin/backend-dev
+    chown git-hook /usr/local/bin/backend
+    chown git-hook /usr/local/bin/backend-dev
+
+
     echo "Adding git-hook user to sudoers for backend stop/start commands..."
     cat installer_files/03-git-hook > /etc/sudoers.d/03-git-hook
     chmod 0440 /etc/sudoers.d/03-git-hook
 
-    if [[ $GIT_ORIGIN =~ "git@github.com" ]]; then
+    if [[ ! $GIT_ORIGIN =~ ^http ]]; then
         echo "This git repository was cloned using ssh. Please copy your private key to /home/git-hook/.ssh/ so that the git-hook user can clone it."
         echo "Alternatively, if the repository is public, use the HTTPS origin instead of SSH."
         read -p "Press enter to continue..."
@@ -543,10 +525,6 @@ function setPermissionsWeb {
     echo "Settings filesystem permissions..."
     chown -R www-data:www-data /var/www
     chmod -R g+w /var/www
-
-    # Allow git-hook to update backend binaries
-    chown git-hook /usr/local/bin/backend
-    chown git-hook /usr/local/bin/backend-dev
 }
 setPermissionsWeb
 
