@@ -206,14 +206,14 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 
 	case "repo":
 		log.Println("repo selection")
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE userSubmitted = ? AND proofName LIKE 'Repository%'")
+		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE repoProblem = 'true' AND userSubmitted IN (SELECT email FROM admins)")
 		if err != nil {
 			http.Error(w, "Statement prepare error", 500)
 			log.Fatal(err)
 			return
 		}
 		defer stmt.Close()
-		rows, err = stmt.Query("gbruns@csumb.edu")
+		rows, err = stmt.Query()
 
 	case "completedrepo":
 		log.Println("completedrepo selection")
@@ -327,6 +327,32 @@ func initializeDatabase() (*sql.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	_, err = db.Exec(`DROP TABLE IF EXISTS admins`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE admins (
+						email TEXT
+					)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := db.Prepare(`INSERT INTO admins VALUES (?)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	for adminEmail := range admin_users {
+		_, err = stmt.Exec(adminEmail)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	// proofs : Unique index on (userSubmitted, proofName)
 	_, err = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_user_proof
 						ON proofs (userSubmitted, proofName)`)
