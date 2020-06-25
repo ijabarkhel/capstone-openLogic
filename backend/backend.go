@@ -206,7 +206,7 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 
 	case "repo":
 		log.Println("repo selection")
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE repoProblem = 'true' AND userSubmitted IN (SELECT email FROM admins)")
+		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE repoProblem = 'true' AND userSubmitted IN (SELECT email FROM admins) ORDER BY userSubmitted")
 		if err != nil {
 			http.Error(w, "Statement prepare error", 500)
 			log.Fatal(err)

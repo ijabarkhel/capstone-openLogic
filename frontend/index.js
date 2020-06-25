@@ -219,7 +219,30 @@ function loadRepoProofs() {
       console.log("loadRepoProofs", data);
       repositoryData.repoProofs = data;
 
-      prepareSelect('#repoProofSelect', data);
+      //prepareSelect('#repoProofSelect', data);
+      let elem = document.querySelector('#repoProofSelect');
+      $(elem).empty();
+
+      elem.appendChild(
+        new Option('Select...', null, true, true)
+      );
+
+      let currentRepoUser;
+      (data) && data.forEach( proof => {
+        if ( currentRepoUser !== proof.UserSubmitted ) {
+          currentRepoUser = proof.UserSubmitted;
+          elem.appendChild(
+            new Option(proof.UserSubmitted, null, false, false)
+          );
+        }
+        elem.appendChild(
+          new Option(proof.ProofName, proof.Id)
+        );
+      });
+
+      // Make section headers not selectable
+      $('#repoProofSelect option[value=null]').attr('disabled', 'disabled');
+
       $('#repoProofSelect').data('repositoryDataKey', 'repoProofs');
     }
   );
