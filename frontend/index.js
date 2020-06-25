@@ -280,7 +280,7 @@ $(document).ready(function() {
   });
 
   // Admin users - publish problems to public repo
-  $('.proofContainer').on('click', '#addToPublicRepoButton', (event) => {
+  $('.proofContainer').on('click', '#togglePublicButton', (event) => {
     let proofName = $('.proofNameSpan').text();
     if ( !proofName || proofName == "" ) {
       proofName = prompt("Please enter a name for your proof:");
@@ -294,6 +294,16 @@ $(document).ready(function() {
       proofName = 'Repository - ' + proofName;
     }
     $('.proofNameSpan').text(proofName);
+
+    let publicStatus = $('#repoProblem').val() || 'false';
+    if ( publicStatus === 'false' ) {
+      $('#repoProblem').val('true');
+      $('#togglePublicButton').fadeOut().text('Make Private').fadeIn();
+    } else {
+      $('#repoProblem').val('false');
+      $('#togglePublicButton').fadeOut().text('Make Public').fadeIn();
+    }
+
     $('#checkButton').click();
   });
 
