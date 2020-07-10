@@ -234,8 +234,11 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 		}
 
 		//'id,entryType,userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion\n';
-
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs")
+		stmt, err = db.Prepare(`SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem
+								FROM proofs
+								INNER JOIN admin_repoproblems ON
+									proofs.Premise = admin_repoproblems.Premise AND
+									proofs.Conclusion = admin_repoproblems.Conclusion`)
 		if err != nil {
 			http.Error(w, "Statement prepare error", 500)
 			log.Fatal(err)
@@ -328,6 +331,7 @@ func initializeDatabase() (*sql.DB) {
 		log.Fatal(err)
 	}
 
+	// Rebuild 'admins' table
 	_, err = db.Exec(`DROP TABLE IF EXISTS admins`)
 	if err != nil {
 		log.Fatal(err)
@@ -351,6 +355,17 @@ func initializeDatabase() (*sql.DB) {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	// Create 'admin_repoproblems' view
+	_, err = db.Exec(`DROP VIEW IF EXISTS admin_repoproblems`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`CREATE VIEW admin_repoproblems (userSubmitted, Premise, Conclusion) AS SELECT userSubmitted, Premise, Conclusion FROM proofs WHERE userSubmitted IN (SELECT email FROM admins)`)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// proofs : Unique index on (userSubmitted, proofName)
