@@ -198,7 +198,7 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	switch requestData.Selection {
 	case "user":
 		log.Println("user selection")
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE userSubmitted = ? AND proofCompleted = 'false' AND proofName != 'n/a'")
+		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE userSubmitted = ? AND proofCompleted != 'true' AND proofName != 'n/a'")
 		if err != nil {
 			http.Error(w, "Statment prepare error", 500)
 			log.Fatal(err)
