@@ -34,6 +34,10 @@ type TokenData struct {
 	Error_description string // also not usually present
 }
 
+func (td TokenData) GetEmail() string {
+	return td.Email
+}
+
 type cachedTokenData struct {
 	data  TokenData
 	valid bool

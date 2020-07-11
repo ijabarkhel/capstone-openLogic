@@ -72,7 +72,12 @@ func getAdmins(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
-	tok := req.Context().Value("tok").(tokenauth.TokenData)
+	type userWithEmail interface {
+		GetEmail() string
+	}
+
+	var user userWithEmail
+	user = req.Context().Value("tok").(userWithEmail)
 	
 	var submittedProof Proof
 
@@ -89,9 +94,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	db := env.db
-
-	tx, err := db.Begin()
+	tx, err := env.db.Begin()
 	if err != nil {
 		http.Error(w, "Database transaction begin error", 500)
 		log.Fatal(err)
@@ -139,7 +142,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Rules marshal error", 500)
 		return
 	}
-	_, err = stmt.Exec(submittedProof.EntryType, tok.Email, submittedProof.ProofName, submittedProof.ProofType,
+	_, err = stmt.Exec(submittedProof.EntryType, user.GetEmail(), submittedProof.ProofName, submittedProof.ProofType,
 		PremiseJSON, LogicJSON, RulesJSON, submittedProof.ProofCompleted, submittedProof.Conclusion, submittedProof.RepoProblem,
 		submittedProof.EntryType, submittedProof.ProofType, PremiseJSON, LogicJSON, RulesJSON, submittedProof.ProofCompleted,
 		submittedProof.Conclusion, submittedProof.RepoProblem)
