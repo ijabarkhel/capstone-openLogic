@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"flag"
 
+	datastore "./datastore"
 	tokenauth "./google-token-auth"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -33,23 +34,12 @@ var (
 	database_uri = "file:db.sqlite3?cache=shared&mode=rwc&_journal_mode=WAL"
 )
 
-type Proof struct {
-	Id             string   // SQL ID
-	EntryType      string   // 'proof'
-	UserSubmitted  string	// Used for results, ignored on user input
-	ProofName      string   // user-chosen name (repo problems start with 'Repository - ')
-	ProofType      string   // 'prop' (propositional/tfl) or 'fol' (first order logic)
-	Premise        []string // Array of 
-	Logic          []string // ?
-	Rules          []string // ?
-	ProofCompleted string   // 'true', 'false', or 'error'
-	Conclusion     string   // ?
-	RepoProblem    string   // 'true' if problem started from a repo problem, else 'false'
-	TimeSubmitted  string
+type userWithEmail interface {
+	GetEmail() string
 }
 
 type Env struct {
-	db *sql.DB
+	ds datastore.IProofStore
 }
 
 func getAdmins(w http.ResponseWriter, req *http.Request) {
@@ -72,14 +62,10 @@ func getAdmins(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
-	type userWithEmail interface {
-		GetEmail() string
-	}
-
 	var user userWithEmail
 	user = req.Context().Value("tok").(userWithEmail)
 	
-	var submittedProof Proof
+	var submittedProof datastore.Proof
 
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
 		log.Println(err)
@@ -94,71 +80,20 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tx, err := env.db.Begin()
-	if err != nil {
-		http.Error(w, "Database transaction begin error", 500)
-		log.Fatal(err)
-	}
-	stmt, err := tx.Prepare(`INSERT INTO proofs (entryType,
-												userSubmitted,
-												proofName,
-												proofType,
-												Premise,
-												Logic,
-												Rules,
-												proofCompleted,
-												timeSubmitted,
-												Conclusion,
-												repoProblem)
-							 VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
-							 ON CONFLICT (userSubmitted, proofName) DO UPDATE SET
-							 	entryType = ?,
-							 	proofType = ?,
-							 	Premise = ?,
-							 	Logic = ?,
-							 	Rules = ?,
-							 	proofCompleted = ?,
-							 	timeSubmitted = datetime('now'),
-							 	Conclusion = ?,
-							 	repoProblem = ?`)
-	defer stmt.Close()
-	if err != nil {
-		http.Error(w, "Transaction prepare error", 500)
-		return
-	}
+	// Replace submitted email (if any) with the email from the token
+	submittedProof.UserSubmitted = user.GetEmail()
 
-	PremiseJSON, err := json.Marshal(submittedProof.Premise)
-	if err != nil {
-		http.Error(w, "Premise marshal error", 500)
+	if err := env.ds.Store(submittedProof); err != nil {
+		http.Error(w, err.Error(), 500)
 		return
 	}
-	LogicJSON, err := json.Marshal(submittedProof.Logic)
-	if err != nil {
-		http.Error(w, "Logic marshal error", 500)
-		return
-	}
-	RulesJSON, err := json.Marshal(submittedProof.Rules)
-	if err != nil {
-		http.Error(w, "Rules marshal error", 500)
-		return
-	}
-	_, err = stmt.Exec(submittedProof.EntryType, user.GetEmail(), submittedProof.ProofName, submittedProof.ProofType,
-		PremiseJSON, LogicJSON, RulesJSON, submittedProof.ProofCompleted, submittedProof.Conclusion, submittedProof.RepoProblem,
-		submittedProof.EntryType, submittedProof.ProofType, PremiseJSON, LogicJSON, RulesJSON, submittedProof.ProofCompleted,
-		submittedProof.Conclusion, submittedProof.RepoProblem)
-	if err != nil {
-		http.Error(w, "Statement exec error", 500)
-		log.Fatal(err)
-		return
-	}
-	tx.Commit()
 
 	w.Header().Set("Content-Type", "application/json")
 	io.WriteString(w, `{"success": "true"}`)
 }
 
 func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
-	tok := req.Context().Value("tok").(tokenauth.TokenData)
+	user := req.Context().Value("tok").(userWithEmail)
 
 	if req.Method != "POST" || req.Body == nil {
 		http.Error(w, "Request not accepted.", 400)
@@ -181,74 +116,36 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", requestData)
 
-	db := env.db
-
 	if len(requestData.Selection) == 0 {
 		http.Error(w, "Selection required", 400)
 		return
 	}
 
-	user := tok.Email
 	log.Printf("USER: %q", user)
 
-	var stmt *sql.Stmt
-	var rows *sql.Rows
 	var err error
+	var proofs []datastore.Proof
 
 	switch requestData.Selection {
 	case "user":
 		log.Println("user selection")
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE userSubmitted = ? AND proofCompleted != 'true' AND proofName != 'n/a'")
-		if err != nil {
-			http.Error(w, "Statment prepare error", 500)
-			log.Fatal(err)
-			return
-		}
-		defer stmt.Close()
-		rows, err = stmt.Query(user)
+		err, proofs = env.ds.GetUserProofs(user)
 
 	case "repo":
 		log.Println("repo selection")
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE repoProblem = 'true' AND userSubmitted IN (SELECT email FROM admins) ORDER BY userSubmitted")
-		if err != nil {
-			http.Error(w, "Statement prepare error", 500)
-			log.Fatal(err)
-			return
-		}
-		defer stmt.Close()
-		rows, err = stmt.Query()
+		err, proofs = env.ds.GetRepoProofs()
 
 	case "completedrepo":
 		log.Println("completedrepo selection")
-		stmt, err = db.Prepare("SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem FROM proofs WHERE userSubmitted = ? AND proofCompleted = 'true'")
-		if err != nil {
-			http.Error(w, "Statement prepare error", 500)
-			log.Fatal(err)
-			return
-		}
-		defer stmt.Close()
-		rows, err = stmt.Query(user)
-
+		err, proofs = env.ds.GetUserCompletedProofs(user)
+	
 	case "downloadrepo":
 		log.Println("downloadrepo selection")
-		if !admin_users[tok.Email] {
+		if !admin_users[user.GetEmail()] {
 			http.Error(w, "Insufficient privileges", 403)
 			return
 		}
-
-		//'id,entryType,userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion\n';
-		stmt, err = db.Prepare(`SELECT id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem
-								FROM proofs
-								INNER JOIN admin_repoproblems ON
-									proofs.Premise = admin_repoproblems.Premise AND
-									proofs.Conclusion = admin_repoproblems.Conclusion`)
-		if err != nil {
-			http.Error(w, "Statement prepare error", 500)
-			log.Fatal(err)
-			return
-		}
-		defer stmt.Close()
-		rows, err = stmt.Query()
+		err, proofs = env.ds.GetAllAttemptedRepoProofs()
 
 	default:
 		http.Error(w, "invalid selection", 400)
@@ -259,41 +156,9 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Query error", 500)
 		return
 	}
-	defer rows.Close()
 
-	var userProofs []Proof
-	for rows.Next() {
-		var userProof Proof
-		var PremiseJSON string
-		var LogicJSON string
-		var RulesJSON string
-
-		err = rows.Scan(&userProof.Id, &userProof.EntryType, &userProof.UserSubmitted, &userProof.ProofName, &userProof.ProofType, &PremiseJSON, &LogicJSON, &RulesJSON, &userProof.ProofCompleted, &userProof.TimeSubmitted, &userProof.Conclusion, &userProof.RepoProblem)
-		if err != nil {
-			http.Error(w, "Query read error", 500)
-			log.Print(err)
-			return
-		}
-
-		if err = json.Unmarshal([]byte(PremiseJSON), &userProof.Premise); err != nil {
-			http.Error(w, "premise decode error", 500)
-			return
-		}
-		if err = json.Unmarshal([]byte(LogicJSON), &userProof.Logic); err != nil {
-			http.Error(w, "logic decode error", 500)
-			return
-		}
-		if err = json.Unmarshal([]byte(RulesJSON), &userProof.Rules); err != nil {
-			http.Error(w, "rules decode error", 500)
-			return
-		}
-
-		log.Printf("%+v", userProof)
-		userProofs = append(userProofs, userProof)
-	}
-
-	log.Printf("%+v", userProofs)
-	userProofsJSON, err := json.Marshal(userProofs)
+	log.Printf("%+v", proofs)
+	userProofsJSON, err := json.Marshal(proofs)
 	if err != nil {
 		http.Error(w, "json marshal error", 500)
 		log.Print(err)
@@ -302,78 +167,41 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 
 	io.WriteString(w, string(userProofsJSON))
 
-	log.Printf("%q %q", user, tok)
+	log.Printf("%q", user)
 
 	log.Printf("%+v", req.URL.Query())
 
 }
 
-func initializeDatabase() (*sql.DB) {
+// This will delete all rows, but not reset the auto_increment id
+func (env *Env) clearDatabase() {
+	if err := env.ds.Empty(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (env *Env) populateTestData() {
+	err := env.ds.Store(datastore.Proof{
+		EntryType: "proof",
+		UserSubmitted: "gbruns@csumb.edu",
+		ProofName: "Repository - Problem 2",
+		ProofType: "prop",
+		Premise: []string{"P", "P -> Q", "Q -> R", "R -> S", "S -> T", "T -> U", "V -> W", "W -> X", "X -> Y", "Y -> X"},
+		Logic: []string{},
+		Rules: []string{},
+		ProofCompleted: "false",
+		Conclusion: "Y",
+		TimeSubmitted: "2019-04-29T01:45:44.452+0000",
+		RepoProblem: "true",
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initializeDatabase() *sql.DB {
 	db, err := sql.Open("sqlite3", database_uri)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Initialize database tables
-	// proofs : [Premise, Logic, Rules] are JSON fields
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS proofs (
-						id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-						entryType TEXT,
-						userSubmitted TEXT,
-						proofName TEXT,
-						proofType TEXT,
-						Premise TEXT,
-						Logic TEXT,
-						Rules TEXT,
-						proofCompleted TEXT,
-						timeSubmitted DATETIME,
-						Conclusion TEXT,
-						repoProblem TEXT
-					)`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Rebuild 'admins' table
-	_, err = db.Exec(`DROP TABLE IF EXISTS admins`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`CREATE TABLE admins (
-						email TEXT
-					)`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	stmt, err := db.Prepare(`INSERT INTO admins VALUES (?)`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	for adminEmail := range admin_users {
-		_, err = stmt.Exec(adminEmail)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	// Create 'admin_repoproblems' view
-	_, err = db.Exec(`DROP VIEW IF EXISTS admin_repoproblems`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`CREATE VIEW admin_repoproblems (userSubmitted, Premise, Conclusion) AS SELECT userSubmitted, Premise, Conclusion FROM proofs WHERE userSubmitted IN (SELECT email FROM admins)`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// proofs : Unique index on (userSubmitted, proofName)
-	_, err = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_user_proof
-						ON proofs (userSubmitted, proofName)`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -381,29 +209,22 @@ func initializeDatabase() (*sql.DB) {
 	return db
 }
 
-// This will delete all rows, but not reset the auto_increment id
-func (env *Env) clearDatabase() {
-	_, err := env.db.Exec(`DELETE FROM proofs`)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (env *Env) populateTestData() {
-	_, err := env.db.Exec(`INSERT INTO proofs (entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, timeSubmitted, Conclusion, repoProblem) VALUES ('proof', 'gbruns@csumb.edu', 'Repository - Problem 2', 'prop', '[ "P", "P -> Q", "Q -> R", "R -> S", "S -> T", "T -> U", "V -> W", "W -> X", "X -> Y", "Y -> X" ]', '[]', '[]', 'false', '2019-04-29T01:45:44.452+0000', 'Y', 'true');`)
-	
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
 	log.Println("Server initializing")
 
-	db := initializeDatabase() // Get an instance of *sql.DB
-	defer db.Close() // When the server exits, close the db handle
-	Env := &Env{db} // Put the instance into a struct to share between threads
+	// Get an instance of *sql.DB
+	db := initializeDatabase()
+
+	// When the server exits, close the db handle
+	defer db.Close()
+
+	// Use the *sql.DB instance to create a datastore instance
+	ds := datastore.New(db)
+
+	// Add the admin users to the database for use in queries
+	ds.UpdateAdmins(admin_users)
+	
+	Env := &Env{&ds} // Put the instance into a struct to share between threads
 
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")

@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	datastore "./datastore"
 )
 
 func TestGetAdmins(t *testing.T) {
@@ -46,19 +47,19 @@ func TestSaveProof(t *testing.T) {
 
 	responseRecorder := httptest.NewRecorder()
 
-	db := initializeDatabase()
-	defer db.Close()
-	Env := &Env{db}
+	var mds datastore.MockDataStore
+
+	Env := &Env{&mds}
 
 	handler := http.HandlerFunc(Env.saveProof)
 
 	handler.ServeHTTP(responseRecorder, req)
 	if status := responseRecorder.Code; status != http.StatusOK {
-		t.Errorf("getAdmins received bad status code: got %v want %v", responseRecorder.Code, http.StatusOK)
+		t.Errorf("SaveProof received bad status code: got %v want %v", responseRecorder.Code, http.StatusOK)
 	}
 
 	expected := `{"success": "true"}`
 	if responseRecorder.Body.String() != expected {
-		t.Errorf("getAdmins returned unexpected body: got %v want %v", responseRecorder.Body.String(), expected)
+		t.Errorf("SaveProof returned unexpected body: got %v want %v", responseRecorder.Body.String(), expected)
 	}
 }
