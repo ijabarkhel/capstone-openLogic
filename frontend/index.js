@@ -219,7 +219,30 @@ function loadRepoProofs() {
       console.log("loadRepoProofs", data);
       repositoryData.repoProofs = data;
 
-      prepareSelect('#repoProofSelect', data);
+      //prepareSelect('#repoProofSelect', data);
+      let elem = document.querySelector('#repoProofSelect');
+      $(elem).empty();
+
+      elem.appendChild(
+        new Option('Select...', null, true, true)
+      );
+
+      let currentRepoUser;
+      (data) && data.forEach( proof => {
+        if ( currentRepoUser !== proof.UserSubmitted ) {
+          currentRepoUser = proof.UserSubmitted;
+          elem.appendChild(
+            new Option(proof.UserSubmitted, null, false, false)
+          );
+        }
+        elem.appendChild(
+          new Option(proof.ProofName, proof.Id)
+        );
+      });
+
+      // Make section headers not selectable
+      $('#repoProofSelect option[value=null]').attr('disabled', 'disabled');
+
       $('#repoProofSelect').data('repositoryDataKey', 'repoProofs');
     }
   );
@@ -280,7 +303,7 @@ $(document).ready(function() {
   });
 
   // Admin users - publish problems to public repo
-  $('.proofContainer').on('click', '#addToPublicRepoButton', (event) => {
+  $('.proofContainer').on('click', '#togglePublicButton', (event) => {
     let proofName = $('.proofNameSpan').text();
     if ( !proofName || proofName == "" ) {
       proofName = prompt("Please enter a name for your proof:");
@@ -294,6 +317,16 @@ $(document).ready(function() {
       proofName = 'Repository - ' + proofName;
     }
     $('.proofNameSpan').text(proofName);
+
+    let publicStatus = $('#repoProblem').val() || 'false';
+    if ( publicStatus === 'false' ) {
+      $('#repoProblem').val('true');
+      $('#togglePublicButton').fadeOut().text('Make Private').fadeIn();
+    } else {
+      $('#repoProblem').val('false');
+      $('#togglePublicButton').fadeOut().text('Make Public').fadeIn();
+    }
+
     $('#checkButton').click();
   });
 
