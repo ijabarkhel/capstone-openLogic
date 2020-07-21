@@ -2,13 +2,22 @@ package datastore
 
 import (
 	"database/sql"
-	"log"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func New(db *sql.DB) ProofStore {
+func (p *ProofStore) Close() error {
+	return p.db.Close()
+}
+
+func New(dsn string) (*ProofStore, error) {
+	db, err := sql.Open("sqlite3", dsn)
+	if err != nil {
+		return nil, err
+	}
+
 	// Initialize database tables
 	// proofs : [Premise, Logic, Rules] are JSON fields
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS proofs (
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS proofs (
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		entryType TEXT,
 		userSubmitted TEXT,
@@ -23,15 +32,15 @@ func New(db *sql.DB) ProofStore {
 		repoProblem TEXT
 	)`)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// proofs : Unique index on (userSubmitted, proofName)
 	_, err = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_user_proof
 			ON proofs (userSubmitted, proofName)`)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return ProofStore{db: db}
+	return &ProofStore{db: db}, nil
 }
