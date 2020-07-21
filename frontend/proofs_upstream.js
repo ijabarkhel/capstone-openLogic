@@ -168,7 +168,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
          newrow.jCell.classList.add("jcell");
          if ((rowdata.jstr != "Hyp") && (rowdata.jstr != "Pr")) {
             if ((currln != prf.openline) || (!(prf.jopen))) {
-               newrow.jCell.innerHTML = rowdata.jstr;
+               newrow.jCell.innerHTML = changeRuleNames(rowdata.jstr);
                if (rowdata.jstr == "") {
                   newrow.jCell.classList.add("showcell");
                }
@@ -176,6 +176,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
                newrow.jCell.myProof = prf;
                newrow.jCell.title = "click to edit";
                newrow.jCell.onclick = function() {
+                  newrow.jCell.innerHTML = changeRuleNames(rowdata.jstr);
                   this.myProof.registerInput();
                   this.myProof.jopen = true;
                   this.myProof.openline = this.myPos;
@@ -187,7 +188,8 @@ function dataToRows(prf, prdata, depth, md, ln) {
                prf.oInput.title = "Insert justification for this line here.";
                prf.oInput.myPos = (currln - 1);
                prf.oInput.myProof = prf;
-               prf.oInput.value = rowdata.jstr;
+
+               prf.oInput.value = changeRuleNames(rowdata.jstr);
                prf.oInput.classList.add("jinput");
                prf.oInput.onchange = function() {
                   this.value = fixJInputStr(this.value);
@@ -496,7 +498,7 @@ function makeProof(pardiv, pstart, conc) {
       this.results.innerHTML = '<img src="assets/wait.gif" alt="[wait]" /> Checking …';
       var fD = new FormData();
       fD.append("predicateSettings", predicateSettings.toString());
-      fD.append("proofData", JSON.stringify(this.proofdata));
+      fD.append("proofData", JSON.stringify(this.proofdata.map(unChangeRuleNames)));
       fD.append("wantedConc", this.wantedConc);
       fD.append("numPrems", this.numPrems);
       AJAXPostRequest('checkproof.php', fD, (text) => {
@@ -583,3 +585,35 @@ function makeProof(pardiv, pstart, conc) {
    p.displayMe();
    return p;
 }
+
+// Change names during display
+const changeRuleNames = (rule) => rule
+   .replace(/dne/i, "Double Negation")
+   .replace("→E", "Modus Ponens")
+   .replace("MT", "Modus Tollens")
+   .replace("DS", "Modus Tollendo Ponens")
+   .replace("∧E", "Simplification")
+   .replace("∨I", "Addition")
+   .replace("∧I", "Adjunction")
+   .replace("↔E", "equivalence")
+   .replace("∀E", "universal instantiation")
+   .replace("∃I", "existential generalization")
+   .replace("∃E", "existential instantiation")
+   .replace("=I", "repeat");
+
+// When submitting to the PHP backend, rule names must be changed back
+const unChangeRuleNames = (row) => Object.assign(row, {
+   jstr: row.jstr.replace(/modus ponens/i, "→E")
+   .replace(/modus tollens/i, "MT")
+   .replace(/double negation/i, "DNE")
+   .replace(/modus tollendo ponens/i, "DS")
+   .replace(/simplification/i, "∧E")
+   .replace(/addition/i, "∨I")
+   .replace(/adjunction/i, "∧I")
+   .replace(/equivalence/i, "↔E")
+   .replace(/bicondition/i, "Bicondition")
+   .replace(/universal instantiation/i, "∀E")
+   .replace(/existential generalization/i, "∃I")
+   .replace(/existential instantiation/i, "∃E")
+   .replace(/repeat/i, "=I")
+});

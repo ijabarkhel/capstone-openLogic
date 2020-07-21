@@ -66,8 +66,8 @@ function fixJInputStr(s) {
    fs = fs.replace(/\s*,,*\s*/g, ', ');
    fs = fs.replace(/\s*[-−–][-−–]*\s*/g, '–');
    fs = negReplace(fs);
-   fs = fs.replace(/e/g,'E');
-   fs = fs.replace(/i/g,'I');
+   //fs = fs.replace(/e/g,'E');
+   //fs = fs.replace(/i/g,'I');
    fs = fs.replace(/  */g, ' ');
    fs = fs.replace(/([∀∃¬∨∧→↔⊥=]) ([EI])/g, "$1$2");
    fs = fs.replace(/[Tt][Nn][Dd]/g, "TND");
@@ -80,7 +80,7 @@ function fixJInputStr(s) {
    fs = fs.replace(/AE/g, "∀E");
    fs = fs.replace(/EI/g, "∃I");
    fs = fs.replace(/AI/g, "∀I");
-   fs = fs.replace(/r/g, "R");
+   //fs = fs.replace(/r/g, "R");
    fs = fs.replace(/[Pp][Rr]/g, "");
    fs = fs.replace(/[Hh][Yy][Pp]/g, "");
    fs = fs.replace(/([^\s,0-9–-])([0-9])/g,"$1 $2")
