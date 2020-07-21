@@ -31,6 +31,7 @@ type UserWithEmail interface {
 }
 
 type IProofStore interface {
+	Close() error
 	Empty() error
 	GetAllAttemptedRepoProofs() (error, []Proof)
 	GetRepoProofs() (error, []Proof)

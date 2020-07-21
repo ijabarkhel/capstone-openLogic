@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -10,7 +9,6 @@ import (
 
 	datastore "./datastore"
 	tokenauth "./google-token-auth"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -200,31 +198,19 @@ func (env *Env) populateTestData() {
 	}
 }
 
-func initializeDatabase() *sql.DB {
-	db, err := sql.Open("sqlite3", database_uri)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return db
-}
-
 func main() {
 	log.Println("Server initializing")
 
-	// Get an instance of *sql.DB
-	db := initializeDatabase()
-
-	// When the server exits, close the db handle
-	defer db.Close()
-
-	// Use the *sql.DB instance to create a datastore instance
-	ds := datastore.New(db)
+	ds, err := datastore.New(database_uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ds.Close()
 
 	// Add the admin users to the database for use in queries
 	ds.UpdateAdmins(admin_users)
 	
-	Env := &Env{&ds} // Put the instance into a struct to share between threads
+	Env := &Env{ds} // Put the instance into a struct to share between threads
 
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")

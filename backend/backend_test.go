@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"context"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,24 @@ import (
 	"testing"
 	datastore "./datastore"
 )
+
+const (
+	// Use an in-memory database for running tests
+	// Must specify cache=shared to prevent multiple connections from getting different DBs
+	test_dsn = "file::memory:?cache=shared"
+)
+
+type MockUserWithEmail struct {
+	Email string
+}
+
+func (u MockUserWithEmail) GetEmail() string {
+	return u.Email
+}
+
+func TestMain(m *testing.M) {
+	os.Exit(m.Run())
+}
 
 func TestGetAdmins(t *testing.T) {
 	req, err := http.NewRequest("GET", "/admins", nil)
@@ -30,14 +49,6 @@ func TestGetAdmins(t *testing.T) {
 	}
 }
 
-type MockUserWithEmail struct {
-	Email string
-}
-
-func (u MockUserWithEmail) GetEmail() string {
-	return u.Email
-}
-
 func TestSaveProof(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "tok", MockUserWithEmail{ "cohunter@csumb.edu" })
 	req, err := http.NewRequestWithContext(ctx, "POST", "/saveproof", strings.NewReader(`{"proofName":"TestSaveProof"}`))
@@ -47,9 +58,13 @@ func TestSaveProof(t *testing.T) {
 
 	responseRecorder := httptest.NewRecorder()
 
-	var mds datastore.MockDataStore
+	ds, err := datastore.New(test_dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ds.Close()
 
-	Env := &Env{&mds}
+	Env := &Env{ds}
 
 	handler := http.HandlerFunc(Env.saveProof)
 
