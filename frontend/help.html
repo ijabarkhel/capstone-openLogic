@@ -23,37 +23,30 @@
 
     <title>proof checker</title>
 
-    <!-- page style from https://github.com/dhg/Skeleton -->
-    <link rel="stylesheet" href="normalize.css">
-    <link rel="stylesheet" href="skeleton.css">
-    <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet" type="text/css">
-    <link rel="icon" href="/assets/logicproofchecker.png">
-    <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">    
-    <script 
-    src="https://code.jquery.com/jquery-3.1.1.min.js" 
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" 
-    crossorigin="anonymous">
-    </script>
-    <script src="semantic/semantic.min.js"></script>
+    <!-- CSS & Fonts, via CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- CSS, local -->
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="stylesheet" type="text/css" href="proofs.css" />
+
+    <!-- Scripts, via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
       body {font-family: "Noto Sans";}
       a, a:hover, a:visited, a:focus, a:active {color: #0c1c8c; text-decoration: none; font-weight: bold ;}
       label, legend { display: inline-block; } 
     </style>
-  
-    <!-- css file -->
-    <link rel="stylesheet" type="text/css" href="proofs.css" />
-    <!-- javascript file -->
-    <script type="text/javascript" charset="utf-8" src="ajax.js"></script>
-    <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
-    <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
 </head>
 <body>
     <div id="top-menu" class="ui menu" style = "height : 60px;">
         <div class="header item">
-            <h1 id="title" style = "color : white;"><a href="index.php" style="color:white;">Proof Checker</a></h1>
+            <h1 id="title" style = "color : white;"><a href="/" style="color:white;">Proof Checker</a></h1>
             <!-- <img id="logo" src="/assets/applogo.png" alt="Italian Trulli" > -->
         </div>
         <a href="help.html" class="item" style = "color : white;">
