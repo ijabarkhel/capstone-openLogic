@@ -192,7 +192,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
                prf.oInput.value = changeRuleNames(rowdata.jstr);
                prf.oInput.classList.add("jinput");
                prf.oInput.onchange = function() {
-                  this.value = fixJInputStr(this.value);
+                  this.value = changeRuleNames(fixJInputStr(unChangeRuleNames(this.value)));
                }
             }
          } else {
@@ -332,7 +332,7 @@ function changeWffValue(pd, pos, val) {
 
 function changeJAt(pd, loc, val) {
    if (loc.length == 1) {
-      pd[loc[0]].jstr = fixJInputStr(val);
+      pd[loc[0]].jstr = fixJInputStr(unChangeRuleNames(val));
    } else {
       pd[loc[0]] = changeJAt(pd[loc[0]], loc.slice(1), val);
    }
@@ -498,7 +498,13 @@ function makeProof(pardiv, pstart, conc) {
       this.results.innerHTML = '<img src="assets/wait.gif" alt="[wait]" /> Checking …';
       var fD = new FormData();
       fD.append("predicateSettings", predicateSettings.toString());
-      fD.append("proofData", JSON.stringify(this.proofdata.map(unChangeRuleNames)));
+      fD.append("proofData", JSON.stringify(
+         this.proofdata.map(
+            (row) => Object.assign({}, row, {
+               jstr: unChangeRuleNames(row.jstr)
+            })
+         ))
+      );
       fD.append("wantedConc", this.wantedConc);
       fD.append("numPrems", this.numPrems);
       AJAXPostRequest('checkproof.php', fD, (text) => {
@@ -602,18 +608,16 @@ const changeRuleNames = (rule) => rule
    .replace("=I", "repeat");
 
 // When submitting to the PHP backend, rule names must be changed back
-const unChangeRuleNames = (row) => Object.assign(row, {
-   jstr: row.jstr.replace(/modus ponens/i, "→E")
+const unChangeRuleNames = (rule) => rule.replace(/modus ponens/i, "→E")
    .replace(/modus tollens/i, "MT")
    .replace(/double negation/i, "DNE")
    .replace(/modus tollendo ponens/i, "DS")
    .replace(/simplification/i, "∧E")
    .replace(/addition/i, "∨I")
    .replace(/adjunction/i, "∧I")
-   .replace(/equivalence/i, "↔E")
+   .replace(/equi[v∨]alence/i, "↔E")
    .replace(/bicondition/i, "Bicondition")
-   .replace(/universal instantiation/i, "∀E")
+   .replace(/uni[v∨]ersal instantiation/i, "∀E")
    .replace(/existential generalization/i, "∃I")
    .replace(/existential instantiation/i, "∃E")
-   .replace(/repeat/i, "=I")
-});
+   .replace(/repeat/i, "=I");
