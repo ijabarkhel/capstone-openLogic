@@ -109,6 +109,7 @@ By using Cloudflare, or any similar CDN/security service, you gain greatly impro
 The front-end and backend part #1 (php7) are stateless. They store no data and have no special requirements (php7 and the multibyte extension for backend part #1). Therefore, moving them or scaling them can be done by copying the files to any suitably configured webserver.
 
 All of the application state is managed by backend part #2. The data is stored in an SQLite database, which consists of a single file. The database can be transferred to a different server by standard Unix utilities such as scp. After ensuring correct filesystem permissions, the backend part #2 can be run on a new server and will use the copy of the database.
+
 ### Original README.md (outdated) below
 -----
 ## Capstone Spring 2019: Logic Proof Checker
