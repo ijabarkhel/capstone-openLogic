@@ -593,7 +593,7 @@ function makeProof(pardiv, pstart, conc) {
 }
 
 // Change names during display
-const changeRuleNames = (rule) => rule
+const changeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace(/dne/i, "Double Negation")
    .replace("→E", "Modus Ponens")
    .replace("MT", "Modus Tollens")
@@ -608,7 +608,7 @@ const changeRuleNames = (rule) => rule
    .replace("=I", "repeat");
 
 // When submitting to the PHP backend, rule names must be changed back
-const unChangeRuleNames = (rule) => rule.replace(/modus ponens/i, "→E")
+const unChangeRuleNames = (rule) => typeof rule === 'string' && rule.replace(/modus ponens/i, "→E")
    .replace(/modus tollens/i, "MT")
    .replace(/double negation/i, "DNE")
    .replace(/modus tollendo ponens/i, "DS")
