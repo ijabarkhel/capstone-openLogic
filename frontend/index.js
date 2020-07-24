@@ -110,13 +110,13 @@ class User {
 // Returns a promise which resolves to the response body or undefined
 function backendPOST(path_str, data_obj) {
   if ( !User.isSignedIn() ) {
-    console.error('Cannot send POST request to backend from unknown user.');
+    console.warn('Cannot send POST request to backend from unknown user.');
     if ( sessionStorage.getItem('loginPromptShown') == null ) {
       alert('You are not signed in.\nTo save your work, please sign in and then try again, or refresh the page.');
       sessionStorage.setItem('loginPromptShown', "true");
     }
     
-    return;
+    return Promise.reject( 'Unauthenticated user' );
   }
 
   if ( User.isTokenExpired() ) {
@@ -175,7 +175,7 @@ function getCSV() {
     downloadLink.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     downloadLink.target = '_blank';
     downloadLink.click();
-  });
+  }, console.log);
 }
 
 const prepareSelect = (selector, options) => {
@@ -208,7 +208,7 @@ function loadUserProofs() {
 
       prepareSelect('#userProofSelect', data);
       $('#userProofSelect').data('repositoryDataKey', 'userProofs')
-    }
+    }, console.log
   );
 }
 
@@ -244,7 +244,7 @@ function loadRepoProofs() {
       $('#repoProofSelect option[value=null]').attr('disabled', 'disabled');
 
       $('#repoProofSelect').data('repositoryDataKey', 'repoProofs');
-    }
+    }, console.log
   );
 }
 
@@ -257,7 +257,7 @@ function loadUserCompletedProofs() {
 
       prepareSelect('#userCompletedProofSelect', data);
       $('#userCompletedProofSelect').data('repositoryDataKey', 'completedUserProofs')
-    }
+    }, console.log
   );
 }
 
@@ -299,7 +299,7 @@ $(document).ready(function() {
       } else {
         loadUserProofs();
       }
-    })
+    }, console.log)
   });
 
   // Admin users - publish problems to public repo
