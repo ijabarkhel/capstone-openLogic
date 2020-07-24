@@ -498,13 +498,14 @@ function makeProof(pardiv, pstart, conc) {
       this.results.innerHTML = '<img src="assets/wait.gif" alt="[wait]" /> Checking …';
       var fD = new FormData();
       fD.append("predicateSettings", predicateSettings.toString());
-      fD.append("proofData", JSON.stringify(
-         this.proofdata.map(
-            (row) => Object.assign({}, row, {
-               jstr: unChangeRuleNames(row.jstr)
-            })
-         ))
-      );
+
+      const deepUnchange = (proofLine) => Array.isArray(proofLine) ?
+         proofLine.map(deepUnchange) :
+         Object.assign({}, proofLine, {
+            jstr: unChangeRuleNames(proofLine.jstr)
+         });
+
+      fD.append("proofData", JSON.stringify(this.proofdata.map(deepUnchange)));
       fD.append("wantedConc", this.wantedConc);
       fD.append("numPrems", this.numPrems);
       AJAXPostRequest('checkproof.php', fD, (text) => {
