@@ -1,5 +1,5 @@
 # Logic Proof Check: Web App
-
+ 
 There are three components of this web app:
 
 - Front-end (static HTML/JavaScript)

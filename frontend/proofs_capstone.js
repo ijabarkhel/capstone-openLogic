@@ -1,7 +1,22 @@
-/** Class to contain proof data for submission to backend */
-class Proof {
-   constructor(entryType, proofName, proofType, Premise, Logic, Rules, proofCompleted, conclusion, repoProblem){
+//class to hold the proof information
+class Proof{
+   id;
+   entryType
+   userSubmitted;
+   proofName;
+   proofType;
+   Premise;
+   Logic;
+   Rules;
+   proofCompleted;
+   conclusion;
+   timeSubmitted;
+   repoProblem;
+
+   constructor(id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, proofCompleted, conclusion, timeSubmitted, repoProblem){
+      this.id = id;
       this.entryType = entryType;
+      this.userSubmitted = userSubmitted;
       this.proofName = proofName;
       this.proofType = proofType;
       this.Premise = Premise;
@@ -9,52 +24,26 @@ class Proof {
       this.Rules = Rules;
       this.proofCompleted = proofCompleted;
       this.conclusion = conclusion;
+      this.timeSubmitted = timeSubmitted;
       this.repoProblem = repoProblem;
    }
 }
 
-// Function from upstream file 'ajax.js'
-function AJAXPostRequest(file, fD, callback) {
-   var xhttp = new XMLHttpRequest();
-   // xhttp.withCredentails = true;
-   xhttp.open("POST", file, true);
-   xhttp.onreadystatechange = function() {
-       if ((xhttp.readyState == 4) && (xhttp.status == "200")) {
-           callback(xhttp.responseText);
-       }
-   }
-   xhttp.send(fD);
-}
+
 
 var proofBeingChecked = false;
+var proofCompleted = false;
+var repoProblem = false;
 
-function processProofCheckResponse(text, context) {
-   if (!(proofBeingChecked)) {
+function setLocalCompleted(cr){
+   //console.log("cr " + cr)
+   cr = cr.toString();
+   sessionStorage.setItem("completed", cr);
+   if (sessionStorage.getItem("completed") === cr) {
       return;
-   }
-	console.log("XX" + text);
-   var res = JSON.parse(text);
-   var restext = '';
-   
-   if (res.issues.length == 0) {
-      if (res.concReached == true) {
-         context.proofCompleted = "true";
-         restext += '<span style="font-size: 150%; color: green;">☺</span> Congratulations! This proof is correct.';
-      } else {
-         context.proofCompleted = "false";
-         restext += '<span style="font-size: 150%; color: blue;">😐</span> No errors yet, but you haven’t reached the conclusion.';
-      }
    } else {
-      context.proofCompleted = "error";
-      restext += '<span style="font-size: 150%; color: red;">☹</span> <strong>Sorry there were errors</strong>.<br />';
-      restext += res.issues.join('<br />');
+      setTimeout(setLocalCompleted(cr), 1000);
    }
-   proofBeingChecked.results.innerHTML = restext;
-   proofBeingChecked = false;
-
-   console.log(context.proofdata);
-
-   document.querySelector('.proofContainer').dispatchEvent( new CustomEvent('checkProofEvent', { detail: context }));
 }
 
 function maxdepth(prdata) {
@@ -168,7 +157,15 @@ function dataToRows(prf, prdata, depth, md, ln) {
          newrow.jCell.classList.add("jcell");
          if ((rowdata.jstr != "Hyp") && (rowdata.jstr != "Pr")) {
             if ((currln != prf.openline) || (!(prf.jopen))) {
-               newrow.jCell.innerHTML = changeRuleNames(rowdata.jstr);
+               newrow.jCell.innerHTML = rowdata.jstr;
+               
+                 //Start replacing rule names here
+                  
+               rowdata.jstr=changeRuleNames(rowdata.jstr);
+               
+               newrow.jCell.innerHTML= rowdata.jstr;
+            
+               
                if (rowdata.jstr == "") {
                   newrow.jCell.classList.add("showcell");
                }
@@ -176,7 +173,12 @@ function dataToRows(prf, prdata, depth, md, ln) {
                newrow.jCell.myProof = prf;
                newrow.jCell.title = "click to edit";
                newrow.jCell.onclick = function() {
-                  newrow.jCell.innerHTML = changeRuleNames(rowdata.jstr);
+                  
+                  //replace rule names here after box is clicked
+                  rowdata.jstr=changeRuleNames(rowdata.jstr);
+                  newrow.jCell.innerHTML=rowdata.jstr;
+                  
+                  
                   this.myProof.registerInput();
                   this.myProof.jopen = true;
                   this.myProof.openline = this.myPos;
@@ -188,11 +190,14 @@ function dataToRows(prf, prdata, depth, md, ln) {
                prf.oInput.title = "Insert justification for this line here.";
                prf.oInput.myPos = (currln - 1);
                prf.oInput.myProof = prf;
-
-               prf.oInput.value = changeRuleNames(rowdata.jstr);
+               
+               //change rule names here as well
+               rowdata.jstr=changeRuleNames(rowdata.jstr);
+               
+               prf.oInput.value = rowdata.jstr;
                prf.oInput.classList.add("jinput");
                prf.oInput.onchange = function() {
-                  this.value = changeRuleNames(fixJInputStr(unChangeRuleNames(this.value)));
+                  this.value = fixJInputStr(this.value);
                }
             }
          } else {
@@ -222,8 +227,8 @@ function dataToRows(prf, prdata, depth, md, ln) {
             var addsplink = document.createElement("a");
             newrow.bCell.appendChild(addrowlink);
             newrow.bCell.appendChild(addsplink);
-            addrowlink.innerHTML = '<img src="assets/new.png" />';
-            addsplink.innerHTML = '<img src="assets/newsp.png" />';
+            addrowlink.innerHTML = '<img src="../assets/new.png" />';
+            addsplink.innerHTML = '<img src="../assets/newsp.png" />';
             addrowlink.myPos = (currln - 1);
             addrowlink.myProof = prf;
             addsplink.myPos = (currln - 1);
@@ -245,8 +250,8 @@ function dataToRows(prf, prdata, depth, md, ln) {
                var addusplink = document.createElement("a");
                newrow.bCell.appendChild(addurowlink);
                newrow.bCell.appendChild(addusplink);
-               addurowlink.innerHTML = '<img src="assets/newb.png" />';
-               addusplink.innerHTML = '<img src="assets/newspb.png" />';
+               addurowlink.innerHTML = '<img src="../assets/newb.png" />';
+               addusplink.innerHTML = '<img src="../assets/newspb.png" />';
                addurowlink.myPos = (currln - 1);
                addurowlink.myProof = prf;
                addusplink.myPos = (currln - 1);
@@ -332,7 +337,7 @@ function changeWffValue(pd, pos, val) {
 
 function changeJAt(pd, loc, val) {
    if (loc.length == 1) {
-      pd[loc[0]].jstr = fixJInputStr(unChangeRuleNames(val));
+      pd[loc[0]].jstr = fixJInputStr(val);
    } else {
       pd[loc[0]] = changeJAt(pd[loc[0]], loc.slice(1), val);
    }
@@ -393,7 +398,6 @@ function makeProof(pardiv, pstart, conc) {
    p.oInput = {};
    
    // associated elements
-   
    p.buttonDiv = document.createElement("div");
    pardiv.appendChild(p.buttonDiv);
    p.buttonDiv.classList.add("buttondiv");
@@ -401,13 +405,12 @@ function makeProof(pardiv, pstart, conc) {
    p.results = document.createElement("div");
    pardiv.appendChild(p.results);
    p.results.classList.add("resultsdiv");
-   
    p.checkButton = document.createElement("button");
    p.checkButton.type = "button";
-   p.checkButton.id = "checkButton";
    p.checkButton.innerHTML = "check proof";
    p.checkButton.myP = p;
    pardiv.appendChild(p.checkButton);
+   //check proof button
    p.checkButton.onclick = function() {
       this.myP.registerInput();
       this.myP.openline = 0;
@@ -417,8 +420,6 @@ function makeProof(pardiv, pstart, conc) {
       this.myP.startCheckMe();
    }
 
-
-   
    p.startOverButton = document.createElement("button");
    p.startOverButton.type = "button";
    p.startOverButton.innerHTML = "start over";
@@ -427,6 +428,7 @@ function makeProof(pardiv, pstart, conc) {
    p.startOverButton.myPardiv = pardiv;
    p.startOverButton.conc = conc;
    p.startOverButton.myP = p;
+   //start over
    p.startOverButton.onclick = function() {
       this.myP.parentNode.removeChild(this.myP.checkButton);
       this.myP.parentNode.removeChild(this.myP.startOverButton);
@@ -434,32 +436,122 @@ function makeProof(pardiv, pstart, conc) {
       this.myP.parentNode.removeChild(this.myP.buttonDiv);
       this.myP.parentNode.removeChild(this.myP);
       makeProof(this.myPardiv, this.start, this.conc);
+      $("#proofdetails").hide();
+      $("#theproof").html("");
    }
-   
-   // Admin button -- add to repository
-   if ( User && User.isSignedIn() && User.isAdministrator() ) {
-      let togglePublicButton = document.createElement('button');
-      togglePublicButton.type = "button";
-      let publicStatus = $('#repoProblem').val() || 'false';
-      if ( publicStatus === 'false' ) {
-         togglePublicButton.textContent = "Make Public";
-      } else {
-         togglePublicButton.textContent = "Make Private";
-      }
 
-      togglePublicButton.id = "togglePublicButton";
-      pardiv.appendChild(togglePublicButton);
+   //clearing the whole proof board
+   var br = document.createElement("p");
+   pardiv.appendChild(br);
+   p.restartFromScratch = document.createElement("button");
+   p.restartFromScratch.type = "button";
+   p.restartFromScratch.innerHTML = "restart proof checking from scratch";
+   pardiv.appendChild(p.restartFromScratch);
+   //restart from scratch
+   p.restartFromScratch.onclick = function() {
+      location.reload();
    }
+
+
+
+
+      var url_string =window.location.href;
+      var url = new URL(url_string);
+      var c = url.searchParams.get("mode");
+      
+        if(c=="insert" && sessionStorage.getItem("administrator") === "true")
+        {
+            
+               p.pushToDBButton = document.createElement("button");
+               p.pushToDBButton.type = "button";
+               p.pushToDBButton.innerHTML = "PUSH PROOF TO DB";
+               pardiv.appendChild(p.pushToDBButton);
+               p.pushToDBButton.start = pstart.slice(0);
+               p.pushToDBButton.myPardiv = pardiv;
+               p.pushToDBButton.conc = conc;
+               p.pushToDBButton.myP = p;
+            
+      
+            
+      p.pushToDBButton.onclick = function() { console.log(predicateSettings.toString());
+      
+      var pd = this.start;
+      var wc = this.conc;
+        //putting the proof items into arrays
+               var Premise = [];
+               var Logic = [];
+               var Rules = [];
+               for(var i = 0; i < pd.length; i++){
+                  if(pd[i].jstr == "Pr"){
+                     Premise.push(pd[i].wffstr);
+                  }else{
+                     Logic.push(pd[i].wffstr);
+                     Rules.push(pd[i].jstr);
+                  }
+               }
+               //creating object to send over to database server
+               var id = null; //no need to set this, will be set at server
+               var entryType = "proof";
+               if($("#proofName").val() === ""){
+                  var proofName = "n/a";
+               }
+               else{
+                  var proofName = "Repository - " + $("#proofName").val();
+               }
+               var userSubmitted = sessionStorage.getItem("userlogged"); 
+               var proofType;
+               if(document.getElementById("tflradio").checked){
+                  proofType = "prop";
+               }
+               else{
+                  proofType = "fol";
+               }
+               var timeSubmitted = new Date();
+               var conclusion = wc;
+               //repo problem var
+               var repoProblem = "true";
+               var bool = "false"; //problem not completed
+               var postData = new Proof(id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, bool, conclusion, timeSubmitted, repoProblem );
+               
+               console.log(postData);
+               $.ajax({
+                  type: "POST",
+                  url: "https://proofsdb.herokuapp.com/saveproof",
+                  contentType: "application/json",
+                  dataType: "json",
+                  data: JSON.stringify(postData),
+                  success: function(data,status) {
+                     console.log("proof saved");
+                     loadSelect();
+                  },
+                  error: function(data,status) { //optional, used for debugging purposes
+                     
+                     }
+               });//ajax
+      
+      
+      
+   }
+            
+            
+            
+            
    
-   
+        }
+
+
+
+   //delete line from to proof
    p.deleteLine = function(n) {
       this.proofdata = deletePDLine(this.proofdata, n);
    }
+   //add line to proof
    p.addNewLine = function(n) {
       this.proofdata = addNLtoPD(this.proofdata, n, false,false);
       this.openline = (n+2);
       this.jopen = false;
    }
+   //add new subproof 
    p.addNewSubProof = function(n) {
       this.proofdata = addNLtoPD(this.proofdata, n, true,false);
       this.openline = (n+2);
@@ -473,7 +565,7 @@ function makeProof(pardiv, pstart, conc) {
    p.addNewUPSubProof = function(n) {
       this.proofdata = addNLtoPD(this.proofdata, n, true,true);
       this.openline = (n+2);
-      this.jopen = false;
+      this.jopen = false;      
    }
    p.registerWff = function(pos, val) {
       this.proofdata = changeWffValue(this.proofdata, pos, val);
@@ -493,24 +585,215 @@ function makeProof(pardiv, pstart, conc) {
       }
    }
    
+   //check the proof
    p.startCheckMe = function() {
+
       proofBeingChecked = this;
-      this.results.innerHTML = '<img src="assets/wait.gif" alt="[wait]" /> Checking …';
+      this.results.innerHTML = '<img src="../assets/wait.gif" alt="[wait]" /> Checking …';
       var fD = new FormData();
-      fD.append("predicateSettings", predicateSettings.toString());
+      
+      //changing names of rules to match the book
+      this.proofdata.forEach(function(message){
+         if(message.jstr.toLowerCase().includes("modus ponens")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("modus ponens", "→E");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("modus tollens")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("modus tollens", "MT");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }  
+         if(message.jstr.toLowerCase().includes("double negation")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("double negation", "DNE");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("modus tollendo ponens")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("modus tollendo ponens", "DS");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("simplification")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("simplification", "∧E");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("addition")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("addition", "∨I");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("adjunction")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("adjunction", "∧I");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("equivalence")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("equivalence", "↔E");
+            message.jstr=message.jstr.toUpperCase();
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("bicondition")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("bicondition", "Bicondition");
+            
+            console.log(message.jstr);
+         }
+         if(message.jstr.toLowerCase().includes("universal instantiation")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("universal instantiation", "∀E");
+            message.jstr=message.jstr.toUpperCase();
 
-      const deepUnchange = (proofLine) => Array.isArray(proofLine) ?
-         proofLine.map(deepUnchange) :
-         Object.assign({}, proofLine, {
-            jstr: unChangeRuleNames(proofLine.jstr)
-         });
-
-      fD.append("proofData", JSON.stringify(this.proofdata.map(deepUnchange)));
-      fD.append("wantedConc", this.wantedConc);
-      fD.append("numPrems", this.numPrems);
-      AJAXPostRequest('checkproof.php', fD, (text) => {
-         processProofCheckResponse(text, this);
+            console.log(message.jstr);
+         }
+         
+         if(message.jstr.toLowerCase().includes("existential generalization")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("existential generalization", "∃I");
+            
+            console.log(message.jstr);
+         }
+         
+         if(message.jstr.toLowerCase().includes("existential instantiation")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("existential instantiation", "∃E");
+            
+            console.log(message.jstr);
+         }
+         
+         if(message.jstr.toLowerCase().includes("repeat")    ){
+         
+            message.jstr = message.jstr.toLowerCase().replace("repeat", "=I");
+            
+            console.log(message.jstr);
+         }
       });
+
+      //creating these variables to use in nested ajax call
+      var pd = this.proofdata;
+      var wc = this.wantedConc;
+      //sending proof to be checked
+      $.ajax({
+         type: "POST",
+         url: "checkproof.php",
+         dataType: "json",
+         data: {
+            "predicateSettings": predicateSettings.toString(),
+            "proofData" : JSON.stringify(this.proofdata),
+            "wantedConc" : this.wantedConc,
+            "numPrems" : this.numPrems
+         }, 
+         success: function(data,status) {
+            console.log(data);
+            if (!(proofBeingChecked)){
+               return;
+            }
+            console.log("XX" + data);
+            setLocalCompleted(data.concReached);
+            var restext = '';
+            if (data.issues.length == 0) {
+               if (data.concReached == true) {
+                  restext += '<span style="font-size: 150%; color: green;">☺</span> Congratulations! This proof is correct.';
+               } else {
+                  restext += '<span style="font-size: 150%; color: blue;">😐</span> No errors yet, but you haven’t reached the conclusion.';
+               }
+            } else {
+               restext += '<span style="font-size: 150%; color: red;">☹</span> <strong>Sorry there were errors</strong>.<br />';
+               restext += data.issues.join('<br />');
+            }
+            proofBeingChecked.results.innerHTML = restext;
+            proofBeingChecked = false;
+
+            ///saving proof to db only in user is logged in
+               var url_string =window.location.href;
+               var url = new URL(url_string);
+               var c = url.searchParams.get("mode");
+            
+   
+            if(sessionStorage.getItem("userlogged") !== null && c!="insert"){
+               //putting the proof items into arrays
+               var Premise = [];
+               var Logic = [];
+               var Rules = [];
+               for(var i = 0; i < pd.length; i++){
+                  if(pd[i].jstr == "Pr"){
+                     Premise.push(pd[i].wffstr);
+                  }else{
+                     Logic.push(pd[i].wffstr);
+                     Rules.push(pd[i].jstr);
+                  }
+               }
+               //creating object to send over to database server
+               var id = null; //no need to set this, will be set at server
+               var entryType = "proof";
+               if($("#proofName").val() === ""){
+                  var proofName = "n/a";
+               }
+               else{
+                  var proofName = $("#proofName").val();
+               }
+               var userSubmitted = sessionStorage.getItem("userlogged"); 
+               var proofType;
+               if(document.getElementById("tflradio").checked){
+                  proofType = "prop";
+               }
+               else{
+                  proofType = "fol";
+               }
+               var timeSubmitted = new Date();
+               var conclusion = wc;
+               //repo problem var
+               if(sessionStorage.getItem("repoProblem" === "false")){
+                  var repoProblem = "false";
+               }else{
+                  var repoProblem = "true";
+               }
+               var bool = sessionStorage.getItem("completed");
+               var postData = new Proof(id, entryType, userSubmitted, proofName, proofType, Premise, Logic, Rules, bool, conclusion, timeSubmitted, repoProblem);
+               
+               console.log(postData);
+               $.ajax({
+                  type: "POST",
+                  url: "https://proofsdb.herokuapp.com/saveproof",
+                  contentType: "application/json",
+                  dataType: "json",
+                  data: JSON.stringify(postData),
+                  success: function(data,status) {
+                     console.log("proof saved");
+                     loadSelect();
+                  },
+                  error: function(data,status) { //optional, used for debugging purposes
+                     //alert("error");
+                  }
+               });//ajax
+            }else{
+               console.log("proof not saved");
+            }
+            ///
+         },
+         error: function(data,status) { //optional, used for debugging purposes
+            console.log(data);
+         }
+      });
+      
+      
    }
    
    p.displayMe = function() {
@@ -563,7 +846,7 @@ function makeProof(pardiv, pstart, conc) {
          var a=document.createElement("button");
          a.type = "button";
          this.buttonDiv.appendChild(a);
-         a.innerHTML = '<img src="assets/new.png" /><span>new line</span>';
+         a.innerHTML = '<img src="../assets/new.png" /><span>new line</span>';
          a.title = 'Add a new line.';
          a.myProof = this;
          a.onclick = function() {
@@ -574,7 +857,7 @@ function makeProof(pardiv, pstart, conc) {
          var b=document.createElement("button");
          b.type = "button";
          this.buttonDiv.appendChild(b);
-         b.innerHTML = '<img src="assets/newsp.png" /><span>new subproof</span>';
+         b.innerHTML = '<img src="../assets/newsp.png" /><span>new subproof</span>';
          b.title = 'Add a new subproof.';
          b.myProof = this;
          b.onclick = function() {
@@ -593,32 +876,48 @@ function makeProof(pardiv, pstart, conc) {
    return p;
 }
 
-// Change names during display
-const changeRuleNames = (rule) => typeof rule === 'string' && rule
-   .replace(/dne/i, "Double Negation")
-   .replace("→E", "Modus Ponens")
-   .replace("MT", "Modus Tollens")
-   .replace("DS", "Modus Tollendo Ponens")
-   .replace("∧E", "Simplification")
-   .replace("∨I", "Addition")
-   .replace("∧I", "Adjunction")
-   .replace("↔E", "equivalence")
-   .replace("∀E", "universal instantiation")
-   .replace("∃I", "existential generalization")
-   .replace("∃E", "existential instantiation")
-   .replace("=I", "repeat");
 
-// When submitting to the PHP backend, rule names must be changed back
-const unChangeRuleNames = (rule) => typeof rule === 'string' && rule.replace(/modus ponens/i, "→E")
-   .replace(/modus tollens/i, "MT")
-   .replace(/double negation/i, "DNE")
-   .replace(/modus tollendo ponens/i, "DS")
-   .replace(/simplification/i, "∧E")
-   .replace(/addition/i, "∨I")
-   .replace(/adjunction/i, "∧I")
-   .replace(/equi[v∨]alence/i, "↔E")
-   .replace(/bicondition/i, "Bicondition")
-   .replace(/uni[v∨]ersal instantiation/i, "∀E")
-   .replace(/existential generalization/i, "∃I")
-   .replace(/existential instantiation/i, "∃E")
-   .replace(/repeat/i, "=I");
+
+function changeRuleNames( rule){
+   
+   if(rule.toLowerCase().includes("dne")    ){
+      rule= rule.toLowerCase().replace("dne", "Double Negation");
+   }
+   if(rule.includes("→E")    ){
+         rule = rule.replace("→E", "Modus Ponens");
+   }
+   if(rule.includes("MT")    ){
+          rule = rule.replace("MT", "Modus Tollens");
+   }   
+   if(rule.includes("DS")    ){
+       rule = rule.replace("DS", "Modus Tollendo Ponens");
+   }
+   if(rule.includes("∧E")    ){
+      rule = rule.replace("∧E", "Simplification");
+   }
+   if(rule.includes("∨I")    ){
+      rule = rule.replace("∨I", "Addition");
+   }
+   if(rule.includes("∧I")    ){
+      rule = rule.replace("∧I", "Adjunction");
+   }
+   if(rule.includes("↔E")    ){ 
+      rule = rule.replace("↔E", "equivalence");
+   }
+   if(rule.includes("∀E")    ){
+      rule = rule.replace("∀E", "universal instantiation");
+   }
+   if(rule.includes("∃I")     ){
+      rule = rule.replace("∃I", "existential generalization");
+   }
+   if(rule.includes("∃E")     ){
+      rule = rule.replace("∃E", "existential instantiation");
+   }
+   if(rule.includes("=I")     ){
+      rule = rule.replace("=I", "repeat");
+   }
+   
+   return rule;
+}
+
+
