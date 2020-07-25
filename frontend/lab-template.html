@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <!-- standard metadata -->
+   <meta charset="utf-8" />
+
+   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="apple-mobile-web-app-capable" content="yes" />
+   <meta name="mobile-web-app-capable" content="yes" />
+
+   <!-- web icon -->
+   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+   <link rel="icon" href="/assets/logicproofchecker.png">
+
+   <title>Lab Template</title>
+
+   <!-- CSS & Fonts, third-party -->
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css"
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous"
+      referrerpolicy="no-referrer" />
+   <link rel="stylesheet" href="assets/lib/normalize.min.css"
+      integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" />
+   <link rel="stylesheet" href="assets/lib/semantic.min.css"
+      integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" />
+
+   <!-- CSS, local -->
+   <link rel="stylesheet" type="text/css" href="index.css" />
+   <link rel="stylesheet" type="text/css" href="proofs.css" />
+
+   <!-- Scripts, third-party -->
+   <script src="assets/lib/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="></script>
+   <script src="assets/lib/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI="></script>
+
+   <!-- Scripts, local -->
+   <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
+   <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
+
+   <!-- Define Problems Here -->
+   <script type="text/javascript">
+      /*
+      predicateSettings = true; // FOL
+      predicateSettings = false; // TFL
+      */
+      predicateSettings = true;
+      var exSetA = [
+         {
+            "prems": [],
+            "conc": "∀xFx ∨ ¬∀xFx"
+         },
+         {
+            "prems": [],
+            "conc": "∀z(Pz ∨ ¬Pz)"
+         },
+         {
+            "prems": ["∀x(Fx → Gx)", "∃xFx"],
+            "conc": "∃xGx"
+         },
+         {
+            "prems": ["∀x(Mx ↔ Nx)", "Ma ∧ ∃xRxa"],
+            "conc": "∃xNx"
+         },
+         {
+            "prems": ["∀x∀yGxy"],
+            "conc": "∃xGxx"
+         },
+         {
+            "prems": [],
+            "conc": "∀xRxx → ∃x∃yRxy"
+         },
+         {
+            "prems": [],
+            "conc": "∀y∃x(Qy → Qx)"
+         },
+         {
+            "prems": ["Na → ∀x(Mx ↔ Ma)", "Ma", "¬Mb"],
+            "conc": "¬Na"
+         },
+         {
+            "prems": ["∀x∀y(Gxy → Gyx)"],
+            "conc": "∀x∀y(Gxy ↔ Gyx)"
+         },
+         {
+            "prems": ["∀x(¬Mx ∨ Ljx)", "∀x(Bx → Ljx)", "∀x(Mx ∨ Bx)"],
+            "conc": "∀xLjx"
+         }
+      ];
+      var exSetB = [
+         {
+            "prems": ["Pa ∨ Qb", "Qb → b=c", "¬Pa"],
+            "conc": "Qc"
+         },
+         {
+            "prems": ["m=n ∨ n=o", "Fn"],
+            "conc": "Fm ∨ Fo"
+         },
+         {
+            "prems": ["∀x x=m", "Rma"],
+            "conc": "∃xRxx"
+         },
+         {
+            "prems": ["∀x∀y(Rxy → x = y)"],
+            "conc": "Rab → Rba"
+         },
+         {
+            "prems": ["¬∃x¬x=m"],
+            "conc": "∀x∀y(Px → Py)"
+         },
+         {
+            "prems": ["∃xJx", "∃x¬Jx"],
+            "conc": "∃x∃y¬x=y"
+         },
+         {
+            "prems": ["∀x(x=n ↔ Mx)", "∀x(Ox ∨ ¬Mx)"],
+            "conc": "On"
+         },
+         {
+            "prems": ["∃xDx", "∀x(x=p ↔ Dx)"],
+            "conc": "Dp"
+         },
+         {
+            "prems": ["∃x[(Kx ∧ ∀y(Ky → x=y)) ∧ Bx]", "Kd"],
+            "conc": "Bd"
+         },
+         {
+            "prems": [],
+            "conc": "Pa → ∀x(Px ∨ ¬ x=a)"
+         }
+      ];
+
+      window.onload = function () {
+         exSetA.forEach(function (p) {
+            var instLine = '';
+            var sofar = [];
+            for (var i = 0; i < p.prems.length; i++) {
+               instLine += prettyStr(p.prems[i]);
+               if ((i + 1) != p.prems.length) {
+                  instLine += ', ';
+               }
+               sofar.push({
+                  "wffstr": p.prems[i],
+                  "jstr": "Pr"
+               });
+            }
+            var li = document.createElement("li");
+            document.getElementById("setA").appendChild(li);
+            instLine += ' ⊢ ' + prettyStr(p.conc);
+            li.innerHTML = instLine;
+            makeProof(li, sofar, p.conc);
+         });
+         exSetB.forEach(function (p) {
+            var instLine = '';
+            var sofar = [];
+            for (var i = 0; i < p.prems.length; i++) {
+               instLine += prettyStr(p.prems[i]);
+               if ((i + 1) != p.prems.length) {
+                  instLine += ', ';
+               }
+               sofar.push({
+                  "wffstr": p.prems[i],
+                  "jstr": "Pr"
+               });
+            }
+            var li = document.createElement("li");
+            document.getElementById("setB").appendChild(li);
+            instLine += ' ⊢ ' + prettyStr(p.conc);
+            li.innerHTML = instLine;
+            makeProof(li, sofar, p.conc);
+         });
+      }
+
+
+   </script>
+   <style type="text/css">
+      ol li {
+         margin-bottom: 4ex;
+      }
+   </style>
+</head>
+
+<body>
+   <div id="top-menu" class="ui menu" style="height: 60px;">
+      <div class="header item">
+         <h1 id="title"><a href="index.html">Proof Checker</a></h1>
+      </div>
+      <a href="help.html" class="item">Help</a>
+      <a href="rules.html" class="item">Logic Rules</a>
+   </div>
+   <div class="ui two column divided grid container" style="padding: 20px; background: rgba(255,255,255,0.95);">
+      <div class="eight wide column">
+         <h1 class="ui header">Lab Template</h1>
+         <h3>Chapter 32, Exercise E</h3>
+         <p>Provide a proof of each claim.</p>
+         <ol id="setA">
+         </ol>
+
+         <h3>Chapter 34, Exercise A</h3>
+         <p>Provide a proof of each claim.</p>
+         <ol id="setB">
+         </ol>
+      </div>
+      <!-- This can be removed or commented out -->
+      <!-- Begin -->
+      <div class="eight wide column">
+         <h1 class="ui header">Lab Hints or Instructions</h1>
+         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sed ultrices justo, sit amet volutpat
+            ligula. Integer ultrices erat ligula, eu condimentum lacus hendrerit eu. Vivamus dignissim mi non nibh
+            lobortis condimentum. Quisque dictum ornare ipsum, a faucibus neque convallis nec. Nullam vitae ultricies
+            purus. Etiam dui elit, pretium in risus at, maximus molestie quam. Praesent non ante nunc. Interdum et
+            malesuada fames ac ante ipsum primis in faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et
+            ultrices posuere cubilia curae; Mauris non mauris semper, iaculis sapien et, luctus tellus. Phasellus id
+            efficitur risus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nulla non lorem neque. Ut sed
+            metus ac nisl rutrum lobortis eget quis tellus. Suspendisse blandit, leo et mattis posuere, quam metus
+            sodales libero, eu varius elit nisl quis lorem. Vivamus eleifend vestibulum fringilla.
+         </p>
+         <ul class="ui list">
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
+            <li>Nullam a magna non purus pellentesque sagittis sit amet nec justo.</li>
+            <li>Donec ullamcorper quam eget enim fermentum elementum.</li>
+         </ul>
+      </div>
+      <!-- End -->
+   </div>
+</body>
+
+</html>
