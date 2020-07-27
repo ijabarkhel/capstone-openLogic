@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="assets/lib/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" />
-    <link rel="stylesheet" href="assets/lib/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" />
+<!--    <link rel="stylesheet" href="assets/lib/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" /> -->
     <link rel="stylesheet" href="assets/lib/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" />
 
     <!-- CSS, local -->
@@ -38,146 +38,143 @@
     <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
     <script type="text/javascript" src="index.js"></script>
   </head>
+
   <body>
-  <div id="top-menu" class="ui menu" style = "height : 60px;">
-        <div class="header item">
-          <h1 id="title"><a href="index.html">Proof Checker</a></h1>
-        </div>
-        <a href="help.html" class="item">
-          Help
-        </a>
-        <a href="references.html" class="item">
-          References
-        </a>
-        <a href="rules.html" class="item">
-          Logic Rules
-        </a>
-        <a id="adminLink" class="item" style="display: none;">
-          Admin
-        </a>
-        <div class="right menu">
-          <div class="header item"><a id="user-email" class="item"></a></div>
-          <div class="g-signin2 item" data-onsuccess="onSignIn"></div>
-        </div>
+    <div id="top-menu" class="ui menu" style="height: 60px;">
+      <div class="header item">
+        <h1 id="title"><a href="index.html">Proof Checker</a></h1>
+      </div>
+      <a href="help.html" class="item">
+        Help
+      </a>
+      <a href="references.html" class="item">
+        References
+      </a>
+      <a href="rules.html" class="item">
+        Logic Rules
+      </a>
+      <a id="adminLink" class="item" style="display: none;">
+        Admin
+      </a>
+      <div class="right menu">
+        <div class="header item"><a id="user-email" class="item"></a></div>
+        <div class="g-signin2 item" data-onsuccess="onSignIn"></div>
+      </div>
     </div>
 
-  <!-- middle stuff -->
-      <div id="load-container" style="display: none;">
-        <div style="float: left;"> 
-          <label for="userProofSelect">load unfinished proofs: </label>
-          <select id="userProofSelect" class="proofSelect">
-            <option> waiting for server...</option>
-          </select>
-        </div>
-        <!--  -->
-        <div style="float: left; padding-left: .9rem;"> 
-          <label for="repoProofSelect">load repository problems: </label>
-          <select id="repoProofSelect" class="proofSelect" data-content="Checking a repository problem will overwrite any past attempts of the selected problem.">
-            <option> waiting for server...</option>
-          </select>
-        </div>
-         <!--  -->
-         <div style="float: left; padding-left: .9rem;"> 
-          <label for="userCompletedProofSelect">finished repository problems: </label>
-          <select id="userCompletedProofSelect" class="proofSelect" data-content="Finished repository problems can be edited.">
-            <option> waiting for server...</option>
-          </select>
-        </div>
+    <!-- middle stuff -->
+    <div id="load-container" style="display: none;">
+      <div style="float: left;"> 
+        <label for="userProofSelect">load unfinished proofs: </label>
+        <select id="userProofSelect" class="proofSelect">
+          <option> waiting for server...</option>
+        </select>
       </div>
-      
-      <div class="ui stackable vertically divided grid" style="clear: both;">
-          <div class="two column row" style="padding:1.5rem;padding-top:1rem;">
-            <div class="column">
-                    <h3 id="textarea-header" class="ui top attached header">
-                      Check Your Proof:
-                    </h3>
-                    <div id="textarea-container" class="ui attached segment">
-                      <div class="createProof">
-                        <div id="nameyourproof" style="padding-bottom: 14px; display: none;">
-                          <label>name your proof:</label>
-                          <div class="ui input" >
-                            <input id="proofName" type="text" placeholder="proof name" data-content="Naming your proof will allow you to finish it later if it is incomplete 👍🏽">
-                          </div>
-                        </div>
-
-                        <input type="radio" name="tflfol" id="tflradio" checked /> <label for="tflradio">Propositional </label>
-                        <input type="radio" name="tflfol" id="folradio" /> <label for="folradio">First-Order</label><br /><br />
-                        Premises (separate with “,” or “;”):<br />
-                        <input id="probpremises" type="text" /><br /><br />
-                        Conclusion:<br />
-                        <input id="probconc" type="text" /><br /><br />
-                        <input type="hidden" id="repoProblem" value="false" />
-                        <button type="button" id="createProb">create problem</button><br /><br />
-                      </div>
-                      <div class="proofContainer" style="display: none;">
-                        <h3 id="problabel">Proof: <span class="proofNameSpan"></span></h3>
-                        <p id="proofdetails"></p>
-                        <div id="theproof"></div>
-                        <br>
-                        <br>
-                        <button type="button" class="newProof">Clear & Start a new Proof</button>
-                      </div>
-                      
-                    </div>
-
-            </div>
-            
-            <div class="column" style="margin-left: 0;">
-
-                <h3 id="textarea-header" class="ui top attached header">
-                  How to Use the Checker:
-                </h3>
-                <div id="textarea-container" class="ui attached segment">
-
-                  <strong><p style="text-decoration: underline;">Symbols:</p></strong>
-                  <table id="symkey">
-                      <tr><td>negation:</td><td> <span class="tt">∼</span></td></tr>
-                      <tr><td>conjunction:</td><td> <span class="tt">^</span></td></tr>
-                      <tr><td>disjunction:</td><td> <span class="tt">v</span></td></tr>
-                      <tr><td>conditional:</td><td> <span class="tt">-&gt;</span></td></tr>
-                      <tr><td>biconditional:</td><td> <span class="tt">&lt;-&gt;</span> (or in TFL only: <span class="tt">=</span>)</td></tr>
-                      <tr><td>universal quantification (FOL only):</td><td> <span class="tt">Ax</span> or <span class="tt">(Ax)</span></tr>
-                      <tr><td>existential quantification (FOL only):</td><td> <span class="tt">Ex</span> or <span class="tt">(Ex)</span></tr>
-                      <!-- <tr><td>contradiction:</td><td> <span class="tt">#</span></td></tr> -->
-                  </table>
-
-                  <strong><p style="text-decoration: underline;">Proof operations:</p></strong><br>
-                  <table id="key">
-                          <tr><td><a>×</a></td><td>delete this line</td></tr>
-                          <tr><td><a><img src="../assets/new.png" alt="|+"/></a></td><td>add a line below this one</td></tr>
-                          <tr><td><a><img src="../assets/newsp.png" alt="||+" /></a></td><td>add a new subproof below this line</td></tr>
-                          <tr><td><a><img src="../assets/newb.png" alt="&lt;+" /></a></td><td>add a new line below this subproof to the parent subproof</td></tr>
-                          <tr><td><a><img src="../assets/newspb.png" alt="&lt;|+" /></a></td><td>add a new subproof below this subproof to the parent subproof</td></tr>
-                  </table>
-
+      <!--  -->
+      <div style="float: left; padding-left: .9rem;"> 
+        <label for="repoProofSelect">load repository problems: </label>
+        <select id="repoProofSelect" class="proofSelect" data-content="Checking a repository problem will overwrite any past attempts of the selected problem.">
+          <option> waiting for server...</option>
+        </select>
+      </div>
+      <!--  -->
+      <div style="float: left; padding-left: .9rem;"> 
+        <label for="userCompletedProofSelect">finished repository problems: </label>
+        <select id="userCompletedProofSelect" class="proofSelect" data-content="Finished repository problems can be edited.">
+          <option> waiting for server...</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="ui stackable vertically divided grid" style="clear: both;">
+      <div class="two column row" style="padding: 1.5rem; padding-top :1rem;">
+        <div class="column">
+          <h3 id="textarea-header" class="ui top attached header">
+            Check Your Proof:
+          </h3>
+          <div id="textarea-container" class="ui attached segment">
+            <div class="createProof">
+              <div id="nameyourproof" style="padding-bottom: 14px; display: none;">
+                <label>name your proof:</label>
+                <div class="ui input" >
+                  <input id="proofName" type="text" placeholder="proof name" data-content="Naming your proof will allow you to finish it later if it is incomplete 👍🏽">
                 </div>
+              </div>
 
+              <input type="radio" name="tflfol" id="tflradio" checked /> <label for="tflradio">Propositional </label>
+              <input type="radio" name="tflfol" id="folradio" /> <label for="folradio">First-Order</label><br /><br />
+              Premises (separate with “,” or “;”):<br />
+              <input id="probpremises" type="text" /><br /><br />
+              Conclusion:<br />
+              <input id="probconc" type="text" /><br /><br />
+              <input type="hidden" id="repoProblem" value="false" />
+              <button type="button" id="createProb">create problem</button><br /><br />
+            </div>
+            <div class="proofContainer" style="display: none;">
+              <h3 id="problabel">Proof: <span class="proofNameSpan"></span></h3>
+              <p id="proofdetails"></p>
+              <div id="theproof"></div>
+              <br>
+              <br>
+              <button type="button" class="newProof">Clear & Start a new Proof</button>
             </div>
           </div>
         </div>
+        
+        <div class="column" style="margin-left: 0;">
 
-        <hr style="margin-bottom: 15px;">
-        <div class="bottom">
-          <p>This site based on code from the <a href="https://github.com/OpenLogicProject/fitch-checker">Open Logic Project</a></p>
-          <p>Adapted by Corey Hunter and a CSUMB 2019 Capstone team: Jay Arellano, Mustafa Al Asadi, Gautam Tata, and Ben Lenz </p>
-          <p>Site Version: GIT_VERSION_TAG</p>
-        </div>
-      </div>
+          <h3 id="textarea-header" class="ui top attached header">
+            How to Use the Checker:
+          </h3>
+          <div id="textarea-container" class="ui attached segment">
 
-      <!-- Administration Interface -->
-      <div class="ui modal">
-        <i class="close icon"></i>
-        <div class="header">
-          Administrator Options
-        </div>
-        <div class="content">
-          <button class="downloadCSV">Download Student Problems as CSV</button>
-        </div>
-        <div class="actions">
-          <div class="ui black deny button">
-            Close
+            <strong><p style="text-decoration: underline;">Symbols:</p></strong>
+            <table id="symkey">
+              <tr><td>negation:</td><td> <span class="tt">∼</span></td></tr>
+              <tr><td>conjunction:</td><td> <span class="tt">^</span></td></tr>
+              <tr><td>disjunction:</td><td> <span class="tt">v</span></td></tr>
+              <tr><td>conditional:</td><td> <span class="tt">-&gt;</span></td></tr>
+              <tr><td>biconditional:</td><td> <span class="tt">&lt;-&gt;</span> (or in TFL only: <span class="tt">=</span>)</td></tr>
+              <tr><td>universal quantification (FOL only):</td><td> <span class="tt">Ax</span> or <span class="tt">(Ax)</span></tr>
+              <tr><td>existential quantification (FOL only):</td><td> <span class="tt">Ex</span> or <span class="tt">(Ex)</span></tr>
+              <!-- <tr><td>contradiction:</td><td> <span class="tt">#</span></td></tr> -->
+            </table>
+
+            <strong><p style="text-decoration: underline;">Proof operations:</p></strong><br>
+            <table id="key">
+              <tr><td><a>×</a></td><td>delete this line</td></tr>
+              <tr><td><a><img src="../assets/new.png" alt="|+"/></a></td><td>add a line below this one</td></tr>
+              <tr><td><a><img src="../assets/newsp.png" alt="||+" /></a></td><td>add a new subproof below this line</td></tr>
+              <tr><td><a><img src="../assets/newb.png" alt="&lt;+" /></a></td><td>add a new line below this subproof to the parent subproof</td></tr>
+              <tr><td><a><img src="../assets/newspb.png" alt="&lt;|+" /></a></td><td>add a new subproof below this subproof to the parent subproof</td></tr>
+            </table>
           </div>
         </div>
       </div>
-  </body>
+    </div>
+
+    <hr style="margin-bottom: 15px;">
+    <div class="bottom">
+      <p>This site based on code from the <a href="https://github.com/OpenLogicProject/fitch-checker">Open Logic Project</a></p>
+      <p>Adapted by Corey Hunter and a CSUMB 2019 Capstone team: Jay Arellano, Mustafa Al Asadi, Gautam Tata, and Ben Lenz </p>
+      <p>Site Version: GIT_VERSION_TAG</p>
+    </div>
+</div>
+
+<!-- Administration Interface -->
+<div class="ui modal">
+  <i class="close icon"></i>
+  <div class="header">
+    Administrator Options
+  </div>
+  <div class="content">
+    <button class="downloadCSV">Download Student Problems as CSV</button>
+  </div>
+  <div class="actions">
+    <div class="ui black deny button">
+      Close
+    </div>
+  </div>
+</div>
+</body>
 </html>
