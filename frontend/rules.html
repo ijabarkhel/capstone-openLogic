@@ -27,7 +27,6 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="assets/lib/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" />
-    <link rel="stylesheet" href="assets/lib/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" />
     <link rel="stylesheet" href="assets/lib/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" />
 
     <!-- CSS, local -->
@@ -42,40 +41,34 @@
       a, a:hover, a:visited, a:focus, a:active {color: #0c1c8c; text-decoration: none; font-weight: bold ;}
       label, legend { display: inline-block; } 
     </style>
-</head>
-<body>
-    <div id="top-menu" class="ui menu" style = "height : 60px;">
-        <div class="header item">
-            <h1 id="title" style = "color : white;"><a href="/" style="color:white;">Proof Checker</a></h1>
-            <!-- <img id="logo" src="/assets/applogo.png" alt="Italian Trulli" > -->
-        </div>
-        <a href="help.html" class="item" style = "color : white;">
-            Help
-        </a>
-        <a href="references.html" class="item" style = "color : white;">
-            References
-        </a>
-        <a href="rules.html" class="item" style = "color : white;">
-            Logic Rules
-        </a>
-        <div class="right menu">
-            <p id="log-sign" class="item" style = "color : white;">
-            </p>
-        </div>
+  </head>
+  <body>
+    <div id="top-menu" class="ui menu" style = "height: 60px;">
+      <div class="header item">
+        <h1 id="title"><a href="index.html">Proof Checker</a></h1>
+      </div>
+      <a href="rules.html" class="item">
+        Proof Rules
+      </a>
+      <a href="references.html" class="item">
+        References
+      </a>
+      <a href="help.html" class="item">
+        Help
+      </a>
+      <div class="right menu">
+        <p id="log-sign" class="item" style = "color : white;">
+        </p>
+      </div>
     </div>
 
-<div class="ui container segment" id="rulesContainer">
-    <h2 id="imageHeader" class="ui header">Textbook Rules</h2>
-    <img class="ui fluid image" src="assets/help.png">
-</div>
+    <div class="ui container segment" id="rulesContainer">
+      <h2 id="imageHeader" class="ui header">Proof Rules</h2>
+      <h3>source: Craig DeLancey, 'A Concise Introduction to Logic'</h3>
+      <!-- <img class="ui fluid image" src="assets/help.png"> -->
+      <img class="ui fluid image" src="assets/help.png">
+    </div>
 
-<hr style="margin-bottom: 15px;">
-<img id="logo" src="/assets/logicproofchecker.png">
-<p id="bottom">Capstone 2019</p>
-<p id="bottom">Logic Proof Checker</p>
-<p id="bottom">Jay Arellano / Mustafa Al Asadi / Gautam Tata / Ben Lenz</p>
-<br>
-
-</body>
-<script type="text/javascript" src="index.js"></script>
+  </body>
+  <script type="text/javascript" src="index.js"></script>
 </html>
