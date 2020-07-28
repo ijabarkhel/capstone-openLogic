@@ -24,7 +24,7 @@ var (
 	}
 
 	admin_users = map[string]bool{
-		// "gbruns@csumb.edu":   true,
+		"gbruns@csumb.edu":   false,
 		"cohunter@csumb.edu": true,
 	}
 
