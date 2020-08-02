@@ -594,69 +594,69 @@ function makeProof(pardiv, pstart, conc) {
       
       //changing names of rules to match the book
       this.proofdata.forEach(function(message){
-         if(message.jstr.toLowerCase().includes("modus ponens")    ){
+         if (message.jstr.toLowerCase().includes("modus ponens")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("modus ponens", "→E");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("modus tollens")    ){
+         if (message.jstr.toLowerCase().includes("modus tollens")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("modus tollens", "MT");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }  
-         if(message.jstr.toLowerCase().includes("double negation")    ){
+         if (message.jstr.toLowerCase().includes("double negation")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("double negation", "DNE");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("modus tollendo ponens")    ){
+         if (message.jstr.toLowerCase().includes("modus tollendo ponens")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("modus tollendo ponens", "DS");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("simplification")    ){
+         if (message.jstr.toLowerCase().includes("simplification")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("simplification", "∧E");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("addition")    ){
+         if (message.jstr.toLowerCase().includes("addition")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("addition", "∨I");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("adjunction")    ){
+         if (message.jstr.toLowerCase().includes("adjunction")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("adjunction", "∧I");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("equivalence")    ){
+         if (message.jstr.toLowerCase().includes("equivalence")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("equivalence", "↔E");
             message.jstr=message.jstr.toUpperCase();
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("bicondition")    ){
+         if (message.jstr.toLowerCase().includes("bicondition")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("bicondition", "Bicondition");
             
             console.log(message.jstr);
          }
-         if(message.jstr.toLowerCase().includes("universal instantiation")    ){
+         if (message.jstr.toLowerCase().includes("universal instantiation")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("universal instantiation", "∀E");
             message.jstr=message.jstr.toUpperCase();
@@ -664,21 +664,21 @@ function makeProof(pardiv, pstart, conc) {
             console.log(message.jstr);
          }
          
-         if(message.jstr.toLowerCase().includes("existential generalization")    ){
+         if (message.jstr.toLowerCase().includes("existential generalization")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("existential generalization", "∃I");
             
             console.log(message.jstr);
          }
          
-         if(message.jstr.toLowerCase().includes("existential instantiation")    ){
+         if (message.jstr.toLowerCase().includes("existential instantiation")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("existential instantiation", "∃E");
             
             console.log(message.jstr);
          }
          
-         if(message.jstr.toLowerCase().includes("repeat")    ){
+         if (message.jstr.toLowerCase().includes("repeat")    ){
          
             message.jstr = message.jstr.toLowerCase().replace("repeat", "=I");
             
@@ -727,13 +727,13 @@ function makeProof(pardiv, pstart, conc) {
                var c = url.searchParams.get("mode");
             
    
-            if(sessionStorage.getItem("userlogged") !== null && c!="insert"){
+            if (sessionStorage.getItem("userlogged") !== null && c!="insert"){
                //putting the proof items into arrays
                var Premise = [];
                var Logic = [];
                var Rules = [];
                for(var i = 0; i < pd.length; i++){
-                  if(pd[i].jstr == "Pr"){
+                  if (pd[i].jstr == "Pr"){
                      Premise.push(pd[i].wffstr);
                   }else{
                      Logic.push(pd[i].wffstr);
@@ -743,7 +743,7 @@ function makeProof(pardiv, pstart, conc) {
                //creating object to send over to database server
                var id = null; //no need to set this, will be set at server
                var entryType = "proof";
-               if($("#proofName").val() === ""){
+               if ($("#proofName").val() === ""){
                   var proofName = "n/a";
                }
                else{
@@ -751,7 +751,7 @@ function makeProof(pardiv, pstart, conc) {
                }
                var userSubmitted = sessionStorage.getItem("userlogged"); 
                var proofType;
-               if(document.getElementById("tflradio").checked){
+               if (document.getElementById("tflradio").checked){
                   proofType = "prop";
                }
                else{
@@ -760,7 +760,7 @@ function makeProof(pardiv, pstart, conc) {
                var timeSubmitted = new Date();
                var conclusion = wc;
                //repo problem var
-               if(sessionStorage.getItem("repoProblem" === "false")){
+               if (sessionStorage.getItem("repoProblem" === "false")){
                   var repoProblem = "false";
                }else{
                   var repoProblem = "true";
@@ -876,44 +876,41 @@ function makeProof(pardiv, pstart, conc) {
    return p;
 }
 
-
-
-function changeRuleNames( rule){
-   
-   if(rule.toLowerCase().includes("dne")    ){
+function changeRuleNames(rule) {
+   if (rule.toLowerCase().includes("dne")    ){
       rule= rule.toLowerCase().replace("dne", "Double Negation");
    }
-   if(rule.includes("→E")    ){
+   if (rule.includes("→E")    ){
          rule = rule.replace("→E", "Modus Ponens");
    }
-   if(rule.includes("MT")    ){
+   if (rule.includes("MT")    ){
           rule = rule.replace("MT", "Modus Tollens");
    }   
-   if(rule.includes("DS")    ){
+   if (rule.includes("DS")    ){
        rule = rule.replace("DS", "Modus Tollendo Ponens");
    }
-   if(rule.includes("∧E")    ){
+   if (rule.includes("∧E")    ){
       rule = rule.replace("∧E", "Simplification");
    }
-   if(rule.includes("∨I")    ){
+   if (rule.includes("∨I")    ){
       rule = rule.replace("∨I", "Addition");
    }
-   if(rule.includes("∧I")    ){
+   if (rule.includes("∧I")    ){
       rule = rule.replace("∧I", "Adjunction");
    }
-   if(rule.includes("↔E")    ){ 
+   if (rule.includes("↔E")    ){ 
       rule = rule.replace("↔E", "equivalence");
    }
-   if(rule.includes("∀E")    ){
+   if (rule.includes("∀E")    ){
       rule = rule.replace("∀E", "universal instantiation");
    }
-   if(rule.includes("∃I")     ){
+   if (rule.includes("∃I")     ){
       rule = rule.replace("∃I", "existential generalization");
    }
-   if(rule.includes("∃E")     ){
+   if (rule.includes("∃E")     ){
       rule = rule.replace("∃E", "existential instantiation");
    }
-   if(rule.includes("=I")     ){
+   if (rule.includes("=I")     ){
       rule = rule.replace("=I", "repeat");
    }
    
