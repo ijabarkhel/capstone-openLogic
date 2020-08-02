@@ -623,7 +623,7 @@ const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace(/adjunction/i,            "∧I")
    .replace(/equi[v∨]alence/i,       "↔E")
    .replace(/bicondition/i,           "Bicondition")
-   .replace(/conditional derivation/i,      "→I")
+   .replace(/conditional deri[v∨]ation/i,  "→I")
    .replace(/uni[v∨]ersal instantiation/i, "∀E")
    .replace(/existential generalization/i,  "∃I")
    .replace(/existential instantiation/i,   "∃E")
