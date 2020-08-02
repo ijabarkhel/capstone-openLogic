@@ -605,14 +605,16 @@ const changeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace("∧E", "Simplification")
    .replace("∨I", "Addition")
    .replace("∧I", "Adjunction")
-   .replace("↔E", "equivalence")
-   .replace("∀E", "universal instantiation")
-   .replace("∃I", "existential generalization")
-   .replace("∃E", "existential instantiation")
-   .replace("=I", "repeat");
+   .replace("↔E", "Equivalence")
+   .replace("→I", "Conditional derivation")
+   .replace("∀E", "Universal instantiation")
+   .replace("∃I", "Existential generalization")
+   .replace("∃E", "Existential instantiation")
+   .replace("=I", "Repeat");
 
 // When submitting to the PHP backend, rule names must be changed back
-const unChangeRuleNames = (rule) => typeof rule === 'string' && rule.replace(/modus ponens/i, "→E")
+const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
+   .replace(/modus ponens/i, "→E")
    .replace(/modus tollens/i, "MT")
    .replace(/double negation/i, "DNE")
    .replace(/modus tollendo ponens/i, "DS")
@@ -621,6 +623,7 @@ const unChangeRuleNames = (rule) => typeof rule === 'string' && rule.replace(/mo
    .replace(/adjunction/i, "∧I")
    .replace(/equi[v∨]alence/i, "↔E")
    .replace(/bicondition/i, "Bicondition")
+   .replace(/conditional derivation/i, "→I")
    .replace(/uni[v∨]ersal instantiation/i, "∀E")
    .replace(/existential generalization/i, "∃I")
    .replace(/existential instantiation/i, "∃E")
