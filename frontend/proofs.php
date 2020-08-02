@@ -35,7 +35,6 @@ $cite_nums = array(
     "IP" => array(0, 1),
     "LEM" => array(0, 2),
     "Bicondition" => array(2,0)
-    
 );
 
 function followsByCQThisWay($a, $b) {
@@ -127,14 +126,12 @@ function differsBySwappingFor($q, $p, $s, $t) {
     );
 }
 
-
 function followsByLL($c, $a, $b) {
     return (
         (followsByLLThisWay($c, $a, $b)) ||
         (followsByLLThisWay($c, $b, $a))
     );
 }
-
 
 function followsByEG($c, $a) {
     if (!($c->mainOp == "∃")) {
@@ -243,10 +240,6 @@ function followsByDNE($c, $a) {
         ($c->rightSide->mainOp == "¬")
         &&
         (sameWff($a, $c->rightSide->rightSide))
-        
-        
-        
-        
     );
 }
 
@@ -581,42 +574,42 @@ function flatten_proof($pr, $dpth_ar) {
 
 //change rule names in the error feedback
 function change_rule_name($rule){ 
-if (strpos($rule, 'DNE') !== false) {
-    return "Double Negation";
-}
-if (strpos($rule, '→E') !== false) {
-    return "Modus Ponens";
-} 
-if (strpos($rule, 'MT') !== false) {
-    return "Modus Tollens";
-} 
-if (strpos($rule, 'DS') !== false) {
-    return "Modus Tollendo Ponens";
-} 
-if (strpos($rule, '∧E') !== false) {
-    return "Simplification";
-} 
-if (strpos($rule, '∨I') !== false) {
-    return "Addition";
-} 
-if (strpos($rule, '∧I') !== false) {
-    return "Adjunction";
-} 
-if (strpos($rule, '↔E') !== false) {
-    return "Equivalence";
-} 
-if (strpos($rule, '∀E') !== false) {
-    return "universal instantiation";
-} 
-if (strpos($rule, '∃I') !== false) {
-    return "existential generalization";
-} 
-if (strpos($rule, '∃E') !== false) {
-    return "existential instantiation";
-} 
-if (strpos($rule, '=I') !== false) {
-    return "repeat";
-} 
+    if (strpos($rule, 'DNE') !== false) {
+	return "Double Negation";
+    }
+    if (strpos($rule, '→E') !== false) {
+	return "Modus Ponens";
+    } 
+    if (strpos($rule, 'MT') !== false) {
+	return "Modus Tollens";
+    } 
+    if (strpos($rule, 'DS') !== false) {
+	return "Modus Tollendo Ponens";
+    } 
+    if (strpos($rule, '∧E') !== false) {
+	return "Simplification";
+    } 
+    if (strpos($rule, '∨I') !== false) {
+	return "Addition";
+    } 
+    if (strpos($rule, '∧I') !== false) {
+	return "Adjunction";
+    } 
+    if (strpos($rule, '↔E') !== false) {
+	return "Equivalence";
+    } 
+    if (strpos($rule, '∀E') !== false) {
+	return "universal instantiation";
+    } 
+    if (strpos($rule, '∃I') !== false) {
+	return "existential generalization";
+    } 
+    if (strpos($rule, '∃E') !== false) {
+	return "existential instantiation";
+    } 
+    if (strpos($rule, 'R') !== false) {
+	return "repeat";
+    } 
     return $rule;
 }
 
@@ -975,9 +968,7 @@ function check_proof($pr, $numprems, $conc) {
         if (!($worked)) {
             array_push($fpr[$i]->issues, 'Is not a proper application of the rule ' . change_rule_name($fpr[$i]->j->rules[0]) .' (for the line(s) cited).'); 
         }
-        
     }
-    
 
     // merge issues
     for ($i = 0; $i<count($fpr) ; $i++) {
@@ -987,7 +978,6 @@ function check_proof($pr, $numprems, $conc) {
             array_push($rv->issues, 'Line ' . $n . ': ' . $issue);
         }
     }
-
 
     // if no issues look for conclusion
     if (count($rv->issues) == 0) {

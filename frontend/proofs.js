@@ -610,7 +610,7 @@ const changeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace("∀E",   "Universal instantiation")
    .replace("∃I",   "Existential generalization")
    .replace("∃E",   "Existential instantiation")
-   .replace("R",   "Repeat");
+   .replace("R",    "Repeat");
 
 // When submitting to the PHP backend, rule names must be changed back
 const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
