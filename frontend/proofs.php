@@ -528,8 +528,8 @@ function parseJ($jstr) {
     global $predicateSettings, $tfl_rules, $fol_rules;
     $j = newJ();
 
-    $jstr = mb_ereg_replace('[;,\s]+',',',$jstr);
-    $jstr = mb_ereg_replace('[-–]+','-',$jstr);
+    $jstr = mb_ereg_replace('[;,\s]+',',',$jstr);   // deliminators to single ,
+    $jstr = mb_ereg_replace('[-–]+','-',$jstr);     // multiple hypens to hypen
 
     $jparts = explode(',',$jstr);
     foreach ($jparts as $jpart) {
