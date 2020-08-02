@@ -481,10 +481,7 @@ function followsByBiconElimThisWay($c, $a, $b) {
     );
 }
 
-
-
 function bicondition($c, $a, $b){
-    
     return (
         
         ($a->mainOp == "→") && ($b->mainOp == "→") &&  ($c->mainOp == "↔")
@@ -500,11 +497,7 @@ function bicondition($c, $a, $b){
         )
         
         );
-    
-    
 }
-
-
 
 function followsByBiconElim($c, $a, $b) {
     return (
@@ -586,70 +579,46 @@ function flatten_proof($pr, $dpth_ar) {
     return $fpr;
 }
 
-
-
-function change_rule_name($rule){ //change rule names in the error feedback
-
+//change rule names in the error feedback
+function change_rule_name($rule){ 
 if (strpos($rule, 'DNE') !== false) {
     return "Double Negation";
 }
-    
-    
 if (strpos($rule, '→E') !== false) {
     return "Modus Ponens";
 } 
-
 if (strpos($rule, 'MT') !== false) {
     return "Modus Tollens";
 } 
-
 if (strpos($rule, 'DS') !== false) {
     return "Modus Tollendo Ponens";
 } 
-
 if (strpos($rule, '∧E') !== false) {
     return "Simplification";
 } 
-
 if (strpos($rule, '∨I') !== false) {
     return "Addition";
 } 
-
 if (strpos($rule, '∧I') !== false) {
     return "Adjunction";
 } 
-
-
 if (strpos($rule, '↔E') !== false) {
     return "Equivalence";
 } 
-
-
 if (strpos($rule, '∀E') !== false) {
     return "universal instantiation";
 } 
-
 if (strpos($rule, '∃I') !== false) {
     return "existential generalization";
 } 
-
-
 if (strpos($rule, '∃E') !== false) {
     return "existential instantiation";
 } 
-
-
 if (strpos($rule, '=I') !== false) {
     return "repeat";
 } 
-
     return $rule;
 }
-
-
-
-
-
 
 function check_proof($pr, $numprems, $conc) {
     global $cite_nums;
@@ -714,7 +683,6 @@ function check_proof($pr, $numprems, $conc) {
         }
     }
     unset($line);
-
 
     // ensure cited lines are available
     for ($i=0; $i<count($fpr); $i++) {
@@ -810,7 +778,6 @@ function check_proof($pr, $numprems, $conc) {
         }
     }
 
-
     // make sure cited lines are well-formed
     for ($i=0; $i<count($fpr); $i++) {
         $fpr[$i]->canBeChecked = true;
@@ -838,7 +805,6 @@ function check_proof($pr, $numprems, $conc) {
             }
         }
     }
-
 
     // check lines that can be checked
     //////////////////////////////////
@@ -915,11 +881,9 @@ function check_proof($pr, $numprems, $conc) {
             case "MT":
                 $worked = followsByMT($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
                 break;
-                
             case "Bicondition":
                 $worked = bicondition($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
                 break;     
-                
             case "DNE":
                 $worked = followsByDNE($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
                 break;
@@ -968,9 +932,6 @@ function check_proof($pr, $numprems, $conc) {
                                                     break;
                                                 }
                                             }
-
-
-
                                         }
                                     }
                                     if ($found) {
