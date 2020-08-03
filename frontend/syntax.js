@@ -157,87 +157,80 @@ function regularizeMe(s) {
 // return the set union of arrays z,x as an array
 // (z assumed to have no duplicates)
 function listUnion(z,x) {
-    var y=z;
-    for (var i=0; i<x.length; i++) {
-        if (y.indexOf(x[i]) == -1) {
-            y.push(x[i]);
-        }
-    }
-    return y;
+   var y=z;
+   for (var i=0; i<x.length; i++) {
+      if (y.indexOf(x[i]) == -1) {
+         y.push(x[i]);
+      }
+   }
+   return y;
 }
 
 function wffToStringAndDepth(w) {
-    var r='';
-    var d=0;
-    if (w.wffType=="splat") {
-        r='⊥';
-        return { stringpart: r,
-                 depthpart : d};
-    }
-    if (w.wffType=="identity") {
-       r = w.myTerms[0] + ' = ' + w.myTerms[1];
-       return {
-          stringpart : r,
-          depthpart: d
-       };
-    }
-    if (w.wffType=="atomic") {
-       r=w.myLetter;
-       if (predicateSettings) {
-          r += w.myTerms.join('');
-       } 
-       return { stringpart: r ,
-                 depthpart: d };
-    }
-    var rightResult=wffToStringAndDepth(w.rightSide);
-    var rightAdd=rightResult.stringpart;
-    var rightDepth=rightResult.depthpart;
-    if (isBinOp(w.rightSide.mainOp)) {
-        switch(rightDepth%2) {
-            case 0:
-                rightAdd='(' + rightAdd + ')';
-                break;
-            case 1:
-                rightAdd='[' + rightAdd + ']';
-                break;
-        }
-        rightDepth += 1;
-    }
-    if (w.wffType=="quantified") {
-        r=w.mainOp + w.myLetter;      
-        r+=rightAdd;
-        d=rightDepth;
-        return { stringpart: r,
-                 depthpart: d};
-    }
-    if (w.mainOp=="¬") {
-        r="¬" + rightAdd;
-        d=rightDepth;
-        return { stringpart: r ,
-                 depthpart: d };
-    }
-    var leftResult=wffToStringAndDepth(w.leftSide);
-    var leftAdd=leftResult.stringpart;
-    var leftDepth=leftResult.depthpart;
-    if (isBinOp(w.leftSide.mainOp)) {
-        switch(leftDepth%2) {
-            case 0:
-                leftAdd='(' + leftAdd + ')';
-                break;
-            case 1:
-                leftAdd='[' + leftAdd + ']';
-                break;
-        }
-        leftDepth += 1;
-    }
-    d=Math.max(rightDepth,leftDepth);
-    r=leftAdd + " " + w.mainOp + " " + rightAdd;
-    return { stringpart: r ,
-                 depthpart: d };
+   var r='';
+   var d=0;
+   if (w.wffType=="splat") {
+      r='⊥';
+      return {stringpart: r, depthpart: d};
+   }
+   if (w.wffType=="identity") {
+      r = w.myTerms[0] + ' = ' + w.myTerms[1];
+      return {stringpart : r, depthpart: d};
+   }
+   if (w.wffType=="atomic") {
+      r=w.myLetter;
+      if (predicateSettings) {
+         r += w.myTerms.join('');
+      } 
+      return {stringpart: r, depthpart: d};
+   }
+   var rightResult=wffToStringAndDepth(w.rightSide);
+   var rightAdd=rightResult.stringpart;
+   var rightDepth=rightResult.depthpart;
+   if (isBinOp(w.rightSide.mainOp)) {
+      switch(rightDepth%2) {
+      case 0:
+         rightAdd='(' + rightAdd + ')';
+         break;
+      case 1:
+         rightAdd='[' + rightAdd + ']';
+         break;
+      }
+      rightDepth += 1;
+   }
+   if (w.wffType=="quantified") {
+      r=w.mainOp + w.myLetter;      
+      r+=rightAdd;
+      d=rightDepth;
+      return {stringpart: r, depthpart: d};
+   }
+   if (w.mainOp=="¬") {
+      r="¬" + rightAdd;
+      d=rightDepth;
+      return {stringpart: r, depthpart: d};
+   }
+   var leftResult=wffToStringAndDepth(w.leftSide);
+   var leftAdd=leftResult.stringpart;
+   var leftDepth=leftResult.depthpart;
+   if (isBinOp(w.leftSide.mainOp)) {
+      switch(leftDepth%2) {
+      case 0:
+         leftAdd='(' + leftAdd + ')';
+         break;
+      case 1:
+         leftAdd='[' + leftAdd + ']';
+         break;
+      }
+      leftDepth += 1;
+   }
+   d=Math.max(rightDepth,leftDepth);
+   r=leftAdd + " " + w.mainOp + " " + rightAdd;
+   return {stringpart: r, depthpart: d};
 }
 
 function wffToString(w, makePretty) {
    if (typeof makePretty === "undefined") makePretty = true;
+    
    var rv = wffToStringAndDepth(w).stringpart;
    if (makePretty) {
       rv = prettyStr(rv);
@@ -289,6 +282,7 @@ function getStLtrs(w) {
     return mL;
 }
 
+// return a new formula object (propositional logic)
 function newSLWff() {
     return {
         isWellFormed : true,
@@ -300,6 +294,8 @@ function newSLWff() {
         rightSide : {},
     }
 }
+
+// return a new formula object (first-order logic)
 function newPLWff() {
     return {
         isWellFormed : true,
@@ -314,23 +310,26 @@ function newPLWff() {
     }
 }
 
-// parse string to wff
+// parse string to wff object
 function parseIt(s) {
     if (predicateSettings) {
        var wff = newPLWff();
     } else {
        var wff = newSLWff();
     }
+    
     var mainOpPos;
     var depthArray=[];
     s=regularizeMe(s);
+
     // Check if non-empty 
     if (s=='') {
         wff.isWellFormed=false;
         wff.ErrMsg="Formula or subformula is blank."
         return wff;
     }
-   // check for stray characters
+
+    // check for stray characters
     if (hasStrayChars(s)) {
             wff.isWellFormed=false;
             if (predicateSettings) {
@@ -340,7 +339,8 @@ function parseIt(s) {
             }
             return wff;
     }
-    // Check depths and parentheses balance
+
+    // check that depths and parentheses balance
     var d=0;
     for (var i=0; i<s.length; i++) {
         if (s.charAt(i)=='(') {
@@ -356,6 +356,7 @@ function parseIt(s) {
         wff.ErrMsg="Parentheses are unbalanced.";
         return wff;
     }
+
     // remove matching outermost parentheses
     if (depthArray[0]==1) {
         var theyMatch=true;
@@ -366,6 +367,7 @@ function parseIt(s) {
             return parseIt(s.substring(1,s.length - 1)); 
         }
     }
+
     // check if in atomic family
     if (!(s.match(/[¬∧∨→↔∀∃]/))) {
        // should be in atomic family
@@ -421,10 +423,7 @@ function parseIt(s) {
           }
        }
        
-       // should be predicate atomic
-       
-       
-       
+       // at this point, should be predicate atomic
        if (!(s.charAt(0).match(/[A-Z]/))) {
           wff.isWellFormed=false;
           wff.ErrMsg="An atomic formula must begin with a predicate.";
@@ -457,7 +456,7 @@ function parseIt(s) {
     }
        
        
-    /* find main operator */
+    // find main operator
     for (var i=0; i<s.length; i++) {
         c=s.charAt(i);
         if ((isOp(c)) && (depthArray[i]==0)) {
@@ -478,22 +477,22 @@ function parseIt(s) {
             }
         }
     }
-    /* if no operator found, return an error */
+    // if no operator found, return an error
     if (wff.mainOp=='?') {
         wff.isWellFormed=false;
         wff.ErrMsg="Missing connective/operator or misplaced parentheses.";
         return wff;
     }
     if (isQuantifier(wff.mainOp)) {
-        /* quantified wff*/
+        // quantified wff
         wff.wffType="quantified";
-        /* quantifier must come first */
+        // quantifier must come first
         if (mainOpPos != 0) {
             wff.isWellFormed=false;
             wff.ErrMsg="Misuse of a quantifier internally in a formula.";
             return wff;
         }
-        /* variable must be next */
+        // variable must be next
         if (!(isVar(s.charAt(1)))) {
             wff.isWellFormed=false;
             wff.ErrMsg="A quantifier is used without binding a variable.";
@@ -544,7 +543,7 @@ function parseIt(s) {
        }
         return wff;
     }
-    /* two sides of binary molecular wff must be wffs */
+    // two sides of binary molecular wff must be wffs
     wff.leftSide=parseIt(s.substring(0,mainOpPos));
     wff.rightSide=parseIt(s.substring(mainOpPos+1));
     if (wff.leftSide.isWellFormed==false) {
