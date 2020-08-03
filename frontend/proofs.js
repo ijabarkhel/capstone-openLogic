@@ -379,9 +379,9 @@ function delLineFromLocation(pd, loc) {
    return pd;
 }
 
-// return a new proof represented as a table element with class 'prooftable'
+// display and return a new proof represented as a table element with class 'prooftable'
 // - pardiv is the parent div element
-// - pstart ('proof start') is an array with premises of the proof
+// - pstart ('proof start') is a 'proofdata' array containing only the premises of the proof
 // - conc is the conclusion of the proof
 function makeProof(pardiv, pstart, conc) {
    var p = document.createElement("table");
@@ -399,8 +399,10 @@ function makeProof(pardiv, pstart, conc) {
    p.openline = 1;
    p.jopen = false;
    p.oInput = {};
-   
+
+   //
    // associated elements
+   //
    
    p.buttonDiv = document.createElement("div");
    pardiv.appendChild(p.buttonDiv);
@@ -431,7 +433,7 @@ function makeProof(pardiv, pstart, conc) {
    p.startOverButton.type = "button";
    p.startOverButton.innerHTML = "start over";
    pardiv.appendChild(p.startOverButton);
-   p.startOverButton.start = pstart.slice(0);
+   p.startOverButton.start = pstart.slice(0);    // a shallow copy of pstart
    p.startOverButton.myPardiv = pardiv;
    p.startOverButton.conc = conc;
    p.startOverButton.myP = p;
