@@ -197,7 +197,6 @@ function followsByEI($c, $a) {
     }
     return false;
 }
-//
 
 function followsByDeMThisWay($a, $b) {
     return (
@@ -815,84 +814,84 @@ function check_proof($pr, $numprems, $conc) {
                 $worked = (($i + 1) <= $numprems);
                 break;
             case "Hyp":
-                $worked = ($fpr[$i]->location[ (count($fpr[$i]->location) - 1) ] == 0); 
+                $worked = ($fpr[$i]->location[(count($fpr[$i]->location) - 1)] == 0); 
                 break;
             case "∧I":
-                $worked = followsByConjIntro($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = followsByConjIntro($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;
             case "∧E":
-                $worked = followsByConjElim($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByConjElim($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
             case "⊥E":
-                $worked = ( $fpr[ ($fpr[$i]->j->lines[0] - 1) ]->wff->wffType == "splat");
+                $worked = ($fpr[ ($fpr[$i]->j->lines[0] - 1)]->wff->wffType == "splat");
                 break;
             case "⊥I":
-                $worked = followsByContraIntro($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = followsByContraIntro($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;
             case "→E":
-                $worked = followsByMP( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = followsByMP($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;
             case "→I":
-                $worked = followsByCP( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff);
+                $worked = followsByCP($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "¬I":
-                $worked = followsByRAA( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff);
+                $worked = followsByRAA($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "¬E":
-                $worked = followsByContraIntro($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = followsByContraIntro($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;
             case "IP":
-                $worked = followsByIP( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff);
+                $worked = followsByIP($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "TND":
-                $worked = followsByTND( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spend - 1  )]->wff);            
+                $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
                 break;
             case "LEM":
-                $worked = followsByTND( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spend - 1  )]->wff);            
+                $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
                 break;
             case "∨I":
-                $worked = followsByAdd($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByAdd($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
             case "∨E":
-                $worked = followsByDisjElim( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spend - 1  )]->wff);               
+                $worked = followsByDisjElim($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);               
                 break;
             case "↔I":
-                $worked = followsByBiconIntro( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->subps[0]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[0]->spend - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spstart - 1  )]->wff, $fpr[( $fpr[$i]->j->subps[1]->spend - 1  )]->wff); 
+                $worked = followsByBiconIntro($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff); 
                 break;
             case "↔E":
-                $worked = followsByBiconElim( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = followsByBiconElim($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;
             case "X":
-                $worked = ( $fpr[ ($fpr[$i]->j->lines[0] - 1) ]->wff->wffType == "splat");
+                $worked = ($fpr[ ($fpr[$i]->j->lines[0] - 1) ]->wff->wffType == "splat");
                 break;
             case "DS":
-                $worked = followsByDS( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff );
+                $worked = followsByDS($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff );
                 break;
             case "R":
-                $worked = sameWff($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff );
+                $worked = sameWff($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff );
                 break;
             case "MT":
-                $worked = followsByMT($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = followsByMT($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;
             case "Bicondition":
-                $worked = bicondition($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff);
+                $worked = bicondition($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff);
                 break;     
             case "DNE":
-                $worked = followsByDNE($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByDNE($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
             case "DeM":
-                $worked = followsByDeM($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByDeM($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
             case "∀E":
-                $worked = followsByUI( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByUI($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
             case "∃I":
-                $worked = followsByEG( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByEG($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
             case "∀I":
                 $univ = $fpr[$i]->wff;
                 if ($univ->mainOp == "∀") {
-                    $inst = $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff;
+                    $inst = $fpr[($fpr[$i]->j->lines[0] - 1)]->wff;
                     $bound_var = $univ->myLetter;
                     if (in_array($univ->myLetter, $univ->rightSide->allFreeVars)) {
                         $worked = false;
@@ -942,7 +941,7 @@ function check_proof($pr, $numprems, $conc) {
                 }
                 break;
             case "∃E":
-                $worked = followsByEI($fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByEI($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 $term = $fpr[$i]->wff->myTerms[0];
                 $termCount = 0;
                 for($j=0; $j<=$i; $j++) {
@@ -956,13 +955,13 @@ function check_proof($pr, $numprems, $conc) {
                 }
                 break;
             case "=I":
-                $worked = isSelfId( $fpr[$i]->wff );
+                $worked = isSelfId($fpr[$i]->wff );
                 break;
             case "=E":
-                $worked = followsByLL( $fpr[$i]->wff, $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff, $fpr[( $fpr[$i]->j->lines[1] - 1  )]->wff );
+                $worked = followsByLL($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff );
                 break;
             case "CQ":
-                $worked = followsByCQ($fpr[$i]->wff , $fpr[( $fpr[$i]->j->lines[0] - 1  )]->wff);
+                $worked = followsByCQ($fpr[$i]->wff , $fpr[($fpr[$i]->j->lines[0] - 1)]->wff);
                 break;
         }
         if (!($worked)) {
