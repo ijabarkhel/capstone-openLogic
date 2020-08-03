@@ -32,7 +32,8 @@ function processProofCheckResponse(text, context) {
    if (!(proofBeingChecked)) {
       return;
    }
-	console.log("XX" + text);
+
+   console.log("XX" + text);
    var res = JSON.parse(text);
    var restext = '';
    
@@ -378,6 +379,10 @@ function delLineFromLocation(pd, loc) {
    return pd;
 }
 
+// return a new proof represented as a table element with class 'prooftable'
+// - pardiv is the parent div element
+// - pstart ('proof start') is an array with premises of the proof
+// - conc is the conclusion of the proof
 function makeProof(pardiv, pstart, conc) {
    var p = document.createElement("table");
    pardiv.appendChild(p);
@@ -404,7 +409,8 @@ function makeProof(pardiv, pstart, conc) {
    p.results = document.createElement("div");
    pardiv.appendChild(p.results);
    p.results.classList.add("resultsdiv");
-   
+
+   // check proof button
    p.checkButton = document.createElement("button");
    p.checkButton.type = "button";
    p.checkButton.id = "checkButton";
@@ -419,9 +425,8 @@ function makeProof(pardiv, pstart, conc) {
       this.myP.displayMe();
       this.myP.startCheckMe();
    }
-
-
    
+   // start over button
    p.startOverButton = document.createElement("button");
    p.startOverButton.type = "button";
    p.startOverButton.innerHTML = "start over";
@@ -453,7 +458,6 @@ function makeProof(pardiv, pstart, conc) {
       togglePublicButton.id = "togglePublicButton";
       pardiv.appendChild(togglePublicButton);
    }
-   
    
    p.deleteLine = function(n) {
       this.proofdata = deletePDLine(this.proofdata, n);

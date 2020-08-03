@@ -1,5 +1,7 @@
 var predicateSettings=false;
 
+// normalize space around logical operators and
+// enclose alphabetic strings in var elements
 function prettyStr(s) {
    var ps = s;
    ps = ps.replace(/\s*¬\s*/g,'¬');
@@ -12,6 +14,7 @@ function prettyStr(s) {
    return ps;
 }
 
+// put logical operators into standard form (not including negation)
 function symReplaceNN(s) {
    var fs = s;
    fs = fs.replace(/<[-−]*>/g,'↔');
@@ -40,6 +43,7 @@ function symReplaceNN(s) {
    return fs;
 }
 
+// put negation operators in s into standard form
 function negReplace(s) {
    var fs = s;
    fs = fs.replace(/~/g,'¬');
@@ -49,10 +53,12 @@ function negReplace(s) {
    return fs;
 }
 
+// put logical operators in s into standard form
 function symReplace(s) {
    return negReplace(symReplaceNN(s));
 }
 
+// put wff string into standard form
 function fixWffInputStr(s) {
    var fs = symReplace(s);
    fs = fs.replace(/  */g, ' ');
@@ -90,7 +96,7 @@ function fixJInputStr(s) {
    return fs;
 }
 
-
+// return true is string s has other than expected characters
 function hasStrayChars(s) {
     if (predicateSettings) {
        if (s.match(/[^A-Za-z∀∃=¬∨∧↔→⊥\s\)\(\]\[\}\{]/)) {
@@ -104,6 +110,7 @@ function hasStrayChars(s) {
     return false;
 }
 
+// convert brackets and curly braces to parens; strip space
 function regularizeMe(s) {
     s=s.replace(/\[/g,'(');
     s=s.replace(/\{/g,'(');
@@ -112,6 +119,7 @@ function regularizeMe(s) {
     s=s.replace(/\s/g,'');
     return s;
 }
+
 /* function fixNotation(s, autoUpperCase) {
     s = s.replace(/v/g,'∨');
     if (autoUpperCase) {
@@ -146,6 +154,8 @@ function regularizeMe(s) {
     return s;
 } */
 
+// return the set union of arrays z,x as an array
+// (z assumed to have no duplicates)
 function listUnion(z,x) {
     var y=z;
     for (var i=0; i<x.length; i++) {
@@ -254,6 +264,8 @@ function isQuantifier(ch) {
     return ((ch=="∀") || (ch=="∃"));
 }
 
+// check if given character is a variable
+// (only x,y, and z can be used as variables?)
 function isVar(ch) {
     return ((ch=="x") || (ch=="y") || (ch=="z"));
 }
