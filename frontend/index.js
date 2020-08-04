@@ -332,30 +332,28 @@ $(document).ready(function() {
       $('#checkButton').click();
    });
 
-   // Populate form when any of the select elements changes
+   // populate form when any of the select elements changes
    $('.proofSelect').change( (event) => {
+      // get the name of the selected item and the selected repository
       let selectedDataId = event.target.value;
       let selectedDataSetName = $(event.target).data('repositoryDataKey');
+
+      // get the proof from the repository (== means '3' is equal to 3)
       let selectedDataSet = repositoryData[selectedDataSetName];
-
-      // == means '3' is equal to 3
       let selectedProof = selectedDataSet.filter( proof => proof.Id == selectedDataId );
-
       if ( !selectedProof || selectedProof.length < 1 ) {
 	 console.error("Selected proof ID not found.");
 	 return;
       }
+      selectedProof = selectedProof[0];
+      console.log('selected proof', selectedProof);
 
-      // Set repoProblem if originally loaded from the repository select
+      // set repoProblem if originally loaded from the repository select
       if ( selectedDataSetName == 'repoProofs' || selectedProof.repoProblem == "true" ) {
 	 $('#repoProblem').val('true');
       } else {
 	 $('#repoProblem').val('false');
       }
-
-      selectedProof = selectedProof[0];
-
-      console.log('selected proof', selectedProof);
 
       if ( Array.isArray(selectedProof.Logic) && Array.isArray(selectedProof.Rules) ) {
 	 $('.proofContainer').data({
@@ -364,7 +362,7 @@ $(document).ready(function() {
 	 });
       }
 
-      // Add a small delay to show the user what is being done
+      // add a small delay to show the user what is being done
       let delayTime = 200;
       $.when(
 	 $('#folradio').prop('checked', true),
@@ -380,7 +378,7 @@ $(document).ready(function() {
       );
    });
 
-   //creating a problem based on premise and conclusion
+   //create a problem based on premise and conclusion
    $("#createProb").click( function() {
       // predicateSettings is a global var defined in syntax_upstream.js
       predicateSettings = (document.getElementById("folradio").checked);
@@ -389,7 +387,6 @@ $(document).ready(function() {
       let proofName = document.getElementById('proofName').value;
       createProb(proofName, premisesString, conclusionString);
    });
-   //end creating a problem based on premise and conclusion
 
    $('.newProof').click( event => {
       resetProofUI();

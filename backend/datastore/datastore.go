@@ -13,7 +13,7 @@ type Proof struct {
 	UserSubmitted  string	// Used for results, ignored on user input
 	ProofName      string   // user-chosen name (repo problems start with 'Repository - ')
 	ProofType      string   // 'prop' (propositional/tfl) or 'fol' (first order logic)
-	Premise        []string // Array of 
+	Premise        []string // Array of WFF strings
 	Logic          []string // ?
 	Rules          []string // ?
 	ProofCompleted string   // 'true', 'false', or 'error'

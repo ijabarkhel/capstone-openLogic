@@ -1,4 +1,5 @@
-/** Class to contain proof data for submission to backend */
+
+// Class to contain proof data for submission to backend 
 class Proof {
    constructor(entryType, proofName, proofType, Premise, Logic, Rules, proofCompleted, conclusion, repoProblem){
       this.entryType = entryType;
@@ -379,10 +380,15 @@ function delLineFromLocation(pd, loc) {
    return pd;
 }
 
-// display and return a new proof represented as a table element with class 'prooftable'
-// - pardiv is the parent div element
-// - pstart ('proof start') is a 'proofdata' array containing only the premises of the proof
-// - conc is the conclusion of the proof
+/**
+ * Display and return a new proof represented as a table element with class 'prooftable'.
+ * @param {element} pardiv the parent div element
+ * @param {array}   pstart ('proof start') a 'proofdata' array containing the premises of the proof
+ * @param {string}  the conclusion of the proof (a wff string)
+ *
+ * Note that the prooftable element has an attribute 'proofdata', which is
+ * a "proofdata" array (the "internal representation" of a proof)
+ */
 function makeProof(pardiv, pstart, conc) {
    var p = document.createElement("table");
    pardiv.appendChild(p);

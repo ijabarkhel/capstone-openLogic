@@ -166,9 +166,7 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, string(userProofsJSON))
 
 	log.Printf("%q", user)
-
 	log.Printf("%+v", req.URL.Query())
-
 }
 
 // This will delete all rows, but not reset the auto_increment id
