@@ -40,7 +40,7 @@ class User {
       this.email = this.profile.getEmail();
       this.name = this.profile.getName();
 
-      if ( adminUsers.indexOf(this.email) > -1 ) {
+      if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
 	 this.showAdminFunctionality();
       }
@@ -109,9 +109,9 @@ class User {
 // Verifies signed in and valid token, then calls authenticatedBackendPOST
 // Returns a promise which resolves to the response body or undefined
 function backendPOST(path_str, data_obj) {
-   if ( !User.isSignedIn() ) {
+   if (!User.isSignedIn()) {
       console.warn('Cannot send POST request to backend from unknown user.');
-      if ( sessionStorage.getItem('loginPromptShown') == null ) {
+      if (sessionStorage.getItem('loginPromptShown') == null) {
 	 alert('You are not signed in.\nTo save your work, please sign in and then try again, or refresh the page.');
 	 sessionStorage.setItem('loginPromptShown', "true");
       }
@@ -119,7 +119,7 @@ function backendPOST(path_str, data_obj) {
       return Promise.reject( 'Unauthenticated user' );
    }
 
-   if ( User.isTokenExpired() ) {
+   if (User.isTokenExpired()) {
       console.warn('Token expired; attempting to refresh token.');
       return User.refreshToken().then(
 	 (googleUser) => authenticatedBackendPOST(path_str, data_obj, googleUser.id_token));
@@ -155,7 +155,7 @@ function getCSV() {
       (data) => {
 	 console.log("downloadRepo", data);
 
-	 if ( !Array.isArray(data) || data.length < 1 ) {
+	 if (!Array.isArray(data) || data.length < 1) {
             console.error('No proofs received.');
             return;
 	 }
@@ -164,7 +164,7 @@ function getCSV() {
 
 	 let csv = data.reduce( (rows, proof) => {
             return rows + Object.values(proof).reduce( (accum, elem) => {
-               if ( Array.isArray(elem) ) {
+               if (Array.isArray(elem)) {
 		  return accum + ',"' + elem.join('|') + '"';
                }
                return accum + ',"' + elem + '"';
@@ -230,7 +230,7 @@ function loadRepoProofs() {
 
 	 let currentRepoUser;
 	 (data) && data.forEach( proof => {
-            if ( currentRepoUser !== proof.UserSubmitted ) {
+            if (currentRepoUser !== proof.UserSubmitted) {
                currentRepoUser = proof.UserSubmitted;
                elem.appendChild(
 		  new Option(proof.UserSubmitted, null, false, false)
@@ -296,7 +296,7 @@ $(document).ready(function() {
 	 (data) => {
 	    console.log('proof saved', data);
 	    
-	    if ( postData.proofCompleted == "true" ) {
+	    if (postData.proofCompleted == "true") {
                loadUserCompletedProofs();
 	    } else {
                loadUserProofs();
@@ -307,21 +307,21 @@ $(document).ready(function() {
    // Admin users - publish problems to public repo
    $('.proofContainer').on('click', '#togglePublicButton', (event) => {
       let proofName = $('.proofNameSpan').text();
-      if ( !proofName || proofName == "" ) {
+      if (!proofName || proofName == "") {
 	 proofName = prompt("Please enter a name for your proof:");
       }
-      if ( !proofName ) {
+      if (!proofName) {
 	 console.error('No proof name entered');
 	 return;
       }
 
-      if ( !proofName.startsWith('Repository - ') ) {
+      if (!proofName.startsWith('Repository - ')) {
 	 proofName = 'Repository - ' + proofName;
       }
       $('.proofNameSpan').text(proofName);
 
       let publicStatus = $('#repoProblem').val() || 'false';
-      if ( publicStatus === 'false' ) {
+      if (publicStatus === 'false') {
 	 $('#repoProblem').val('true');
 	 $('#togglePublicButton').fadeOut().text('Make Private').fadeIn();
       } else {
@@ -332,7 +332,7 @@ $(document).ready(function() {
       $('#checkButton').click();
    });
 
-   // populate form when any of the select elements changes
+   // populate form when any repository proof selected
    $('.proofSelect').change( (event) => {
       // get the name of the selected item and the selected repository
       let selectedDataId = event.target.value;
@@ -341,21 +341,21 @@ $(document).ready(function() {
       // get the proof from the repository (== means '3' is equal to 3)
       let selectedDataSet = repositoryData[selectedDataSetName];
       let selectedProof = selectedDataSet.filter( proof => proof.Id == selectedDataId );
-      if ( !selectedProof || selectedProof.length < 1 ) {
+      if (!selectedProof || selectedProof.length < 1) {
 	 console.error("Selected proof ID not found.");
 	 return;
       }
       selectedProof = selectedProof[0];
       console.log('selected proof', selectedProof);
 
-      // set repoProblem if originally loaded from the repository select
-      if ( selectedDataSetName == 'repoProofs' || selectedProof.repoProblem == "true" ) {
+      // set repoProblem if proof originally loaded from the repository select
+      if (selectedDataSetName == 'repoProofs' || selectedProof.repoProblem == "true") {
 	 $('#repoProblem').val('true');
       } else {
 	 $('#repoProblem').val('false');
       }
 
-      if ( Array.isArray(selectedProof.Logic) && Array.isArray(selectedProof.Rules) ) {
+      if (Array.isArray(selectedProof.Logic) && Array.isArray(selectedProof.Rules)) {
 	 $('.proofContainer').data({
             'Logic': selectedProof.Logic,
             'Rules': selectedProof.Rules
@@ -369,8 +369,8 @@ $(document).ready(function() {
 	 // Checking this radio button will uncheck the other radio button
 	 $('#tflradio').prop('checked', (selectedProof.ProofType == 'prop')),
 	 $('#proofName').delay(delayTime).val(selectedProof.ProofName),
-	 $('#probpremises').delay(delayTime).val( selectedProof.Premise.join(',') ),
-	 $('#probconc').delay(delayTime).val( selectedProof.Conclusion )
+	 $('#probpremises').delay(delayTime).val(selectedProof.Premise.join(',')),
+	 $('#probconc').delay(delayTime).val(selectedProof.Conclusion)
       ).then(
 	 function () {
             $('#createProb').click();
@@ -463,8 +463,8 @@ function createProb(proofName, premisesString, conclusionString) {
    }
 
    let proofContainerData = $('.proofContainer').data();
-   if ( proofContainerData.hasOwnProperty('Logic') && proofContainerData.hasOwnProperty('Rules') ) {
-      if ( Array.isArray(proofContainerData.Logic) && Array.isArray(proofContainerData.Rules) ) {
+   if (proofContainerData.hasOwnProperty('Logic') && proofContainerData.hasOwnProperty('Rules')) {
+      if (Array.isArray(proofContainerData.Logic) && Array.isArray(proofContainerData.Rules)) {
 	 proofContainerData.Logic.forEach( (value, idx) => {
             let w = parseIt(fixWffInputStr(proofContainerData.Logic[idx]));
             sofar.push({

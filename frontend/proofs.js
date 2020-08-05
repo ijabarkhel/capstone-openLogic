@@ -57,7 +57,7 @@ function processProofCheckResponse(text, context) {
    console.log(context.proofdata);
 
    let proofContainer = document.querySelector('.proofContainer')
-   if ( proofContainer !== null ) {
+   if (proofContainer !== null) {
       proofContainer.dispatchEvent( new CustomEvent('checkProofEvent', { detail: context }));
    }
 }
@@ -453,11 +453,11 @@ function makeProof(pardiv, pstart, conc) {
    }
    
    // Admin button -- add to repository
-   if ( typeof User !== 'undefined' && User.isSignedIn() && User.isAdministrator() ) {
+   if (typeof User !== 'undefined' && User.isSignedIn() && User.isAdministrator()) {
       let togglePublicButton = document.createElement('button');
       togglePublicButton.type = "button";
       let publicStatus = $('#repoProblem').val() || 'false';
-      if ( publicStatus === 'false' ) {
+      if (publicStatus === 'false') {
          togglePublicButton.textContent = "Make Public";
       } else {
          togglePublicButton.textContent = "Make Private";
