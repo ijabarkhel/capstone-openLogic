@@ -65,6 +65,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	
 	var submittedProof datastore.Proof
 
+	// read the JSON-encoded value from the HTTP request and store it in submittedProof
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), 400)

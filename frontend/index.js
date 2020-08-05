@@ -263,16 +263,20 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-   // Store proof when check button is clicked
+
+   // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
       console.log(event, event.detail, event.detail.proofdata);
 
       let proofData = event.detail.proofdata;
 
       let Premises = [].concat(proofData.filter( elem => elem.jstr == "Pr" ).map( elem => elem.wffstr ));
+
+      // Logic/Rules store the body of the proof
+      // initialize them with the premises (Logic) and corresponding justifications (Rules)
+      // THIS BREAKS FOR SUBPROOFS
       let Logic = [],
           Rules = [];
-      
       proofData.filter( elem => elem.jstr != "Pr" ).forEach(
 	 elem => {
             Logic.push(elem.wffstr);
@@ -304,7 +308,7 @@ $(document).ready(function() {
 	 }, console.log)
    });
 
-   // Admin users - publish problems to public repo
+   // admin users - publish problems to public repo
    $('.proofContainer').on('click', '#togglePublicButton', (event) => {
       let proofName = $('.proofNameSpan').text();
       if (!proofName || proofName == "") {
@@ -355,6 +359,7 @@ $(document).ready(function() {
 	 $('#repoProblem').val('false');
       }
 
+      // attach Logic/Rules data to the proofContainer
       if (Array.isArray(selectedProof.Logic) && Array.isArray(selectedProof.Rules)) {
 	 $('.proofContainer').data({
             'Logic': selectedProof.Logic,
@@ -362,7 +367,8 @@ $(document).ready(function() {
 	 });
       }
 
-      // add a small delay to show the user what is being done
+      // set proofName, probpremises, and probconc; then click on #createProb
+      // (add a small delay to show the user what's being done)
       let delayTime = 200;
       $.when(
 	 $('#folradio').prop('checked', true),
@@ -378,7 +384,7 @@ $(document).ready(function() {
       );
    });
 
-   //create a problem based on premise and conclusion
+   // create a problem based on premise and conclusion
    $("#createProb").click( function() {
       // predicateSettings is a global var defined in syntax_upstream.js
       predicateSettings = (document.getElementById("folradio").checked);
@@ -391,7 +397,7 @@ $(document).ready(function() {
    $('.newProof').click( event => {
       resetProofUI();
 
-      // Reset 'repoProblem'
+      // reset 'repoProblem'
       $('#repoProblem').val('false');
 
       $('.createProof').slideDown();
@@ -419,10 +425,10 @@ function resetProofUI() {
    $('.proofNameSpan').text(''); // Clear proof name
    $('#theproof').empty(); // Remove all HTML from 'theproof' element
 
-   // Reset all select boxes to "Select..." (the first option element)
+   // reset all select boxes to "Select..." (the first option element)
    $('#load-container select option:nth-child(1)').prop('selected', true);
 
-   // Remove Logic/Rules from proofContainer's data
+   // remove Logic/Rules data from proofContainer
    $('.proofContainer').removeData();
 }
 
@@ -430,10 +436,13 @@ function resetProofUI() {
 // var pstr = document.getElementById("probpremises").value;
 // var conc = fixWffInputStr(document.getElementById("probconc").value);
 function createProb(proofName, premisesString, conclusionString) {
+
+   // verify the premises are well formed, and initialize the
+   // proofdata with the premises
    let pstr = premisesString.replace(/^[,;\s]*/,'');
    pstr = pstr.replace(/[,;\s]*$/,'');
    let prems = pstr.split(/[,;\s]*[,;][,;\s]*/);
-   let sofar = [];
+   let proofdata = [];
    for (let a=0; a<prems.length; a++) {
       if (prems[a] != '') {
 	 let w = parseIt(fixWffInputStr(prems[a]));
@@ -445,12 +454,14 @@ function createProb(proofName, premisesString, conclusionString) {
             alert('Premise ' + (a+1) + ' is not closed.');
             return false;
 	 }
-	 sofar.push({
+	 proofdata.push({
             "wffstr": wffToString(w, false),
             "jstr": "Pr"
 	 });
       }
    }
+
+   // verify the conclusion is well formed
    let conc = fixWffInputStr(conclusionString);
    var cw = parseIt(conc);
    if (!(cw.isWellFormed)) {
@@ -462,12 +473,13 @@ function createProb(proofName, premisesString, conclusionString) {
       return false;
    }
 
+   // extend the proofdata with lines of the proof body
    let proofContainerData = $('.proofContainer').data();
    if (proofContainerData.hasOwnProperty('Logic') && proofContainerData.hasOwnProperty('Rules')) {
       if (Array.isArray(proofContainerData.Logic) && Array.isArray(proofContainerData.Rules)) {
 	 proofContainerData.Logic.forEach( (value, idx) => {
             let w = parseIt(fixWffInputStr(proofContainerData.Logic[idx]));
-            sofar.push({
+            proofdata.push({
                wffstr: wffToString(w, false),
                jstr: proofContainerData.Rules[idx]
             })
@@ -481,15 +493,18 @@ function createProb(proofName, premisesString, conclusionString) {
    resetProofUI();
    $('.proofContainer').show();
    $('.proofNameSpan').text(proofName);
+
+   // set the argument (premises/conclusion)  string
    var probstr = '';
-   for (var k=0; k<sofar.length; k++) {
-      probstr += prettyStr(sofar[k].wffstr);
-      if ((k+1) != sofar.length) {
+   for (var k=0; k < proofdata.length; k++) {
+      probstr += prettyStr(proofdata[k].wffstr);
+      if ((k+1) != proofdata.length) {
 	 probstr += ', ';
       }
    }
    document.getElementById("proofdetails").innerHTML = "Construct a proof for the argument: " + probstr + " ∴ " +  wffToString(cw, true);
+
    var tp = document.getElementById("theproof");
-   makeProof(tp, sofar, wffToString(cw, false));
+   makeProof(tp, proofdata, wffToString(cw, false));
    return true;
 }

@@ -383,7 +383,7 @@ function delLineFromLocation(pd, loc) {
 /**
  * Display and return a new proof represented as a table element with class 'prooftable'.
  * @param {element} pardiv the parent div element
- * @param {array}   pstart ('proof start') a 'proofdata' array containing the premises of the proof
+ * @param {array}   pstart ('proof start') a 'proofdata' array containing the proof body (including premises)
  * @param {string}  the conclusion of the proof (a wff string)
  *
  * Note that the prooftable element has an attribute 'proofdata', which is
