@@ -1,4 +1,5 @@
-/** Class to contain proof data for submission to backend */
+
+// Class to contain proof data for submission to backend 
 class Proof {
    constructor(entryType, proofName, proofType, Premise, Logic, Rules, proofCompleted, conclusion, repoProblem){
       this.entryType = entryType;
@@ -32,7 +33,8 @@ function processProofCheckResponse(text, context) {
    if (!(proofBeingChecked)) {
       return;
    }
-	console.log("XX" + text);
+
+   console.log("XX" + text);
    var res = JSON.parse(text);
    var restext = '';
    
@@ -55,16 +57,17 @@ function processProofCheckResponse(text, context) {
    console.log(context.proofdata);
 
    let proofContainer = document.querySelector('.proofContainer')
-   if ( proofContainer !== null ) {
+   if (proofContainer !== null) {
       proofContainer.dispatchEvent( new CustomEvent('checkProofEvent', { detail: context }));
    }
 }
 
-function maxdepth(prdata) {
+// return the max nesting depth of the proof data
+function maxdepth(pd) {
    var rv = 0;
-   for (var i=0; i<prdata.length; i++) {
-      if (Array.isArray(prdata[i])) {
-         var newd = (maxdepth(prdata[i]) + 1);
+   for (var i=0; i < pd.length; i++) {
+      if (Array.isArray(pd[i])) {
+         var newd = (maxdepth(pd[i]) + 1);
          rv = Math.max(newd,rv);
       }
    }
@@ -73,7 +76,7 @@ function maxdepth(prdata) {
 
 function countnonspacers(rs) {
    var c = 0;
-   for (var i=0; i<rs.length; i++) {
+   for (var i=0; i < rs.length; i++) {
       if (!(rs[i].classList.contains("spacerrow"))) {
          c++;
       }
@@ -86,7 +89,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
    var spacerrow = document.createElement("tr");
    spacerrow.classList.add("spacerrow");
    spacerrow.appendChild(document.createElement("td"));
-   for (var j=0; j<depth; j++) {
+   for (var j=0; j < depth; j++) {
       var c = document.createElement('td');
       spacerrow.appendChild(c);
       c.classList.add('midcell');
@@ -97,7 +100,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
    spacerrow.appendChild(spacercell);
    spacercell.classList.add("spacercell");
    var rs=[spacerrow];
-   for (var i=0; i<prdata.length; i++) {
+   for (var i=0; i < prdata.length; i++) {
       if (Array.isArray(prdata[i])) {
          nrs = dataToRows(prf, prdata[i], (depth+1), md, currln);
          rs = rs.concat(nrs);
@@ -112,7 +115,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
          newrow.myProof = prf;
          newrow.lineNumCell.innerHTML = currln;
          newrow.lineNumCell.classList.add('linenocell');
-         for (var j=0; j<depth; j++) {
+         for (var j=0; j < depth; j++) {
             var c = document.createElement('td');
             newrow.appendChild(c);
             c.classList.add('midcell');
@@ -274,25 +277,24 @@ function dataToRows(prf, prdata, depth, md, ln) {
    return rs;
 }
 
-function flat_array(a, dpar) {
+function flattenArray(a, dpar) {
    var b=[];
-   for (var i=0; i<a.length; i++) {
-         if (Array.isArray(a[i])) {
-            
-            b = b.concat(flat_array(a[i], dpar.concat([i])));
-         } else {
-            var x = {};
-            x.wffstr = a[i].wffstr;            
-            x.jstr = a[i].wffstr;            
-            x.location = dpar.concat([i]);
-            b.push(x);
-         }
+   for (var i=0; i < a.length; i++) {
+      if (Array.isArray(a[i])) {
+         b = b.concat(flattenArray(a[i], dpar.concat([i])));
+      } else {
+         var x = {};
+         x.wffstr = a[i].wffstr;            
+         x.jstr = a[i].wffstr;            
+         x.location = dpar.concat([i]);
+         b.push(x);
+      }
    }
    return b;
 }
 
 function addNLtoPD(pd, n, newsp, uppa) {
-   var fa = flat_array(pd, []);
+   var fa = flattenArray(pd, []);
    if ((fa.length > 0) && (n < fa.length)) {
       loc = fa[n].location;
    } else {
@@ -324,7 +326,7 @@ function changeWffAt(pd, loc, val) {
 }
 
 function changeWffValue(pd, pos, val) {
-   var fa = flat_array(pd, []);
+   var fa = flattenArray(pd, []);
    if (fa.length > 0) {
       loc = fa[pos].location;
    } else {
@@ -343,7 +345,7 @@ function changeJAt(pd, loc, val) {
 }
 
 function changeJValue(pd, pos, val) {
-   var fa = flat_array(pd, []);
+   var fa = flattenArray(pd, []);
    if (fa.length > 0) {
       loc = fa[pos].location;
    } else {
@@ -353,7 +355,7 @@ function changeJValue(pd, pos, val) {
 }
 
 function deletePDLine(pd, pos) {
-   var fa = flat_array(pd, []);
+   var fa = flattenArray(pd, []);
    if ((fa.length > 0) && (pos < fa.length)) {
       loc = fa[pos].location;
    } else {
@@ -378,13 +380,22 @@ function delLineFromLocation(pd, loc) {
    return pd;
 }
 
+/**
+ * Display and return a new proof represented as a table element with class 'prooftable'.
+ * @param {element} pardiv the parent div element
+ * @param {array}   pstart ('proof start') a 'proofdata' array containing the proof body (including premises)
+ * @param {string}  the conclusion of the proof (a wff string)
+ *
+ * Note that the proof table element has an attribute 'proofdata', which is
+ * a "proofdata" array (the "internal representation" of a proof)
+ */
 function makeProof(pardiv, pstart, conc) {
    var p = document.createElement("table");
    pardiv.appendChild(p);
    p.classList.add("prooftable");
    p.proofdata = pstart;
    p.numPrems = 0;
-   for (var i=0; i<pstart.length; i++) {
+   for (var i=0; i < pstart.length; i++) {
       if ((pstart[i].hasOwnProperty("jstr")) && (pstart[i].jstr=="Pr")) {
          p.numPrems++;
       }
@@ -394,8 +405,10 @@ function makeProof(pardiv, pstart, conc) {
    p.openline = 1;
    p.jopen = false;
    p.oInput = {};
-   
+
+   //
    // associated elements
+   //
    
    p.buttonDiv = document.createElement("div");
    pardiv.appendChild(p.buttonDiv);
@@ -404,7 +417,8 @@ function makeProof(pardiv, pstart, conc) {
    p.results = document.createElement("div");
    pardiv.appendChild(p.results);
    p.results.classList.add("resultsdiv");
-   
+
+   // check proof button
    p.checkButton = document.createElement("button");
    p.checkButton.type = "button";
    p.checkButton.id = "checkButton";
@@ -419,14 +433,13 @@ function makeProof(pardiv, pstart, conc) {
       this.myP.displayMe();
       this.myP.startCheckMe();
    }
-
-
    
+   // start over button
    p.startOverButton = document.createElement("button");
    p.startOverButton.type = "button";
    p.startOverButton.innerHTML = "start over";
    pardiv.appendChild(p.startOverButton);
-   p.startOverButton.start = pstart.slice(0);
+   p.startOverButton.start = pstart.slice(0);    // a shallow copy of pstart
    p.startOverButton.myPardiv = pardiv;
    p.startOverButton.conc = conc;
    p.startOverButton.myP = p;
@@ -440,11 +453,11 @@ function makeProof(pardiv, pstart, conc) {
    }
    
    // Admin button -- add to repository
-   if ( typeof User !== 'undefined' && User.isSignedIn() && User.isAdministrator() ) {
+   if (typeof User !== 'undefined' && User.isSignedIn() && User.isAdministrator()) {
       let togglePublicButton = document.createElement('button');
       togglePublicButton.type = "button";
       let publicStatus = $('#repoProblem').val() || 'false';
-      if ( publicStatus === 'false' ) {
+      if (publicStatus === 'false') {
          togglePublicButton.textContent = "Make Public";
       } else {
          togglePublicButton.textContent = "Make Private";
@@ -453,7 +466,6 @@ function makeProof(pardiv, pstart, conc) {
       togglePublicButton.id = "togglePublicButton";
       pardiv.appendChild(togglePublicButton);
    }
-   
    
    p.deleteLine = function(n) {
       this.proofdata = deletePDLine(this.proofdata, n);
@@ -520,14 +532,14 @@ function makeProof(pardiv, pstart, conc) {
       this.innerHTML = '';
       var md = maxdepth(this.proofdata);
       var rs = dataToRows(this, this.proofdata, 0, md, 0);
-      for (var i=0; i< rs.length; i++) {
+      for (var i=0; i < rs.length; i++) {
          this.appendChild(rs[i]);
       }
       var tds = this.getElementsByTagName("td");
       var lasttd = tds[tds.length -1];
       this.buttonDiv.innerHTML = '';
       var bts=lasttd.getElementsByTagName("a");
-      for (var i=0; i<bts.length; i++) {
+      for (var i=0; i < bts.length; i++) {
          var b = bts[i];
          var imgs = b.getElementsByTagName("img");
          if (imgs.length > 0) {

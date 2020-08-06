@@ -13,11 +13,11 @@ type Proof struct {
 	UserSubmitted  string	// Used for results, ignored on user input
 	ProofName      string   // user-chosen name (repo problems start with 'Repository - ')
 	ProofType      string   // 'prop' (propositional/tfl) or 'fol' (first order logic)
-	Premise        []string // Array of 
-	Logic          []string // ?
-	Rules          []string // ?
+	Premise        []string // premises of the proof; an array of WFFs
+	Logic          []string // body of the proof; an array of WFFs
+	Rules          []string // justification for each line in body of proof
 	ProofCompleted string   // 'true', 'false', or 'error'
-	Conclusion     string   // ?
+	Conclusion     string   // conclusion of the proof
 	RepoProblem    string   // 'true' if problem started from a repo problem, else 'false'
 	TimeSubmitted  string
 }
@@ -164,27 +164,27 @@ func (p *ProofStore) Store(proof Proof) error {
 		return errors.New("Database transaction begin error")
 	}
 	stmt, err := tx.Prepare(`INSERT INTO proofs (entryType,
-												userSubmitted,
-												proofName,
-												proofType,
-												Premise,
-												Logic,
-												Rules,
-												proofCompleted,
-												timeSubmitted,
-												Conclusion,
-												repoProblem)
-							 VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
-							 ON CONFLICT (userSubmitted, proofName) DO UPDATE SET
-							 	entryType = ?,
-							 	proofType = ?,
-							 	Premise = ?,
-							 	Logic = ?,
-							 	Rules = ?,
-							 	proofCompleted = ?,
-							 	timeSubmitted = datetime('now'),
-							 	Conclusion = ?,
-							 	repoProblem = ?`)
+							userSubmitted,
+							proofName,
+							proofType,
+							Premise,
+							Logic,
+							Rules,
+							proofCompleted,
+							timeSubmitted,
+							Conclusion,
+							repoProblem)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
+				 ON CONFLICT (userSubmitted, proofName) DO UPDATE SET
+					 	entryType = ?,
+					 	proofType = ?,
+					 	Premise = ?,
+					 	Logic = ?,
+					 	Rules = ?,
+					 	proofCompleted = ?,
+					 	timeSubmitted = datetime('now'),
+					 	Conclusion = ?,
+					 	repoProblem = ?`)
 	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")

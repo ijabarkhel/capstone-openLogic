@@ -65,6 +65,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	
 	var submittedProof datastore.Proof
 
+	// read the JSON-encoded value from the HTTP request and store it in submittedProof
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), 400)
@@ -166,9 +167,7 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, string(userProofsJSON))
 
 	log.Printf("%q", user)
-
 	log.Printf("%+v", req.URL.Query())
-
 }
 
 // This will delete all rows, but not reset the auto_increment id
