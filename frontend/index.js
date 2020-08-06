@@ -293,7 +293,8 @@ $(document).ready(function() {
       let proofCompleted = event.detail.proofCompleted;
       let conclusion = event.detail.wantedConc;
 
-      let postData = new Proof(entryType, proofName, proofType, Premises, Logic, Rules, proofCompleted, conclusion, repoProblem);
+      let postData = new Proof(entryType, proofName, proofType, Premises, Logic, Rules,
+			       proofCompleted, conclusion, repoProblem);
 
       console.log('saving proof', postData);
       backendPOST('saveproof', postData).then(
@@ -385,6 +386,7 @@ $(document).ready(function() {
    });
 
    // create a problem based on premise and conclusion
+   // get the proof name, premises, and conclusion from the document
    $("#createProb").click( function() {
       // predicateSettings is a global var defined in syntax_upstream.js
       predicateSettings = (document.getElementById("folradio").checked);
