@@ -386,7 +386,7 @@ function delLineFromLocation(pd, loc) {
  * @param {array}   pstart ('proof start') a 'proofdata' array containing the proof body (including premises)
  * @param {string}  the conclusion of the proof (a wff string)
  *
- * Note that the prooftable element has an attribute 'proofdata', which is
+ * Note that the proof table element has an attribute 'proofdata', which is
  * a "proofdata" array (the "internal representation" of a proof)
  */
 function makeProof(pardiv, pstart, conc) {
