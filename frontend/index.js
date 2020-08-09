@@ -206,7 +206,6 @@ function loadUserProofs() {
       (data) => {
 	 console.log("loadSelect", data);
 	 repositoryData.userProofs = data;
-
 	 prepareSelect('#userProofSelect', data);
 	 $('#userProofSelect').data('repositoryDataKey', 'userProofs')
       }, console.log
@@ -255,7 +254,6 @@ function loadUserCompletedProofs() {
       (data) => {
 	 console.log("loadUserCompletedProofs", data);
 	 repositoryData.completedUserProofs = data;
-
 	 prepareSelect('#userCompletedProofSelect', data);
 	 $('#userCompletedProofSelect').data('repositoryDataKey', 'completedUserProofs')
       }, console.log
