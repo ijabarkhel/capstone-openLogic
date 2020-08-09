@@ -471,10 +471,10 @@ function createProb(proofName, premisesString, conclusionString) {
    let proofContainerData = $('.proofContainer').data();
    if (proofContainerData.hasOwnProperty('Logic')) {
       if (Array.isArray(proofContainerData.Logic) && proofContainerData.Logic.length > 0) {
-	 jsonProofData = proofContainerData.Logic[0]
+	 let jsonProofData = proofContainerData.Logic[0]
 	 proofdata = JSON.parse(jsonProofData)
       } else {
-	 console.warn('Error/unexpected: Logic/Rules are not arrays', proofContainerData);
+	 console.warn('Error/unexpected: Logic is not a non-empty array', proofContainerData);
       }
    }
 
