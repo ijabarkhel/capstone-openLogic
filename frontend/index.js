@@ -469,8 +469,8 @@ function createProb(proofName, premisesString, conclusionString) {
    // if proofContainerData contains 'Logic', use it for the proof body
    // (and overwrite the already initialized value of proofdata)
    let proofContainerData = $('.proofContainer').data();
-   if (proofContainerData.hasOwnProperty('Logic') && proofContainerData.hasOwnProperty('Rules')) {
-      if (Array.isArray(proofContainerData.Logic) && Array.isArray(proofContainerData.Rules)) {
+   if (proofContainerData.hasOwnProperty('Logic')) {
+      if (Array.isArray(proofContainerData.Logic) && proofContainerData.Logic.length > 0) {
 	 jsonProofData = proofContainerData.Logic[0]
 	 proofdata = JSON.parse(jsonProofData)
       } else {
