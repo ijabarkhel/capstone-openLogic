@@ -487,7 +487,7 @@ function createProb(proofName, premisesString, conclusionString) {
    var probstr = '';
    for (var k=0; k < prems.length; k++) {
       probstr += prettyStr(prems[k]);
-      if ((k+1) != proofdata.length) {
+      if ((k+1) < prems.length) {
 	 probstr += ', ';
       }
    }
