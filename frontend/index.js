@@ -471,7 +471,8 @@ function createProb(proofName, premisesString, conclusionString) {
    let proofContainerData = $('.proofContainer').data();
    if (proofContainerData.hasOwnProperty('Logic') && proofContainerData.hasOwnProperty('Rules')) {
       if (Array.isArray(proofContainerData.Logic) && Array.isArray(proofContainerData.Rules)) {
-	 proofdata = JSON.parse(proofContainerData.Logic[0])
+	 jsonProofData = proofContainerData.Logic[0]
+	 proofdata = JSON.parse(jsonProofData
       } else {
 	 console.warn('Error/unexpected: Logic/Rules are not arrays', proofContainerData);
       }
