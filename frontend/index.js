@@ -420,18 +420,16 @@ $(document).ready(function() {
 });
 
 function resetProofUI() {
-   $('#proofName').val(''); // Clear name
-   $('#tflradio').prop('checked', true); // Set to Propositional
-   $('#probpremises').val(''); // Clear premises
-   $('#probconc').val(''); // Clear conclusion
-   $('.proofNameSpan').text(''); // Clear proof name
-   $('#theproof').empty(); // Remove all HTML from 'theproof' element
+   $('#proofName').val('');			// clear name
+   $('#tflradio').prop('checked', true);	// set to Propositional
+   $('#probpremises').val('');			// clear premises
+   $('#probconc').val('');			// clear conclusion
+   $('.proofNameSpan').text('');		// clear proof name
+   $('#theproof').empty();			// remove all HTML from 'theproof' element
+   $('.proofContainer').removeData();		// clear Logic/Rules data
 
    // reset all select boxes to "Select..." (the first option element)
    $('#load-container select option:nth-child(1)').prop('selected', true);
-
-   // remove Logic/Rules data from proofContainer
-   $('.proofContainer').removeData();
 }
 
 // predicateSettings = (document.getElementById("folradio").checked);
