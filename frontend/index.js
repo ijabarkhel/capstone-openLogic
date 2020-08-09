@@ -272,8 +272,10 @@ $(document).ready(function() {
 
       let Premises = [].concat(proofData.filter( elem => elem.jstr == "Pr" ).map( elem => elem.wffstr ));
 
-      // The Logic and Rules lists used to contain lines of the proof, but
+      // The Logic and Rules arrays used to contain lines of the proof, but
       // this only worked for proofs with no subproofs.
+      // Now Logic is always a array containing a single string, and Rules is
+      // always an empty array.
       let Logic = [JSON.stringify(proofData)],
           Rules = [];
 
@@ -353,7 +355,7 @@ $(document).ready(function() {
 	 $('#repoProblem').val('false');
       }
 
-      // attach Logic/Rules data to the proofContainer
+      // attach the proof body to the proofContainer
       if (Array.isArray(selectedProof.Logic) && Array.isArray(selectedProof.Rules)) {
 	 $('.proofContainer').data({
             'Logic': selectedProof.Logic,
@@ -419,7 +421,7 @@ function resetProofUI() {
    $('#probconc').val('');			// clear conclusion
    $('.proofNameSpan').text('');		// clear proof name
    $('#theproof').empty();			// remove all HTML from 'theproof' element
-   $('.proofContainer').removeData();		// clear Logic/Rules data
+   $('.proofContainer').removeData();		// clear proof body
 
    // reset all select boxes to "Select..." (the first option element)
    $('#load-container select option:nth-child(1)').prop('selected', true);
@@ -430,31 +432,12 @@ function resetProofUI() {
 // var conc = fixWffInputStr(document.getElementById("probconc").value);
 function createProb(proofName, premisesString, conclusionString) {
 
-   // verify the premises are well formed, and initialize the
-   // proofdata with the premises
+   // verify the premises are well-formed
    let pstr = premisesString.replace(/^[,;\s]*/,'');
    pstr = pstr.replace(/[,;\s]*$/,'');
    let prems = pstr.split(/[,;\s]*[,;][,;\s]*/);
-   let proofdata = [];
-   for (let a=0; a<prems.length; a++) {
-      if (prems[a] != '') {
-	 let w = parseIt(fixWffInputStr(prems[a]));
-	 if (!(w.isWellFormed)) {
-            alert('Premise ' + (a+1) + ', ' + fixWffInputStr(prems[a]) + ', is not well formed.');
-            return false;
-         }
-	 if ((predicateSettings) && (!(w.allFreeVars.length == 0))) {
-            alert('Premise ' + (a+1) + ' is not closed.');
-            return false;
-	 }
-	 proofdata.push({
-            "wffstr": wffToString(w, false),
-            "jstr": "Pr"
-	 });
-      }
-   }
 
-   // verify the conclusion is well formed
+   // verify the conclusion is well-formed
    let conc = fixWffInputStr(conclusionString);
    var cw = parseIt(conc);
    if (!(cw.isWellFormed)) {
@@ -466,15 +449,37 @@ function createProb(proofName, premisesString, conclusionString) {
       return false;
    }
 
-   // if proofContainerData contains 'Logic', use it for the proof body
-   // (and overwrite the already initialized value of proofdata)
+   // set the body of the proof
+   // If the proof body is attached to the proofContainerData as array Logic[],
+   // get the proof body from that.  Otherwise initialize the proof body from
+   // the premises.
+   // Note: for legacy reasons Logic always contains a single element -- the
+   // JSON encoding of the proof data.
+   let proofdata = [];
    let proofContainerData = $('.proofContainer').data();
    if (proofContainerData.hasOwnProperty('Logic')) {
       if (Array.isArray(proofContainerData.Logic) && proofContainerData.Logic.length > 0) {
-	 let jsonProofData = proofContainerData.Logic[0]
-	 proofdata = JSON.parse(jsonProofData)
+	 proofdata = JSON.parse(proofContainerData.Logic[0])
       } else {
 	 console.warn('Error/unexpected: Logic is not a non-empty array', proofContainerData);
+      }
+   } else {
+      for (let a=0; a<prems.length; a++) {
+	 if (prems[a] != '') {
+	    let w = parseIt(fixWffInputStr(prems[a]));
+	    if (!(w.isWellFormed)) {
+               alert('Premise ' + (a+1) + ', ' + fixWffInputStr(prems[a]) + ', is not well formed.');
+               return false;
+            }
+	    if ((predicateSettings) && (!(w.allFreeVars.length == 0))) {
+               alert('Premise ' + (a+1) + ' is not closed.');
+               return false;
+	    }
+	    proofdata.push({
+               "wffstr": wffToString(w, false),
+               "jstr": "Pr"
+	    });
+	 }
       }
    }
 

@@ -14,8 +14,8 @@ type Proof struct {
 	ProofName      string   // user-chosen name (repo problems start with 'Repository - ')
 	ProofType      string   // 'prop' (propositional/tfl) or 'fol' (first order logic)
 	Premise        []string // premises of the proof; an array of WFFs
-	Logic          []string // body of the proof; an array of WFFs
-	Rules          []string // justification for each line in body of proof
+	Logic          []string // body of the proof; a JSON-encoded string
+	Rules          []string // deprecated; now always an empty string
 	ProofCompleted string   // 'true', 'false', or 'error'
 	Conclusion     string   // conclusion of the proof
 	RepoProblem    string   // 'true' if problem started from a repo problem, else 'false'
