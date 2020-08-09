@@ -272,17 +272,10 @@ $(document).ready(function() {
 
       let Premises = [].concat(proofData.filter( elem => elem.jstr == "Pr" ).map( elem => elem.wffstr ));
 
-      // Logic/Rules store the body of the proof
-      // initialize them with the premises (Logic) and corresponding justifications (Rules)
-      // THIS BREAKS FOR SUBPROOFS
-      let Logic = [],
+      // The Logic and Rules lists used to contain lines of the proof, but
+      // this only worked for proofs with no subproofs.
+      let Logic = [JSON.stringify(proofData)],
           Rules = [];
-      proofData.filter( elem => elem.jstr != "Pr" ).forEach(
-	 elem => {
-            Logic.push(elem.wffstr);
-            Rules.push(elem.jstr);
-	 }
-      );
 
       let entryType = "proof"; // What is this meant to be used for?
 
@@ -473,17 +466,12 @@ function createProb(proofName, premisesString, conclusionString) {
       return false;
    }
 
-   // extend the proofdata with lines of the proof body
+   // if proofContainerData contains 'Logic', use it for the proof body
+   // (and overwrite the already initialized value of proofdata)
    let proofContainerData = $('.proofContainer').data();
    if (proofContainerData.hasOwnProperty('Logic') && proofContainerData.hasOwnProperty('Rules')) {
       if (Array.isArray(proofContainerData.Logic) && Array.isArray(proofContainerData.Rules)) {
-	 proofContainerData.Logic.forEach( (value, idx) => {
-            let w = parseIt(fixWffInputStr(proofContainerData.Logic[idx]));
-            proofdata.push({
-               wffstr: wffToString(w, false),
-               jstr: proofContainerData.Rules[idx]
-            })
-	 });
+	 proofdata = JSON.parse(proofContainerData.Logic[0])
       } else {
 	 console.warn('Error/unexpected: Logic/Rules are not arrays', proofContainerData);
       }
