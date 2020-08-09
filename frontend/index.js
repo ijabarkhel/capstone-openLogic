@@ -485,8 +485,8 @@ function createProb(proofName, premisesString, conclusionString) {
 
    // set the argument (premises/conclusion)  string
    var probstr = '';
-   for (var k=0; k < proofdata.length; k++) {
-      probstr += prettyStr(proofdata[k].wffstr);
+   for (var k=0; k < prems.length; k++) {
+      probstr += prettyStr(prems[k]);
       if ((k+1) != proofdata.length) {
 	 probstr += ', ';
       }
