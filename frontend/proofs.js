@@ -454,8 +454,8 @@ function makeProof(pardiv, pstart, conc) {
    p.startOverButton.onclick = function() {
       this.myP.parentNode.removeChild(this.myP.checkButton);
       this.myP.parentNode.removeChild(this.myP.startOverButton);
-      this.myP.parentNode.removeChild(this.myP.results);
       this.myP.parentNode.removeChild(this.myP.togglePublicButton);
+      this.myP.parentNode.removeChild(this.myP.results);
       this.myP.parentNode.removeChild(this.myP.buttonDiv);
       this.myP.parentNode.removeChild(this.myP);
       makeProof(this.myPardiv, this.start, this.conc);
