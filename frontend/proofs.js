@@ -445,6 +445,7 @@ function makeProof(pardiv, pstart, conc) {
    // start over button
    p.startOverButton = document.createElement("button");
    p.startOverButton.type = "button";
+   p.startOverButton.id = "startOverButton"
    p.startOverButton.innerHTML = "start over";
    p.startOverButton.start = pstart.slice(0);    // a shallow copy of pstart
    p.startOverButton.myPardiv = pardiv;
