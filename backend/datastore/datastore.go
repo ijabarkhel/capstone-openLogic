@@ -72,10 +72,6 @@ func getProofsFromRows(rows *sql.Rows) (error, []Proof) {
 		if err = json.Unmarshal([]byte(RulesJSON), &userProof.Rules); err != nil {
 			return err, nil
 		}
-		// don't return proofs with non-empty Rules arrays, as they are deprecated
-		if len(userProof.Rules) > 0 {
-		        continue;
-		}
 
 		userProofs = append(userProofs, userProof)
 	}
