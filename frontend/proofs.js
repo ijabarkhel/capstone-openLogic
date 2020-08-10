@@ -464,17 +464,17 @@ function makeProof(pardiv, pstart, conc) {
    
    // Admin button -- add to repository
    if (typeof User !== 'undefined' && User.isSignedIn() && User.isAdministrator()) {
-      let togglePublicButton = document.createElement('button');
-      togglePublicButton.type = "button";
+      p.togglePublicButton = document.createElement('button');
+      p.togglePublicButton.type = "button";
       let publicStatus = $('#repoProblem').val() || 'false';
       if (publicStatus === 'false') {
-         togglePublicButton.textContent = "Make Public";
+         p.togglePublicButton.textContent = "make public";
       } else {
-         togglePublicButton.textContent = "Make Private";
+         p.togglePublicButton.textContent = "make private";
       }
 
-      togglePublicButton.id = "togglePublicButton";
-      pardiv.appendChild(togglePublicButton);
+      p.togglePublicButton.id = "togglePublicButton";
+      pardiv.appendChild(p.togglePublicButton);
    }
    
    p.deleteLine = function(n) {
