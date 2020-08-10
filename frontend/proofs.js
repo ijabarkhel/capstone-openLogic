@@ -1,3 +1,11 @@
+/**
+ * The part of the front end dealing with the proof and its controls.
+ *
+ * The element with id 'theproof' is the proof table plus the buttons just
+ * below it.
+ * The element with id 'prooftable' is the proof table itself (the Fitch
+ * diagram).
+ */
 
 // Class to contain proof data for submission to backend 
 class Proof {
@@ -381,13 +389,13 @@ function delLineFromLocation(pd, loc) {
 }
 
 /**
- * Display and return a new proof represented as a table element with class 'prooftable'.
+ * Add the proof table and buttons just below the table to pardiv ("the proof") and display it
  * @param {element} pardiv the parent div element
  * @param {array}   pstart ('proof start') a 'proofdata' array containing the proof body (including premises)
  * @param {string}  the conclusion of the proof (a wff string)
  *
  * Note that the proof table element has an attribute 'proofdata', which is
- * a "proofdata" array (the "internal representation" of a proof)
+ * a 'proofdata' array (the internal representation of a proof)
  */
 function makeProof(pardiv, pstart, conc) {
    var p = document.createElement("table");
@@ -423,7 +431,7 @@ function makeProof(pardiv, pstart, conc) {
    p.checkButton.type = "button";
    p.checkButton.id = "checkButton";
    p.checkButton.innerHTML = "check proof";
-   p.checkButton.myP = p;
+   p.checkButton.myP = p;		
    pardiv.appendChild(p.checkButton);
    p.checkButton.onclick = function() {
       this.myP.registerInput();
@@ -438,17 +446,17 @@ function makeProof(pardiv, pstart, conc) {
    p.startOverButton = document.createElement("button");
    p.startOverButton.type = "button";
    p.startOverButton.innerHTML = "start over";
-   pardiv.appendChild(p.startOverButton);
    p.startOverButton.start = pstart.slice(0);    // a shallow copy of pstart
    p.startOverButton.myPardiv = pardiv;
    p.startOverButton.conc = conc;
    p.startOverButton.myP = p;
+   pardiv.appendChild(p.startOverButton);
    p.startOverButton.onclick = function() {
       this.myP.parentNode.removeChild(this.myP.checkButton);
       this.myP.parentNode.removeChild(this.myP.startOverButton);
       this.myP.parentNode.removeChild(this.myP.results);
-      this.myP.parentNode.removeChild(this.myP.buttonDiv);
       this.myP.parentNode.removeChild(this.myP.togglePublicButton);
+      this.myP.parentNode.removeChild(this.myP.buttonDiv);
       this.myP.parentNode.removeChild(this.myP);
       makeProof(this.myPardiv, this.start, this.conc);
    }
