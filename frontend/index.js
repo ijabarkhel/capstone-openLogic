@@ -299,10 +299,8 @@ $(document).ready(function() {
 	    } else {
                loadUserProofs();
 	    }
-		 
-	    if (postData.repoProblem != "false") {
-               loadRepoProofs();
-	    }
+		
+            loadRepoProofs();
 	 }, console.log)
    });
 
