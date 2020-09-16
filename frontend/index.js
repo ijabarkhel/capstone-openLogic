@@ -299,6 +299,8 @@ $(document).ready(function() {
 	    } else {
                loadUserProofs();
 	    }
+		
+            loadRepoProofs();
 	 }, console.log)
    });
 
