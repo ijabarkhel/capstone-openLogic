@@ -1,6 +1,12 @@
 <?php
 
-$tfl_rules = array('∧I','∧E','⊥I','⊥E','¬I','¬E','→I','→E','RAA','TND','∨I','∨E','↔I','↔E','DS','R','MT','DNE','DeM','Pr','Hyp','X','IP','LEM', 'Bicondition');
+// negation elimination and introduction rules have been disabled 
+// for this checker, which is based on logic in DeLancey's text
+// removed '¬I','¬E'
+// added RAA
+// The ¬I and ¬E rules have been retained elsewhere so they can
+// easily be reintroduced.
+$tfl_rules = array('∧I','∧E','⊥I','⊥E','→I','→E','RAA','TND','∨I','∨E','↔I','↔E','DS','R','MT','DNE','DeM','Pr','Hyp','X','IP','LEM', 'Bicondition');
 $fol_rules = array('∀E','∀I','∃I','∃E','=I','=E','CQ');
 
 // for every proof rule:

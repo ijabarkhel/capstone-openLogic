@@ -619,21 +619,66 @@ function makeProof(pardiv, pstart, conc) {
 }
 
 // Change names during display
-const changeRuleNames = (rule) => typeof rule === 'string' && rule
+const changeRuleNamesOld = (rule) => typeof rule === 'string' && rule
    .replace(/dne/i, "Double Negation")
    .replace("→E",   "Modus Ponens")
    .replace("MT",   "Modus Tollens")
    .replace("DS",   "Modus Tollendo Ponens")
    .replace("RAA",  "Reductio Ad Absurdum")
-   .replace("∧E",  "Simplification")
-   .replace("∨I",  "Addition")
-   .replace("∧I",  "Adjunction")
+   .replace("∧E",   "Simplification")
+   .replace("∨I",   "Addition")
+   .replace("∧I",   "Adjunction")
    .replace("↔E",   "Equivalence")
    .replace("→I",   "Conditional derivation")
    .replace("∀E",   "Universal instantiation")
    .replace("∃I",   "Existential generalization")
    .replace("∃E",   "Existential instantiation")
    .replace("R",    "Repeat");
+
+
+var dest = [
+   "Double Negation",
+   "Modus Ponens",
+   "Modus Tollens",
+   "Modus Tollendo Ponens",
+   "Reductio Ad Absurdum",
+   "Simplification",
+   "Addition",
+   "Adjunction",
+   "Equivalence",
+   "Conditional derivation",
+   "Universal instantiation",
+   "Existential generalization",
+   "Existential instantiation",
+   "Repeat"
+];
+ 
+var src = [
+   "dne",
+   "→E".
+   "MT".
+   "DS".
+   "RAA".
+   "∧E".
+   "∨I".
+   "∧I".
+   "↔E".
+   "→I".
+   "∀E".
+   "∃I".
+   "∃E".
+   "R"
+]
+
+// Change names during display
+function changeRuleNames(s) {
+   for (var i = 0; i < src.length; i++) {
+      if (src[i].toUpperCase() == s) {
+         return dest[i];
+      }
+   }
+   return s;
+}
 
 // When submitting to the PHP backend, rule names must be changed back
 const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
