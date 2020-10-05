@@ -80,6 +80,7 @@ function fixJInputStr(s) {
    fs = fs.replace(/[Mm][Tt]/g, "MT");
    fs = fs.replace(/[Cc][Qq]/g, "CQ");
    fs = fs.replace(/[Dd][Ss]/g, "DS");
+   fs = fs.replace(/[Rr][Aa][Aa]/g, "RAA");
    fs = fs.replace(/[Dd][Nn][Ee]/g, "DNE");
    fs = fs.replace(/[Dd][Ee][Mm]/g, "DeM");
    fs = fs.replace(/EE/g, "∃E");

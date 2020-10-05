@@ -1,8 +1,11 @@
 <?php
 
-$tfl_rules = array('∧I','∧E','⊥I','⊥E','¬I','¬E','→I','→E','TND','∨I','∨E','↔I','↔E','DS','R','MT','DNE','DeM','Pr','Hyp','X','IP','LEM', 'Bicondition');
+$tfl_rules = array('∧I','∧E','⊥I','⊥E','¬I','¬E','→I','→E','RAA','TND','∨I','∨E','↔I','↔E','DS','R','MT','DNE','DeM','Pr','Hyp','X','IP','LEM', 'Bicondition');
 $fol_rules = array('∀E','∀I','∃I','∃E','=I','=E','CQ');
 
+// for every proof rule:
+// - first number is correct number of cited lines
+// - second number is correct number of cited subproofs
 $cite_nums = array(
     "∧I" => array(2, 0),
     "∧E" => array(1, 0),
@@ -12,6 +15,7 @@ $cite_nums = array(
     "¬E" => array(2, 0),
     "→I" => array(0, 1),
     "→E" => array(2, 0),
+    "RAA" => array(0, 1),
     "TND" => array(0, 2),
     "∨I" => array(1, 0),
     "∨E" => array(1, 2),
@@ -373,6 +377,26 @@ function followsByRAA($c, $a, $b) {
     );
 }
 
+function followsByRAA2ThisWay($c, $a, $b, $d) {
+    return (
+        ($c->mainOp == "¬")
+        &&
+        (sameWff($c->rightSide, $a))
+        &&
+        ($d->mainOp == "¬")
+        &&
+        (sameWff($d->rightSide, $b))
+    );
+}
+
+function followsByRAA2($c, $a, $b, $d) {
+    return (
+        (followsByRAA2ThisWay($c, $a, $b, $d))
+        ||
+        (followsByRAA2ThisWay($c, $a, $d, $b))
+    );
+}
+
 function followsByIP($c, $a, $b) {
     return (
         ($a->mainOp == "¬")
@@ -509,6 +533,8 @@ function newJ() {
     return $j;
 }
 
+// parse justification part of a line of a proof
+// return clean justification j with j->parsedOK set to true or false
 function parseJ($jstr) {
     global $predicateSettings, $tfl_rules, $fol_rules;
     $j = newJ();
@@ -518,16 +544,22 @@ function parseJ($jstr) {
 
     $jparts = explode(',',$jstr);
     foreach ($jparts as $jpart) {
+        // case: empty justification
         if ($jpart == '') {
             $j->parsedOK = false;
             $j->errMsg = 'Justification left blank.';
             return $j;
         }
+        // case: a proof line number is cited
         if (mb_ereg_match('[0-9]*$', $jpart)) {
             array_push($j->lines, intval($jpart) );
             continue;
         }
+        // case: a range of line numbers is cited
+        // subproof start is set to first line, subproof end is set to last line
         if (mb_ereg_match('[0-9]+-[0-9]+$', $jpart)) {
+            // if a range of lines is given, subproof start is set to first line
+            // of range; subproof end is set to last lin of range
             $spc = new StdClass();
             $jpbreak = explode('-', $jpart);
             $spc->spstart = intval($jpbreak[0]);
@@ -535,6 +567,7 @@ function parseJ($jstr) {
             array_push($j->subps, $spc);
             continue;
         }
+        // case: a rule name is given
         if ((in_array($jpart, $tfl_rules)) ||
             ( ($predicateSettings) && (in_array($jpart, $fol_rules )))) {
             array_push($j->rules, $jpart);
@@ -634,7 +667,7 @@ function check_proof($pr, $numprems, $conc) {
     }
     //var_dump($rulesStrings);
 
-    // check syntax for all
+    // check formula syntax on all proof lines
     foreach ($fpr as &$line) {
         $line->wff = parseIt($line->wffstr);
         if (!($line->wff->isWellFormed)) {
@@ -643,7 +676,7 @@ function check_proof($pr, $numprems, $conc) {
     }
     unset($line);
 
-    // parse jStr for all
+    // parse justification on all proof lines
     foreach ($fpr as &$line) {
         $line->j = parseJ($line->jstr);
         if (!($line->j->parsedOK)) {
@@ -656,9 +689,9 @@ function check_proof($pr, $numprems, $conc) {
     foreach ($fpr as &$line) {
         if ($line->j->parsedOK) {
             $cnums = $cite_nums[$line->j->rules[0]];
-            $good_lc=$cnums[0];
-            $good_spc=$cnums[1];
-            $act_lc = count($line->j->lines);
+            $good_lc=$cnums[0];                  // correct number of cited lines for this proof rule
+            $good_spc=$cnums[1];                 // correct number of cited subproofs for this proof rule
+            $act_lc = count($line->j->lines);    // actual number of cited lines
             $act_spc = count($line->j->subps);
             if ($act_lc < $good_lc) {
                 array_push($line->issues, 'Cites too few line numbers for the rule ' . change_rule_name($line->j->rules[0]) . '.');
@@ -842,6 +875,11 @@ function check_proof($pr, $numprems, $conc) {
                 break;
             case "IP":
                 $worked = followsByIP($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
+                break;
+            case "RAA":
+                $worked = followsByRAA2($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, 
+                                                       $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff,
+                                                       $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "TND":
                 $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
