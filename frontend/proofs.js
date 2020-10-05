@@ -619,7 +619,7 @@ function makeProof(pardiv, pstart, conc) {
 }
 
 // Change names during display
-const changeRuleNamesOld = (rule) => typeof rule === 'string' && rule
+const changeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace(/dne/i, "Double Negation")
    .replace("→E",   "Modus Ponens")
    .replace("MT",   "Modus Tollens")
@@ -633,52 +633,7 @@ const changeRuleNamesOld = (rule) => typeof rule === 'string' && rule
    .replace("∀E",   "Universal instantiation")
    .replace("∃I",   "Existential generalization")
    .replace("∃E",   "Existential instantiation")
-   .replace("R",    "Repeat");
-
-
-var dest = [
-   "Double Negation",
-   "Modus Ponens",
-   "Modus Tollens",
-   "Modus Tollendo Ponens",
-   "Reductio Ad Absurdum",
-   "Simplification",
-   "Addition",
-   "Adjunction",
-   "Equivalence",
-   "Conditional derivation",
-   "Universal instantiation",
-   "Existential generalization",
-   "Existential instantiation",
-   "Repeat"
-];
- 
-var src = [
-   "dne",
-   "→E".
-   "MT".
-   "DS".
-   "RAA".
-   "∧E".
-   "∨I".
-   "∧I".
-   "↔E".
-   "→I".
-   "∀E".
-   "∃I".
-   "∃E".
-   "R"
-]
-
-// Change names during display
-function changeRuleNames(s) {
-   for (var i = 0; i < src.length; i++) {
-      if (src[i].toUpperCase() == s) {
-         return dest[i];
-      }
-   }
-   return s;
-}
+   .replace("Rep",  "Repeat");
 
 // When submitting to the PHP backend, rule names must be changed back
 const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
@@ -696,4 +651,4 @@ const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace(/uni[v∨]ersal instantiation/i, "∀E")
    .replace(/existential generalization/i,  "∃I")
    .replace(/existential instantiation/i,   "∃E")
-   .replace(/repeat/i, "R");
+   .replace(/repeat/i, "Rep");

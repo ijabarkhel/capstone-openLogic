@@ -6,7 +6,7 @@
 // added RAA
 // The ¬I and ¬E rules have been retained elsewhere so they can
 // easily be reintroduced.
-$tfl_rules = array('∧I','∧E','⊥I','⊥E','→I','→E','RAA','TND','∨I','∨E','↔I','↔E','DS','R','MT','DNE','DeM','Pr','Hyp','X','IP','LEM', 'Bicondition');
+$tfl_rules = array('∧I','∧E','⊥I','⊥E','→I','→E','RAA','TND','∨I','∨E','↔I','↔E','DS','Rep','MT','DNE','DeM','Pr','Hyp','X','IP','LEM', 'Bicondition');
 $fol_rules = array('∀E','∀I','∃I','∃E','=I','=E','CQ');
 
 // for every proof rule:
@@ -28,7 +28,7 @@ $cite_nums = array(
     "↔I" => array(0, 2),
     "↔E" => array(2, 0),
     "DS" => array(2, 0),
-    "R" => array(1, 0),
+    "Rep" => array(1, 0),
     "MT" => array(2, 0),
     "DNE" => array(1, 0),
     "DeM" => array(1, 0),
@@ -645,7 +645,7 @@ function change_rule_name($rule){
     if (strpos($rule, '∃E') !== false) {
 	return "existential instantiation";
     } 
-    if (strpos($rule, 'R') !== false) {
+    if (strpos($rule, 'Rep') !== false) {
 	return "repeat";
     } 
     return $rule;
@@ -911,7 +911,7 @@ function check_proof($pr, $numprems, $conc) {
             case "DS":
                 $worked = followsByDS($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff, $fpr[($fpr[$i]->j->lines[1] - 1)]->wff );
                 break;
-            case "R":
+            case "Rep":
                 $worked = sameWff($fpr[$i]->wff, $fpr[($fpr[$i]->j->lines[0] - 1)]->wff );
                 break;
             case "MT":
