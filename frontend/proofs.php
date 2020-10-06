@@ -386,9 +386,9 @@ function followsByRAA($c, $a, $b) {
 // RAA2 is the form of reductio ad absurdum in the DeLancey logic text
 function followsByRAA2ThisWay($c, $a, $b, $d) {
     return (
-        ($c->mainOp == "¬")
+        ($a->mainOp == "¬")
         &&
-        (sameWff($c->rightSide, $a))
+        (sameWff($a->rightSide, $c))
         &&
         ($d->mainOp == "¬")
         &&
