@@ -35,7 +35,7 @@ $cite_nums = array(
     "∀E" => array(1, 0),
     "∀I" => array(1, 0),
     "∃I" => array(1, 0),
-    "∃E" => array(1, 0),
+    "∃E" => array(1, 1),
     "=I" => array(0, 0),
     "=E" => array(2, 0),
     "CQ" => array(1, 0),
