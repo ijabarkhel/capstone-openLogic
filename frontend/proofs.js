@@ -631,6 +631,7 @@ const changeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace("↔E",   "Equivalence")
    .replace("→I",   "Conditional derivation")
    .replace("∀E",   "Universal instantiation")
+   .replace("∀I",   "Universal derivation")
    .replace("∃I",   "Existential generalization")
    .replace("∃E",   "Existential instantiation")
    .replace("Rep",  "Repeat");
@@ -649,6 +650,7 @@ const unChangeRuleNames = (rule) => typeof rule === 'string' && rule
    .replace(/bicondition/i,           "Bicondition")
    .replace(/conditional deri[v∨]ation/i,  "→I")
    .replace(/uni[v∨]ersal instantiation/i, "∀E")
+   .replace(/uni[v∨]ersal derivation/i,    "∀I")
    .replace(/existential generalization/i,  "∃I")
    .replace(/existential instantiation/i,   "∃E")
    .replace(/repeat/i, "Rep");
