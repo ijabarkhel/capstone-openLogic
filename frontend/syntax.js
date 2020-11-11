@@ -83,10 +83,10 @@ function fixJInputStr(s) {
    fs = fs.replace(/[Rr][Aa][Aa]/g, "RAA");
    fs = fs.replace(/[Dd][Nn][Ee]/g, "DNE");
    fs = fs.replace(/[Dd][Ee][Mm]/g, "DeM");
-   fs = fs.replace(/EE/g, "∃E");
    fs = fs.replace(/AE/g, "∀E");
-   fs = fs.replace(/EI/g, "∃I");
    fs = fs.replace(/AI/g, "∀I");
+   fs = fs.replace(/EE/g, "∃E");
+   fs = fs.replace(/EI/g, "∃I");
    //fs = fs.replace(/r/g, "R");
    fs = fs.replace(/[Pp][Rr]/g, "");
    fs = fs.replace(/[Hh][Yy][Pp]/g, "");
