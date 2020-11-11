@@ -640,11 +640,14 @@ function change_rule_name($rule){
     if (strpos($rule, '∀E') !== false) {
 	return "universal instantiation";
     } 
-    if (strpos($rule, '∃I') !== false) {
-	return "existential generalization";
+    if (strpos($rule, '∀I') !== false) {
+	return "universal derivation";
     } 
     if (strpos($rule, '∃E') !== false) {
 	return "existential instantiation";
+    } 
+    if (strpos($rule, '∃I') !== false) {
+	return "existential generalization";
     } 
     if (strpos($rule, 'Rep') !== false) {
 	return "repeat";
