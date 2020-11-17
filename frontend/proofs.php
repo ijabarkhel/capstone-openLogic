@@ -637,14 +637,17 @@ function change_rule_name($rule){
     if (strpos($rule, '↔E') !== false) {
 	return "Equivalence";
     } 
+    if (strpos($rule, '=E') !== false) {
+	return "Substitution of identicals";
+    } 
     if (strpos($rule, '∀E') !== false) {
-	return "universal instantiation";
+	return "Universal instantiation";
     } 
     if (strpos($rule, '∀I') !== false) {
-	return "universal derivation";
+	return "Universal derivation";
     } 
     if (strpos($rule, '∃E') !== false) {
-	return "existential instantiation";
+	return "Existential instantiation";
     } 
     if (strpos($rule, '∃I') !== false) {
 	return "existential generalization";
