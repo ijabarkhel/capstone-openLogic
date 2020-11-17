@@ -637,8 +637,14 @@ function change_rule_name($rule){
     if (strpos($rule, '↔E') !== false) {
 	return "Equivalence";
     } 
+    if (strpos($rule, '↔I') !== false) {
+	return "Bicondition";
+    } 
     if (strpos($rule, '=E') !== false) {
 	return "Substitution of identicals";
+    } 
+    if (strpos($rule, '=I') !== false) {
+	return "Identity introduction";
     } 
     if (strpos($rule, '∀E') !== false) {
 	return "Universal instantiation";
