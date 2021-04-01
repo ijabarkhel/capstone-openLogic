@@ -99,7 +99,7 @@ func (p *ProofStore) GetAllAttemptedRepoProofs() (error, []Proof) {
 	if err != nil {
 		return err, nil
 	}
-	defer stmt.Close()
+	defer stmt.Close()             // make sure the statement is closed, error or not
 	
 	rows, err := stmt.Query()
 	if err != nil {
