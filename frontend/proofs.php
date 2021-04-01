@@ -748,7 +748,6 @@ function check_proof($pr, $numprems, $conc) {
                     continue;
                 }
                 $cloc = $fpr[($citedline - 1)]->location;
-                // is the cited line in a lower-level subproof?
                 if (count($cloc) > count($nloc)) {
                     array_push($fpr[$i]->issues, 'Cites an unavailable line (' . $citedline . ').');
                     continue;
@@ -897,21 +896,7 @@ function check_proof($pr, $numprems, $conc) {
                 $worked = followsByIP($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "RAA":
-                phi1_line = ($fpr[$i]->j->subps[0]->spend - 2)
-                phi2_line = ($fpr[$i]->j->subps[0]->spend - 1)
-                phi1_loc  = $fpr[phi1_line]->location
-                phi2_loc  = $fpr[phi2_line]->location
-                conc_loc  = $fpr[$i]->location;
-                $worked = false;
-                // the two last lines of the subproof must be at same nesting depth
-                if (count(phi1_loc) != count(phi2_loc) {
-                    break;
-                }
-                // the last line of the subproof must be at nesting depth one greater than the conclusion
-                if (count(conc_loc) - count(phi2_loc) != 1) {
-                    break;
-                }
-                $worked = followsByRAA2($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[phi1_line]->wff, $fpr[phi2_line]->wff);
+                $worked = followsByRAA2($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "TND":
                 $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
