@@ -907,8 +907,9 @@ function check_proof($pr, $numprems, $conc) {
 
                 if (count($sp_res1_loc) != count($sp_res2_loc)) {
 		   $worked = false;
+		} else {
+                   $worked = followsByRAA2($res, $sp_hyp, $sp_res1, $sp_res2);
 		}
-                $worked = followsByRAA2($res, $sp_hyp, $sp_res1, $sp_res2);
                 break;
             case "TND":
                 $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
