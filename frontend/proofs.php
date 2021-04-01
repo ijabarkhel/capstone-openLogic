@@ -900,6 +900,9 @@ function check_proof($pr, $numprems, $conc) {
                 $sp_res1 = $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff;     // next to last line of subproof
                 $sp_res2 = $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff;     // last line of subproof
                 $res = $fpr[$i]->wff;
+		$sp_res1_loc = $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->location;
+		$sp_res2_loc = $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->location;
+		$res_loc = $fpr[$i]->location;
                 $worked = followsByRAA2($res, $sp_hyp, $sp_res1, $sp_res2);
                 break;
             case "TND":
