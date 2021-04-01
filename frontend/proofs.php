@@ -896,8 +896,8 @@ function check_proof($pr, $numprems, $conc) {
                 $worked = followsByIP($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "RAA":
-                $conc = $fpr[$i]->wff;
-                $worked = followsByRAA2($conc, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
+                $conc_wff = $fpr[$i]->wff;
+                $worked = followsByRAA2($conc_wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "TND":
                 $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
