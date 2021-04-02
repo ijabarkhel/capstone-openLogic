@@ -903,15 +903,10 @@ function check_proof($pr, $numprems, $conc) {
 		
 		$sp_res1_loc = $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->location;
 		$sp_res2_loc = $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->location;
-		$res_loc = $fpr[$i]->location;
 
                 if (count($sp_res1_loc) != count($sp_res2_loc)) {
 		   // the two last lines of the subproof do not have the same depth
 		   $worked = false;
-		// } elseif ((count($res_loc) - count($sp_res2_loc) != 1)) {
-		//   // the last line of the subproof is not one deeper than the following line
-		//   // (note: this check may be redundant with earlier checks)
-		//   $worked = false;
 		} else {
                    $worked = followsByRAA2($res, $sp_hyp, $sp_res1, $sp_res2);
 		}
