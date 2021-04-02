@@ -670,17 +670,17 @@ function check_proof($pr, $numprems, $conc) {
     $rv->issues = array();
     $rv->concReached = false;
 
-    $fpr = flatten_proof($pr, array() );
+    $fpr = flatten_proof($pr, array());
     //var_dump($fpr); //we can use this as a part of saving the proofs, it is the string
     $premiseStrings = array();
     $logicStrings = array();
     $rulesStrings = array();
     ///////////////////////////
     for($i = 0; $i < count($fpr); $i++){
-        if(strcmp($fpr[$i]->jstr, "Pr") != 0){
+        if (strcmp($fpr[$i]->jstr, "Pr") != 0) {
             array_push($logicStrings, $fpr[$i]->wffstr);
             array_push($rulesStrings, $fpr[$i]->jstr);
-        }else{
+        } else {
             array_push($premiseStrings, $fpr[$i]->wffstr);
         }
     }
@@ -767,7 +767,7 @@ function check_proof($pr, $numprems, $conc) {
             // line range citations
             foreach ($fpr[$i]->j->subps as $citedsp) {
                 $startcite = $citedsp->spstart;
-                $endcite = $citedsp->spend;
+                $endcite   = $citedsp->spend;
                 if ($startcite > $endcite) {
                     array_push($fpr[$i]->issues, 'Cites a range of lines in the wrong order (' . $startcite . '–' . $endcite . ').');
                     continue;
@@ -781,8 +781,8 @@ function check_proof($pr, $numprems, $conc) {
                     continue;
                 }
                 // ensure an actual subproof
-                $endloc = $fpr[($endcite - 1)]->location;
                 $startloc = $fpr[($startcite - 1)]->location;
+                $endloc   = $fpr[($endcite - 1)]->location;
                 $problem = false;
                 if (count($endloc) != count($startloc)) {
                     $problem = true;
@@ -896,7 +896,20 @@ function check_proof($pr, $numprems, $conc) {
                 $worked = followsByIP($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
                 break;
             case "RAA":
-                $worked = followsByRAA2($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff);
+                $sp_hyp  = $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff;   // first line of subproof
+                $sp_res1 = $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->wff;     // next to last line of subproof
+                $sp_res2 = $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff;     // last line of subproof
+                $res = $fpr[$i]->wff;
+		
+		$sp_res1_loc = $fpr[($fpr[$i]->j->subps[0]->spend - 2)]->location;
+		$sp_res2_loc = $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->location;
+
+                if (count($sp_res1_loc) != count($sp_res2_loc)) {
+		   // the two last lines of the subproof do not have the same depth
+		   $worked = false;
+		} else {
+                   $worked = followsByRAA2($res, $sp_hyp, $sp_res1, $sp_res2);
+		}
                 break;
             case "TND":
                 $worked = followsByTND($fpr[$i]->wff, $fpr[($fpr[$i]->j->subps[0]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[0]->spend - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spstart - 1)]->wff, $fpr[($fpr[$i]->j->subps[1]->spend - 1)]->wff);            
