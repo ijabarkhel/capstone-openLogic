@@ -907,6 +907,8 @@ function check_proof($pr, $numprems, $conc) {
 
                 if (count($sp_res1_loc) != count($sp_res2_loc)) {
 		   $worked = false;
+		} elseif ((count($res_loc) - count($sp_res2_loc) != 1)) {
+		   $worked = false;
 		} else {
                    $worked = followsByRAA2($res, $sp_hyp, $sp_res1, $sp_res2);
 		}
