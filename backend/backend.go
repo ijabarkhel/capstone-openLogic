@@ -237,6 +237,6 @@ func main() {
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
-	log.Println("Server started")
+	log.Println("Server started on: 127.0.0.1:8080" )
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }
