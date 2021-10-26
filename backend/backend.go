@@ -41,6 +41,26 @@ type Env struct {
 	ds datastore.IProofStore
 }
 
+// //cookie management using g_state cookie.
+// // Cookies parses and returns the HTTP cookies sent with the request.
+// func (r *Request) Cookies() []*Cookie {
+// 	return readCookies(r.Header, "")
+// }
+
+// // ErrNoCookie is returned by Request's Cookie method when a cookie is not found.
+// var ErrNoCookie = errors.New("http: named cookie not present")
+
+// // Cookie returns the named cookie provided in the request or
+// // ErrNoCookie if not found.
+// // If multiple cookies match the given name, only one cookie will
+// // be returned.
+// func (r *Request) Cookie(name string) (*Cookie, error) {
+// 	for _, c := range readCookies(r.Header, name) {
+// 		return c, nil
+// 	}
+// 	return nil, ErrNoCookie
+// }
+
 func getAdmins(w http.ResponseWriter, req *http.Request) {
 	type adminUsers struct {
 		Admins []string
@@ -198,8 +218,16 @@ func (env *Env) populateTestData() {
 	}
 }
 
+//function to get cookie state.
+func cookieState(w http.ResponseWriter, req *http.Request){
+	c, err := req.cookie("g_state")
+	return c;
+}
+
 func main() {
 	log.Println("Server initializing")
+	//current cookie being used is set to the path""/", therefore call function on "/"
+	//http.HandleFunc("/", cookieState)
 
 	ds, err := datastore.New(database_uri)
 	if err != nil {
@@ -228,6 +256,7 @@ func main() {
 	tokenauth.SetAuthorizedDomains(authorized_domains)
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
 
+
 	// method saveproof : POST : JSON <- id_token, proof
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
@@ -237,6 +266,6 @@ func main() {
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
-	log.Println("Server started on: 127.0.0.1:8080" )
+	log.Println("Server started")
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }

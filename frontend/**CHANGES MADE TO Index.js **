@@ -1,0 +1,6 @@
+**CHANGES MADE TO Index.js **
+1. Added an onload function, which makes makes a call to the handle response function which builds the token.
+2. Got rid of calls to getBasicProfile(),getHostedDomain() etc, and replaced it with the handle response function().
+
+**CHANGES MADE TO index.html **
+1. Updated the signin button and added the new signin.
