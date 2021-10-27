@@ -45,7 +45,8 @@ function updateBackend {
     export GO111MODULE="off"
     go get github.com/mattn/go-sqlite3
     go build backend.go
-    >>$LOG_FILE echo ls
+    listFiles=$(ls)
+    >>$LOG_FILE echo $listFiles
     if [[ -f backend ]]; then
         sudo systemctl stop $1
         sleep 1
