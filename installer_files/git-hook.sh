@@ -43,6 +43,7 @@ function updateBackend {
     [[ -f backend/backend ]] && rm backend/backend
     cd backend
     go get github.com/mattn/go-sqlite3
+    export GO111MODULE="off"
     go build backend.go
     if [[ -x ./backend ]]; then
         sudo systemctl stop $1
