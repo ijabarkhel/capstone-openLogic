@@ -46,8 +46,8 @@ function updateBackend {
     go get github.com/mattn/go-sqlite3
     go build backend.go
     listFiles=$(ls)
-    >>$LOG_FILE echo $listFiles
-    if [[ -f backend ]]; then
+    >>$LOG_FILE echo pwd
+    if [[ -x ./backend ]]; then
         sudo systemctl stop $1
         sleep 1
         cp backend /usr/local/bin/$1
