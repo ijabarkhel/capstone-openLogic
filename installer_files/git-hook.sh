@@ -45,8 +45,6 @@ function updateBackend {
     export GO111MODULE="off"
     go get github.com/mattn/go-sqlite3
     go build backend.go 
-    listFiles=$(ls)
-    >>$LOG_FILE echo "testing"
     if [[ -x ./backend ]]; then
         sudo systemctl stop $1
         sleep 1
@@ -54,7 +52,7 @@ function updateBackend {
         sudo systemctl start $1
         >>$LOG_FILE echo "[$1]: Backend recompiled and restarted."
     else
-        >>$LOG_FILE echo "[$1]: Backend did not build successfully. testing"
+        >>$LOG_FILE echo "[$1]: Backend did not build successfully."
     fi
     cd ..
 }
