@@ -220,8 +220,14 @@ func (env *Env) populateTestData() {
 
 //function to get cookie state.
 func cookieState(w http.ResponseWriter, req *http.Request){
-	c, err := req.cookie("g_state")
-	return c;
+	c, err := req.Cookie("g_state")
+	if err != nil {
+	   http.Error(w, http.StatusText(400), http.StatusBadRequest)
+	   return
+	}
+	log.Println(w, "YOUR COOKIE:", c)
+
+
 }
 
 func main() {
