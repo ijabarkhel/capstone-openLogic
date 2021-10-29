@@ -21,7 +21,7 @@ var (
 	// Same as in the front-end index.php
 	authorized_client_ids = []string{
 		"49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com",
-	}
+  }
 
 	admin_users = map[string]bool{
         "sislam@csumb.edu":   true,
