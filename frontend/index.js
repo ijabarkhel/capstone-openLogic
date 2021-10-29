@@ -88,9 +88,9 @@ function onSignIn(googleUser) {
 }
 
 //onSignOut function for user.
-function onSignOut(googleUser) {
+// function onSignOut(googleUser) {
 
-}
+// }
 
 /**
  * Class for functionality specific to user sign-in/authentication
@@ -158,7 +158,7 @@ class User {
    static isSignedIn() {
       //return gapi.auth2.getAuthInstance().isSignedIn.get();
       //return true if signed in, return false if not signed in.
-      if(googleUser.email_verified == "true"){
+      if(googleUser.email_verified == "true" && googleUser.hd == "csumb.edu"){
          return true;
       }else{
          return false;
