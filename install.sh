@@ -296,8 +296,10 @@ function getCloudFlareCertsFromUser {
 
 function configureAuthenticatedOriginPulls {
     echo "Configuring authenticated origin pulls."
-    curl "https://support.cloudflare.com/hc/en-us/article_attachments/360044928032/origin-pull-ca.pem" > /etc/nginx/certs/origin-pull-ca.pem
-
+    #curl "https://support.cloudflare.com/hc/en-us/article_attachments/360044928032/origin-pull-ca.pem" > /etc/nginx/certs/origin-pull-ca.pem
+    echo
+    #echo "Please copy/paste the origin-pull-ca certificate now from https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/set-up, followed by pressing CTRL+d (control key and d) when done"
+    #cat  > /etc/nginx/certs/origin-pull-ca.pem
     sed -i 's/\#AUTHENTICATED_ORIGIN_CERT_HERE/ssl_client_certificate \/etc\/nginx\/certs\/origin-pull-ca.pem;\n\tssl_verify_client on;/' $LIVE_NGINX_CONFIG
     sed -i 's/\#AUTHENTICATED_ORIGIN_CERT_HERE/ssl_client_certificate \/etc\/nginx\/certs\/origin-pull-ca.pem;\n\tssl_verify_client on;/' $DEV_NGINX_CONFIG
 }

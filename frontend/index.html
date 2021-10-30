@@ -28,17 +28,11 @@
     <!-- Scripts, third-party -->
     <script src="assets/lib/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="></script>
     <script src="assets/lib/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI="></script>
-
-    <!-- updated api call for signin -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <div id="g_id_onload"
-        data-client_id="266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse">
-    </div>
-
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 
     <!-- Sign in with Google Client ID -->
     <!-- <meta name="google-signin-client_id" content="266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com"> -->
+    <meta name="google-signin-client_id" content="49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com">
     
     <!-- Scripts, local -->
     <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
@@ -65,8 +59,7 @@
       </a>
       <div class="right menu">
         <div class="header item"><a id="user-email" class="item"></a></div>
-        <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
-        <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
+        <div class="g-signin2 item" data-onsuccess="onSignIn"></div>
       </div>
     </div>
 
@@ -189,7 +182,7 @@
     <hr style="margin-bottom: 15px;">
     <div class="bottom">
       <p>This site based on the <a href="https://github.com/OpenLogicProject/fitch-checker">Open Logic Project</a> proof checker. </p>
-      Modifications by students and faculty at Cal. State University, Montery Bay. See <a href="references.html" class="item">Credits</a> for details.</p>
+      Modifications by students and faculty at Cal. State University, Monterey Bay. See <a href="references.html" class="item">Credits</a> for details.</p>
       <p>Site Version: GIT_VERSION_TAG</p>
     </div>
 </div>
