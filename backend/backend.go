@@ -20,8 +20,8 @@ var (
 	// Client-side client ID from your Google Developer Console
 	// Same as in the front-end index.php
 	authorized_client_ids = []string{
-		"49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com",
-  }
+		"266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com",
+	}
 
 	admin_users = map[string]bool{
         "sislam@csumb.edu":   true,
@@ -220,14 +220,8 @@ func (env *Env) populateTestData() {
 
 //function to get cookie state.
 func cookieState(w http.ResponseWriter, req *http.Request){
-	c, err := req.Cookie("g_state")
-	if err != nil {
-	   http.Error(w, http.StatusText(400), http.StatusBadRequest)
-	   return
-	}
-	log.Println(w, "YOUR COOKIE:", c)
-
-
+	c, err := req.cookie("g_state")
+	return c;
 }
 
 func main() {
