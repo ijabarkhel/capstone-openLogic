@@ -41,7 +41,15 @@ let adminUsers = [];
 //   "jti": "abc161803398874def"
 // }
  /////////
- function handleCredentialResponse(response) {
+
+function show() {
+    console.log("I am in");
+    // document.getElementById("addAdmin").style.display ="block";
+    $('#addAdmin').show();
+}
+
+
+function handleCredentialResponse(response) {
    // decodeJwtResponse() is a custom function defined by you
    // to decode the credential response.
    const responsePayload = decodeJwtResponse(response.credential);
@@ -60,31 +68,29 @@ let adminUsers = [];
 ///////
 ////
 
-//******Updated onSignin function*******
+
+/**
+ * This function is called by the Google Sign-in Button
+ * @param {*} googleUser 
+ */
+
+//******Updated onSignin function*******//
 function onSignIn(googleUser) {
    console.log("onSignIn", googleUser);
 
-   //*****new addition to function.(for migration process, test later.)
+   //*****new addition to function.(for migration process, test later.) **//
    google.accounts.id.initialize({
       client_id: '266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com',
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
-   //******
+   //******//
    
 
    // This response will be cached after the first page load
-   $.getJSON('/backend/admins', (admins) => {
-      try {
-	 adminUsers = admins['Admins'];
-      } catch(e) {
-	 console.error('Unable to load admin users', e);
-      }
-
       new User(googleUser)
 	 .initializeDisplay()
 	 .loadProofs();
-   });
 }
 
 //onSignOut function for user.
@@ -106,6 +112,8 @@ class User {
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
+      this.emailVerified = googleَUser.email_verified;
+      this.expiration = googleUser.exp;
 
       if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
@@ -145,7 +153,7 @@ class User {
       //what is being used to determine a user's signin status?
       //Plausible solution: use JWT's user ID and attach signInListener().
       //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
-      googleUser.sub.isSignedIn.listen(this.signInChangeListener);
+      this.profile.isSignedIn.listen(this.signInChangeListener);
       //this.profile.signInChangeListener();
       return this;
    }
@@ -158,7 +166,7 @@ class User {
    static isSignedIn() {
       //return gapi.auth2.getAuthInstance().isSignedIn.get();
       //return true if signed in, return false if not signed in.
-      if(googleUser.email_verified == "true" && googleUser.hd == "csumb.edu"){
+      if(this.emailVerified == "true" && this.domain == "csumb.edu"){
          return true;
       }else{
          return false;
@@ -167,19 +175,19 @@ class User {
 
    static isAdministrator() {
       //return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
-      return adminUsers.indexOf(googleUser.sub.getEmail()) > -1;
+      return adminUsers.indexOf(this.profile.getEmail()) > -1;
    }
 
    // Check if the current time (in unix timestamp) is after the token's expiration
    static isTokenExpired() {
       //return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
-      return  + new Date() > googleUser.exp;
+      return  + new Date() > this.expiration;
    }
 
    // Retrieve the last cached token
    static getIdToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-      return googleUser.sub;
+      return this.profile;
    }
 
    // Get a newly issued token (returns a promise)
@@ -187,7 +195,7 @@ class User {
    static refreshToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
       //RESEARCH how to refresh token using JWT.
-      googleUser.reloadAuthResponse();
+      this.profile.reloadAuthResponse();
    }
 }
 
@@ -347,7 +355,8 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-
+   
+   
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
       console.log(event, event.detail, event.detail.proofdata);

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- standard metadata -->
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- web icon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/assets/logicproofchecker.png">
+
+    <title>Proof Checker</title>
+
+    <!-- CSS & Fonts, third-party -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/lib/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" />
+    <!--    <link rel="stylesheet" href="assets/lib/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" /> -->
+    <link rel="stylesheet" href="assets/lib/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" />
+
+    <!-- CSS, local -->
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="stylesheet" type="text/css" href="proofs.css" />
+
+    <!-- Scripts, third-party -->
+    <script src="assets/lib/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="></script>
+    <script src="assets/lib/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI="></script>
+
+    <!-- updated api call for signin -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <div id="g_id_onload" 
+        data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse">
+    </div>
+
+
+    <!-- Sign in with Google Client ID -->
+    <!-- <meta name="google-signin-client_id" content="266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com"> -->
+    
+    <!-- Scripts, local -->
+    <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
+    <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+  </head>
+
+  <body>
+    <div id="top-menu" class="ui menu" style="height: 60px;">
+      <div class="header item">
+        <h1 id="title"><a href="index.html">Proof Checker</a></h1>
+      </div>
+      <a href="rules.html" class="item">
+        Proof Rules
+      </a>
+      <a href="references.html" class="item">
+        Credits
+      </a>
+      <a href="help.html" class="item">
+        Help
+      </a>
+      <a href="admin.html" class="item">
+        Admin
+      </a>
+      <div class="right menu">
+        <div class="header item"><a id="user-email" class="item"></a></div>
+        <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
+        <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
+      </div>
+    </div>
+
+
+    <div class="ui container segment" id="rulesContainer">
+      <h3 id="imageHeader" class="ui header">
+	Welcome to the administration page
+      </h3>
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="show">Add admins/instructors</a><br>
+      <div id="addAdmin" style="padding-bottom: 14px; margin-left: 60px; display:none;">
+        <label>Enter admin email:</label>
+        <div class="ui input" >
+          <input id="adminEmail" type="text" placeholder="admin email" data-content="adding someone as admin would be able to do all the operations in this page 👍🏽">
+          <button type="button" class="newAdmin" style="margin-left: 20px;">Add admin</button>
+	</div>
+      </div>
+      <p style="margin-left: 40px"><a href = "">Assign and unassign students from the section</a><br>
+      <p style="margin-left: 40px"><a href = "">Create or delete section</a><br>
+      <p style="margin-left: 40px"><a href = "">Display a summary of the section</a><br>
+      		            
+    </div>
+
+
+    <hr style="margin-bottom: 15px;">
+    <div class="bottom">
+      <p>This site based on the <a href="https://github.com/OpenLogicProject/fitch-checker">Open Logic Project</a> proof checker. </p>
+      Modifications by students and faculty at Cal. State University, Montery Bay. See <a href="references.html" class="item">Credits</a> for details.</p>
+      <p>Site Version: 108ed1d24e5e6ec3166d50518c55752d6e9677d4</p>
+    </div>
+</div>
+
+<!-- Administration Interface -->
+<div class="ui modal">
+  <i class="close icon"></i>
+  <div class="header">
+    Administrator Options
+  </div>
+  <div class="content">
+    <button class="downloadCSV">Download Student Problems as CSV</button>
+  </div>
+  <div class="actions">
+    <div class="ui black deny button">
+      Close
+    </div>
+  </div>
+</div>
+</body>
+</html>
