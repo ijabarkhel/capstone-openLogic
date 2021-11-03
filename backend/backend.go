@@ -61,11 +61,12 @@ func getAdmins(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, string(output))
 }
 
+
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	var user userWithEmail
 	user = req.Context().Value("tok").(userWithEmail)
 	
-	var submittedProof datastore.Proof
+	var submittedProof datastore.FrontEndData
 
 	// read the JSON-encoded value from the HTTP request and store it in submittedProof
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
@@ -82,9 +83,17 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Replace submitted email (if any) with the email from the token
-	submittedProof.UserSubmitted = user.GetEmail()
+	//submittedProof.UserSubmitted = user.GetEmail()
 
-	if err := env.ds.Store(submittedProof); err != nil {
+	//change old front end data to new format
+	var solution = Database.Solution
+	solution.ProblemId = submittedProof.id
+	solution.UserId = user.GetEmail()//
+	solution.Logic = submittedProof.Logic
+	solution.Rules = submittedProof.Rules
+	solution.SolutionStatus = submittedProof.ProofCompleted
+
+	if err := env.ds.StoreSolution(solution); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -92,6 +101,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	io.WriteString(w, `{"success": "true"}`)
 }
+
 
 func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	user := req.Context().Value("tok").(userWithEmail)
