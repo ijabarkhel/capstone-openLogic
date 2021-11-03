@@ -68,31 +68,29 @@ function handleCredentialResponse(response) {
 ///////
 ////
 
-//******Updated onSignin function*******
+
+/**
+ * This function is called by the Google Sign-in Button
+ * @param {*} googleUser 
+ */
+
+//******Updated onSignin function*******//
 function onSignIn(googleUser) {
    console.log("onSignIn", googleUser);
 
-   //*****new addition to function.(for migration process, test later.)
+   //*****new addition to function.(for migration process, test later.) **//
    google.accounts.id.initialize({
       client_id: '266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com',
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
-   //******
+   //******//
    
 
    // This response will be cached after the first page load
-   $.getJSON('/backend/admins', (admins) => {
-      try {
-	 adminUsers = admins['Admins'];
-      } catch(e) {
-	 console.error('Unable to load admin users', e);
-      }
-
       new User(googleUser)
 	 .initializeDisplay()
 	 .loadProofs();
-   });
 }
 
 //onSignOut function for user.
@@ -114,6 +112,7 @@ class User {
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
+      this.emailVerified = googleَUser.email_verified;
 
       if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
@@ -166,7 +165,7 @@ class User {
    static isSignedIn() {
       //return gapi.auth2.getAuthInstance().isSignedIn.get();
       //return true if signed in, return false if not signed in.
-      if(googleUser.email_verified == "true" && googleUser.hd == "csumb.edu"){
+      if(this.emailVerified == "true" && this.domain == "csumb.edu"){
          return true;
       }else{
          return false;
