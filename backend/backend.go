@@ -20,7 +20,8 @@ var (
 	// Client-side client ID from your Google Developer Console
 	// Same as in the front-end index.php
 	authorized_client_ids = []string{
-		"49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com",
+		"684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com",
+		//"49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com",
 		//"266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com",
 	}
 
