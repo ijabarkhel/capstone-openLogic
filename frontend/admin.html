@@ -29,21 +29,10 @@
     <script src="assets/lib/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="></script>
     <script src="assets/lib/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI="></script>
 
-    <!-- updated api call for signin -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <div id="g_id_onload" 
-        data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse">
-    </div>
-
-
-    <!-- Sign in with Google Client ID -->
-    <!-- <meta name="google-signin-client_id" content="266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com"> -->
-    
     <!-- Scripts, local -->
     <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
     <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
-    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="admin.js"></script>
   </head>
 
   <body>
@@ -63,11 +52,6 @@
       <a href="admin.html" class="item">
         Admin
       </a>
-      <div class="right menu">
-        <div class="header item"><a id="user-email" class="item"></a></div>
-        <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
-        <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
-      </div>
     </div>
 
 
@@ -75,15 +59,26 @@
       <h3 id="imageHeader" class="ui header">
 	Welcome to the administration page
       </h3>
-      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="show">Add admins/instructors</a><br>
-      <div id="addAdmin" style="padding-bottom: 14px; margin-left: 60px; display:none;">
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showAddAdmin()">Add admins/instructors</a><br>
+      <div id="addAdmin" style="padding-bottom: 14px; margin-left: 60px; display: none;">
         <label>Enter admin email:</label>
         <div class="ui input" >
           <input id="adminEmail" type="text" placeholder="admin email" data-content="adding someone as admin would be able to do all the operations in this page 👍🏽">
           <button type="button" class="newAdmin" style="margin-left: 20px;">Add admin</button>
 	</div>
       </div>
-      <p style="margin-left: 40px"><a href = "">Assign and unassign students from the section</a><br>
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showAddStudent()">Assign and unassign students from the section</a><br>
+      <div id="addStudentToSection" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <label>Enter student email:</label>
+        <div class="ui input" >
+          <input id="studentEmail" type="text" placeholder="student email" data-content="adding student to section would be able to see all the problems in section 👍🏽">
+	</div>
+	<label>Enter section name:</label>
+        <div class="ui input" >
+          <input id="sectionName" type="text" placeholder="section name" data-content="adding section name will add student to this section name 👍🏽">
+          <button type="button" class="newAdmin" style="margin-left: 20px;">Add student</button>
+	</div>
+      </div>
       <p style="margin-left: 40px"><a href = "">Create or delete section</a><br>
       <p style="margin-left: 40px"><a href = "">Display a summary of the section</a><br>
       		            
