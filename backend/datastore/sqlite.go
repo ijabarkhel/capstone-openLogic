@@ -14,7 +14,7 @@ func New(dsn string) (*ProofStore, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	/*
 	// Initialize database tables
 	// proofs : [Premise, Logic, Rules] are JSON fields
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS proofs (
@@ -41,6 +41,7 @@ func New(dsn string) (*ProofStore, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	*/
+	
 	return &ProofStore{db: db}, nil
 }
