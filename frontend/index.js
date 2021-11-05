@@ -80,7 +80,7 @@ function onSignIn(googleUser) {
 
    //*****new addition to function.(for migration process, test later.) **//
    google.accounts.id.initialize({
-      client_id: '266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com',
+      client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com',
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
