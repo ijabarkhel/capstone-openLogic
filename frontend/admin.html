@@ -64,11 +64,11 @@
         <label>Enter admin email:</label>
         <div class="ui input" >
           <input id="adminEmail" type="text" placeholder="admin email" data-content="adding someone as admin would be able to do all the operations in this page 👍🏽">
-          <button type="button" class="newAdmin" style="margin-left: 20px;">Add admin</button>
+          <button type="button" class="newAdminBtn" style="margin-left: 20px;">Add admin</button>
 	</div>
       </div>
       <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showAddStudent()">Assign and unassign students from the section</a><br>
-      <div id="addStudentToSection" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+      <div id="addOrDeleteStudent" style="padding-bottom: 14px; margin-left: 60px; display: none;">
         <label>Enter student email:</label>
         <div class="ui input" >
           <input id="studentEmail" type="text" placeholder="student email" data-content="adding student to section would be able to see all the problems in section 👍🏽">
@@ -76,12 +76,51 @@
 	<label>Enter section name:</label>
         <div class="ui input" >
           <input id="sectionName" type="text" placeholder="section name" data-content="adding section name will add student to this section name 👍🏽">
-          <button type="button" class="newAdmin" style="margin-left: 20px;">Add student</button>
+          <button type="button" class="addStudentBtn" style="margin-left: 20px;">Add student</button>
+          <button type="button" class="deleteStudentBtn" style="margin-left: 20px;">Delete student</button>
 	</div>
       </div>
-      <p style="margin-left: 40px"><a href = "">Create or delete section</a><br>
-      <p style="margin-left: 40px"><a href = "">Display a summary of the section</a><br>
-      		            
+
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showSection()">Create or delete section</a><br>
+      <div id="addOrDeleteSection" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <label>Enter section name:</label>
+        <div class="ui input" >
+          <input id="sectionName2" type="text" placeholder="section name" data-content="adding section name will either create or delete section 👍🏽">
+          <button type="button" class="addSectionBtn" style="margin-left: 20px;">Add section</button>
+          <button type="button" class="deleteSectionBtn" style="margin-left: 20px;">Delete section</button>
+	</div>
+      </div>
+
+      <p style="margin-left: 40px"><a href = "javascript:void(0);" onclick="showSummary();">Display a summary of the section</a><br>
+      <div id="displaySummary" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+	<label>Summary of the section</label>
+	<div class="ui input" >
+          <input id="sectionName3" type="text" placeholder="section name" data-content="adding section name will display the summary of students 👍🏽">
+          <button type="button" class="displaySummaryBtn" style="margin-left: 20px;">Display summary</button> 
+	</div><br>
+      </div>
+      <div id="displaySummaryTable" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <table border="1" width="400" height="100">
+	  <thead>
+	    <tr>
+	      <th>ProblemName</th>
+	      <th>FirstStudent </th>
+	      <th>SecondStudent </th>
+	      <th>ThirdStudent </th>
+	      <th>..... </th>
+	      <th>LastStudent </th>
+	    </tr>
+	  </thead>
+ 	  <tr>
+	    <td>Problem 1.1</td>
+	    <td>Submitted</td>
+	    <td>In progress</td>
+	    <td>Unstarted</td>
+	    <td>.....</td>
+	    <td>Submitted</td>
+	  <tr>
+        </table>
+      </div>
     </div>
 
 
