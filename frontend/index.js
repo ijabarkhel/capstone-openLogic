@@ -80,7 +80,7 @@ function onSignIn(googleUser) {
 
    //*****new addition to function.(for migration process, test later.) **//
    google.accounts.id.initialize({
-      client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com',
+      client_id: '266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com',
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
@@ -113,6 +113,7 @@ class User {
       this.email = googleUser.email; 
       this.name = googleUser.name;
       this.emailVerified = googleَUser.email_verified;
+      this.expiration = googleUser.exp;
 
       if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
@@ -152,7 +153,7 @@ class User {
       //what is being used to determine a user's signin status?
       //Plausible solution: use JWT's user ID and attach signInListener().
       //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
-      googleUser.sub.isSignedIn.listen(this.signInChangeListener);
+      this.profile.isSignedIn.listen(this.signInChangeListener);
       //this.profile.signInChangeListener();
       return this;
    }
@@ -174,19 +175,19 @@ class User {
 
    static isAdministrator() {
       //return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
-      return adminUsers.indexOf(googleUser.sub.getEmail()) > -1;
+      return adminUsers.indexOf(this.profile.getEmail()) > -1;
    }
 
    // Check if the current time (in unix timestamp) is after the token's expiration
    static isTokenExpired() {
       //return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
-      return  + new Date() > googleUser.exp;
+      return  + new Date() > this.expiration;
    }
 
    // Retrieve the last cached token
    static getIdToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-      return googleUser.sub;
+      return this.profile;
    }
 
    // Get a newly issued token (returns a promise)
@@ -194,7 +195,7 @@ class User {
    static refreshToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
       //RESEARCH how to refresh token using JWT.
-      googleUser.reloadAuthResponse();
+      this.profile.reloadAuthResponse();
    }
 }
 
