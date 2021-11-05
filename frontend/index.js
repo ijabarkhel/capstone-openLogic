@@ -12,22 +12,91 @@ let adminUsers = [];
  * This function is called by the Google Sign-in Button
  * @param {*} googleUser 
  */
+
+ ///
+ //An EXAMPLE OF A DECODED JWT RESPONSE
+//  header
+// {
+//   "alg": "RS256",
+//   "kid": "f05415b13acb9590f70df862765c655f5a7a019e", // JWT signature
+//   "typ": "JWT"
+// }
+// payload
+// {
+//   "iss": "https://accounts.google.com", // The JWT's issuer
+//   "nbf":  161803398874,
+//   "aud": "314159265-pi.apps.googleusercontent.com", // Your server's client ID
+//   "sub": "3141592653589793238", // The unique ID of the user's Google Account
+//   "hd": "gmail.com", // If present, the host domain of the user's GSuite email address
+//   "email": "elisa.g.beckett@gmail.com", // The user's email address
+//   "email_verified": true, // true, if Google has verified the email address
+//   "azp": "314159265-pi.apps.googleusercontent.com",
+//   "name": "Elisa Beckett",
+//                             // If present, a URL to user's profile picture
+//   "picture": "https://lh3.googleusercontent.com/a-/e2718281828459045235360uler",
+//   "given_name": "Elisa",
+//   "family_name": "Beckett",
+//   "iat": 1596474000, // Unix timestamp of the assertion's creation time
+//   "exp": 1596477600, // Unix timestamp of the assertion's expiration time
+//   "jti": "abc161803398874def"
+// }
+ /////////
+
+function show() {
+    console.log("I am in");
+    // document.getElementById("addAdmin").style.display ="block";
+    $('#addAdmin').show();
+}
+
+
+function handleCredentialResponse(response) {
+   // decodeJwtResponse() is a custom function defined by you
+   // to decode the credential response.
+   const responsePayload = decodeJwtResponse(response.credential);
+
+   console.log("ID: " + responsePayload.sub);
+   console.log("Hosted Domain: " + responsePayload.hd);
+   console.log('Full Name: ' + responsePayload.name);
+   console.log('Given Name: ' + responsePayload.given_name);
+   console.log('Family Name: ' + responsePayload.family_name);
+   console.log("Image URL: " + responsePayload.picture);
+   console.log("Email: " + responsePayload.email);
+   new User(responsePayload)
+      .initializeDisplay()
+      .loadProofs();
+}
+///////
+////
+
+
+/**
+ * This function is called by the Google Sign-in Button
+ * @param {*} googleUser 
+ */
+
+//******Updated onSignin function*******//
 function onSignIn(googleUser) {
    console.log("onSignIn", googleUser);
 
-   // This response will be cached after the first page load
-   $.getJSON('/backend/admins', (admins) => {
-      try {
-	 adminUsers = admins['Admins'];
-      } catch(e) {
-	 console.error('Unable to load admin users', e);
-      }
+   //*****new addition to function.(for migration process, test later.) **//
+   google.accounts.id.initialize({
+      client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com',
+      callback: handleCredentialResponse
+   });
+   google.accounts.id.prompt();
+   //******//
+   
 
+   // This response will be cached after the first page load
       new User(googleUser)
 	 .initializeDisplay()
 	 .loadProofs();
-   });
 }
+
+//onSignOut function for user.
+// function onSignOut(googleUser) {
+
+// }
 
 /**
  * Class for functionality specific to user sign-in/authentication
@@ -35,10 +104,16 @@ function onSignIn(googleUser) {
 class User {
    // Constructor is called from User.onSignIn - not intended for direct use.
    constructor(googleUser) {
-      this.profile = googleUser.getBasicProfile();
-      this.domain = googleUser.getHostedDomain();
-      this.email = this.profile.getEmail();
-      this.name = this.profile.getName();
+      // this.profile = googleUser.getBasicProfile();
+      // this.domain = googleUser.getHostedDomain();
+      // this.email = this.profile.getEmail();
+      // this.name = this.profile.getName();
+      this.profile = googleUser.sub //sub contains the unique ID of the google user.
+      this.domain = googleUser.hd; //hd is hosted domain.
+      this.email = googleUser.email; 
+      this.name = googleUser.name;
+      this.emailVerified = googleَUser.email_verified;
+      this.expiration = googleUser.exp;
 
       if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
@@ -71,44 +146,63 @@ class User {
       return this;
    }
 
+   //These need to be changed.
+   //Remove any references to auth2.attachClickHandler() and its registered callback handlers.
+   //Remove any references to listen(), auth2.currentUser, and auth2.isSignedIn.
    attachSignInChangeListener() {
-      gapi.auth2.getAuthInstance().isSignedIn.listen(this.signInChangeListener);
-
+      //what is being used to determine a user's signin status?
+      //Plausible solution: use JWT's user ID and attach signInListener().
+      //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
+      this.profile.isSignedIn.listen(this.signInChangeListener);
+      //this.profile.signInChangeListener();
       return this;
    }
-
+   
    signInChangeListener(loggedIn) {
       console.log('Sign in status changed', loggedIn);
       window.location.reload();
    }
 
    static isSignedIn() {
-      return gapi.auth2.getAuthInstance().isSignedIn.get();
+      //return gapi.auth2.getAuthInstance().isSignedIn.get();
+      //return true if signed in, return false if not signed in.
+      if(this.emailVerified == "true" && this.domain == "csumb.edu"){
+         return true;
+      }else{
+         return false;
+      }
    }
 
    static isAdministrator() {
-      return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
+      //return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
+      return adminUsers.indexOf(this.profile.getEmail()) > -1;
    }
 
    // Check if the current time (in unix timestamp) is after the token's expiration
    static isTokenExpired() {
-      return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
+      //return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
+      return  + new Date() > this.expiration;
    }
 
    // Retrieve the last cached token
    static getIdToken() {
-      return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+      //return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+      return this.profile;
    }
 
    // Get a newly issued token (returns a promise)
+   //INCOMPLETE
    static refreshToken() {
-      return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
+      //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
+      //RESEARCH how to refresh token using JWT.
+      this.profile.reloadAuthResponse();
    }
 }
 
 // Verifies signed in and valid token, then calls authenticatedBackendPOST
 // Returns a promise which resolves to the response body or undefined
 function backendPOST(path_str, data_obj) {
+   //needs to be changed, cannot use isSignedIn(), it is no longer supported.
    if (!User.isSignedIn()) {
       console.warn('Cannot send POST request to backend from unknown user.');
       if (sessionStorage.getItem('loginPromptShown') == null) {
@@ -261,7 +355,8 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-
+   
+   
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
       console.log(event, event.detail, event.detail.proofdata);
