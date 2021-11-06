@@ -22,6 +22,17 @@ class Proof {
    }
 }
 
+class Problem{
+   constructor(id, ownerId, proofName, proofType, premise, conclusion){
+      this.id = id
+      this.ownerId = ownerId
+      this.proofName = proofName
+      this.proofType = proofType
+      this.premise = premise
+      this.conclusion = conclusion
+   }
+}
+
 // Function from upstream file 'ajax.js'
 function AJAXPostRequest(file, fD, callback) {
    var xhttp = new XMLHttpRequest();
@@ -92,30 +103,41 @@ function countnonspacers(rs) {
    return c;
 }
 
+//turns the proof into html for display
 function dataToRows(prf, prdata, depth, md, ln) {
    var currln = ln;
+   //create a new table which other elements will be added to
    var spacerrow = document.createElement("tr");
+   //add the html class for formatting
    spacerrow.classList.add("spacerrow");
+   //add an initial row element this one will be blank and exists for uniform spacing
    spacerrow.appendChild(document.createElement("td"));
    for (var j=0; j < depth; j++) {
       var c = document.createElement('td');
       spacerrow.appendChild(c);
       c.classList.add('midcell');
    }
+
+   //more table datas for spacing
    spacerrow.appendChild(document.createElement("td"));
    spacerrow.appendChild(document.createElement("td"));
+
    var spacercell = document.createElement("td");
    spacerrow.appendChild(spacercell);
    spacercell.classList.add("spacercell");
+   //the rs array will hold all the rows of the table
+   //each row will have will either be a sentence or a subproof on it and the associated tags needed for proper spacing
    var rs=[spacerrow];
    for (var i=0; i < prdata.length; i++) {
-      if (Array.isArray(prdata[i])) {
-         nrs = dataToRows(prf, prdata[i], (depth+1), md, currln);
+      if (Array.isArray(prdata[i])) {//if the row is an array than there is a sub proof 
+         nrs = dataToRows(prf, prdata[i], (depth+1), md, currln);//call this function recursivly do create the subproof
          rs = rs.concat(nrs);
          currln += countnonspacers(nrs);
-      } else {
+      } else {//the row is a sentence
+         //create the row and but in each element in to a cell aka td tag
          var newrow = document.createElement("tr");
          var rowdata = prdata[i];
+         //the line num cell displays the line number of this line of the proof
          newrow.lineNumCell = document.createElement("td");
          newrow.appendChild(newrow.lineNumCell);
          currln++;
@@ -123,11 +145,15 @@ function dataToRows(prf, prdata, depth, md, ln) {
          newrow.myProof = prf;
          newrow.lineNumCell.innerHTML = currln;
          newrow.lineNumCell.classList.add('linenocell');
+         //note the vertical line between the number and the sentence is created by the css class linenocell
+         //if the sentence should idented this will create the cells needed for indendation
          for (var j=0; j < depth; j++) {
             var c = document.createElement('td');
             newrow.appendChild(c);
             c.classList.add('midcell');
          }
+
+         //here is where the sentence or Well formed formula is created
          newrow.wffCell = document.createElement("td");
          newrow.wffCell.colSpan = ((md - depth) + 1);
          newrow.appendChild(newrow.wffCell);
@@ -145,8 +171,8 @@ function dataToRows(prf, prdata, depth, md, ln) {
             ||
             ( rowdata.jstr == "Hyp" 
             )
-         ) {
-            newrow.wffCell.classList.add("sepcell");
+         ) {//this checks to see if the fitch bar should go below this wff
+            newrow.wffCell.classList.add("sepcell");//add the fitch bar | sepcell = seperator cell
          }
          if ((currln != prf.openline) || (prf.jopen) || (rowdata.jstr == "Pr")) {
             newrow.wffDisplay = document.createElement("span");
@@ -279,7 +305,7 @@ function dataToRows(prf, prdata, depth, md, ln) {
                }
             }
          }
-         rs.push(newrow);
+         rs.push(newrow);//add the new row to the array of rows
       }
    }
    return rs;
@@ -390,14 +416,15 @@ function delLineFromLocation(pd, loc) {
 
 /**
  * Add the proof table and buttons just below the table to pardiv ("the proof") and display it
- * @param {element} pardiv the parent div element
+ * @param {element} pardiv the parent div element which will hold the proof table
  * @param {array}   pstart ('proof start') a 'proofdata' array containing the proof body (including premises)
- * @param {string}  the conclusion of the proof (a wff string)
+ * @param {string}  conc the conclusion of the proof (a wff string)
  *
  * Note that the proof table element has an attribute 'proofdata', which is
  * a 'proofdata' array (the internal representation of a proof)
  */
 function makeProof(pardiv, pstart, conc) {
+   //create the html table tag that will hold the proof
    var p = document.createElement("table");
    pardiv.appendChild(p);
    p.classList.add("prooftable");
@@ -459,7 +486,7 @@ function makeProof(pardiv, pstart, conc) {
       this.myP.parentNode.removeChild(this.myP.results);
       this.myP.parentNode.removeChild(this.myP.buttonDiv);
       this.myP.parentNode.removeChild(this.myP);
-      makeProof(this.myPardiv, this.start, this.conc);
+      makeProof(this.myPardiv, this.pstart, this.conc);
    }
    
    // Admin button -- add to repository
@@ -518,12 +545,14 @@ function makeProof(pardiv, pstart, conc) {
       }
    }
    
+   //this function sends the proof to the checkproof.php to make sure it is correct
    p.startCheckMe = function() {
       proofBeingChecked = this;
       this.results.innerHTML = '<img src="assets/wait.gif" alt="[wait]" /> Checking …';
       var fD = new FormData();
       fD.append("predicateSettings", predicateSettings.toString());
 
+      //
       const deepUnchange = (proofLine) => Array.isArray(proofLine) ?
          proofLine.map(deepUnchange) :
          Object.assign({}, proofLine, {
