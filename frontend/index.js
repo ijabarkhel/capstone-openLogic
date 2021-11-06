@@ -355,7 +355,12 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-   
+   $('.dbTest').click(function(){
+      $.get('/dbgettest',function(data,status){
+         console.log(status);
+         console.log(data)
+      })
+   });
    
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {

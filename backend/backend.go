@@ -210,6 +210,20 @@ func (env *Env) populateTestData() {
 	}
 }
 
+func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
+	testData := env.DbGetTest()
+	json.NewEncoder(w).Encode(testData)
+}
+
+func (env *Env) dbPostTest(W)(w http.ResponseWriter, req *http.Request){
+	var problem Problem
+	json.NewDecoder(r.body).Decode(&problem)
+	env.DbPostTest(problem)
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
 func main() {
 	log.Println("Server initializing")
 
@@ -218,6 +232,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ds.Close()
+	//create the tables if they do not exist
+	ds.CreateTables();
 
 	// Add the admin users to the database for use in queries
 	ds.UpdateAdmins(admin_users)
@@ -236,6 +252,14 @@ func main() {
 		Env.populateTestData()
 	}
 
+	var problem Problem
+	Problem.OwnerId = 1
+	Problem.ProofName = "Test"
+	Problem.ProofType = "prop"
+	Problem.Premise = JSON.Marshal("P")
+	Problem.Conclusion = "P"
+	env.DbPostTest(problem)
+
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
@@ -245,6 +269,9 @@ func main() {
 
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
+
+	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
+	http.Hanlde("/dbposttest", http.HanlerFunc(Env.dbPostTest))
 
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability

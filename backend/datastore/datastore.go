@@ -80,6 +80,9 @@ type IProofStore interface {
 	Close() error
 	CreateTables() error
 	StoreSolution(solution Solution) error
+	GetSolutions(userId int, problemId int) ([]solution, error)
+	DbPostTest(problem Problem) error
+	DbGetTest() Problem error
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -208,7 +211,7 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 	if err != nil {
 		return errors.New("Logic marshal error")
 	}
-	RulesJSON, err := json.Marshal(prsolutionoof.Rules)
+	RulesJSON, err := json.Marshal(solutionoof.Rules)
 	if err != nil {
 		return errors.New("Rules marshal error")
 	}
@@ -221,7 +224,7 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 	return nil
 }
 
-func (p *ProofStore) getSolutions(userId int, problemId int) ([]solution, error){
+func (p *ProofStore) GetSolutions(userId int, problemId int) ([]solution, error){
 	stmt, err = p.db.prepare(`SELECT * FROM solutions WHERE solutions.userId=? AND solutions.problemId=?`)
 	if err != nil{
 		return nil, err
@@ -258,6 +261,56 @@ func (p *ProofStore) getSolutions(userId int, problemId int) ([]solution, error)
 	}
 
 	return solutions, nil
+}
+
+func (p *ProofStore) DbPostTest(problem Problem) error{
+	tx, err := p.db.Begin()
+	if err != nil{
+		return err
+	}
+
+	stmt, err := tx.Prepare(`INSERT INTO problems(ownerId, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
+	defer stmt.close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	premiseJSON, err := json.Marshal(problem.premise)
+	if err != nil {
+		return errors.New("Premise marshal error")
+	}
+
+	_, err = stmt.Exec(p.OwnerId, p.ProofName, p.ProofType, premiseJSON, p.Conclusion)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
+}
+
+func (p *ProofStore) DbGetTest() (Problem, error){
+	rows, err = db.Exec("SELECT * FROM problems")
+	if err != nil{
+		return nil, err
+	}
+	defer rows.close()
+
+	for rows.next(){
+		p Problem
+		var PremiseJSON
+
+		rows.Scan(&p.Id, &p.OwnerId, &p.ProofName, &p.ProofType, &PremiseJSON, &p.Conclusion)
+
+		err = json.Unmarshal([]byte(PremiseJSON), &PremiseJSON)
+		if(err !=nil){
+			return nil, err
+		}
+
+		return p, nil
+	}
+
+	return problem, nil
 }
 /*
 func (p *ProofStore) Empty() error {
