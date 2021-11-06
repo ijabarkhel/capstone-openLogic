@@ -355,7 +355,12 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-   
+   $('.dbTest').click(function(){
+      $.get('/dbgettest',function(data,status){
+         console.log(status);
+         console.log(data)
+      })
+   });
    
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
@@ -376,7 +381,7 @@ $(document).ready(function() {
 
       let proofName = $('.proofNameSpan').text() || "n/a";
       let repoProblem = $('#repoProblem').val() || "false";
-      let proofType = predicateSettings ? "fol" : "prop";
+      let proofType = predicateSettings ? "fol" : "prop";//first order logic or propositional logic
 
       let proofCompleted = event.detail.proofCompleted;
       let conclusion = event.detail.wantedConc;
@@ -479,7 +484,7 @@ $(document).ready(function() {
    // get the proof name, premises, and conclusion from the document
    $("#createProb").click( function() {
       // predicateSettings is a global var defined in syntax_upstream.js
-      predicateSettings = (document.getElementById("folradio").checked);
+      predicateSettings = (document.getElementById("folradio").checked);//checks if the proof is propositional or first order
       let premisesString = document.getElementById("probpremises").value;
       let conclusionString = document.getElementById("probconc").value;
       let proofName = document.getElementById('proofName').value;
@@ -509,6 +514,9 @@ $(document).ready(function() {
    // End admin modal
 });
 
+/**
+ * clears all the elements related to the creation or display of a proof
+ */
 function resetProofUI() {
    $('#proofName').val('');			// clear name
    $('#tflradio').prop('checked', true);	// set to Propositional
@@ -522,9 +530,15 @@ function resetProofUI() {
    $('#load-container select option:nth-child(1)').prop('selected', true);
 }
 
-// predicateSettings = (document.getElementById("folradio").checked);
-// var pstr = document.getElementById("probpremises").value;
-// var conc = fixWffInputStr(document.getElementById("probconc").value);
+/**
+ * This function is called when the create  problem button is pressed.
+ * This button is on the unmoddifed index.html
+ * @param {*} proofName The human readable name of the proof
+ * @param {*} premisesString a string containing all the premises example: P->Q,P. all premises should be well formed formulas
+ * @param {*} conclusionString the wff that is the conclusion for the argument
+ * @description this is used when the user creates a new problem. The function makes sure it is valid.
+ * The function then hides the problem creation interface and shows the problem solving interface
+ */
 function createProb(proofName, premisesString, conclusionString) {
 
    // verify the premises are well-formed
@@ -578,10 +592,10 @@ function createProb(proofName, premisesString, conclusionString) {
       }
    }
 
-   $('.createProof').slideUp();
+   $('.createProof').slideUp();//hide the element and child elements for displaying the create proof interface
    resetProofUI();
-   $('.proofContainer').show();
-   $('.proofNameSpan').text(proofName);
+   $('.proofContainer').show();//show the element and child elements for displaying the proof and proof solving interface
+   $('.proofNameSpan').text(proofName);//set the proof name to say the name of the proof
 
    // set the argument (premises/conclusion)  string
    var probstr = '';
@@ -594,6 +608,8 @@ function createProb(proofName, premisesString, conclusionString) {
    document.getElementById("proofdetails").innerHTML = "Construct a proof for the argument: " + probstr + " ∴ " +  wffToString(cw, true);
 
    var tp = document.getElementById("theproof");
+   //make proof will display the problem as a table in the element with id theproof
+   //this function is implemented in proofs.js
    makeProof(tp, proofdata, wffToString(cw, false));
    return true;
 }
