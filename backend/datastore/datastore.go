@@ -4,12 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"log"
 )
 /**/
 //type Proof struct {
-type FrontEndData {
-	Id             string   // SQL ID
+type FrontEndData struct {
+	Id             int   // SQL ID
 	EntryType      string   // 'proof'
 	UserSubmitted  string	// Used for results, ignored on user input
 	ProofName      string   // user-chosen name (repo problems start with 'Repository - ')
@@ -80,9 +79,9 @@ type IProofStore interface {
 	Close() error
 	CreateTables() error
 	StoreSolution(solution Solution) error
-	GetSolutions(userId int, problemId int) ([]solution, error)
+	GetSolutions(userId int, problemId int) ([]Solution, error)
 	DbPostTest(problem Problem) error
-	DbGetTest() Problem error
+	DbGetTest() ([]Problem, error)
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -94,7 +93,7 @@ type IProofStore interface {
 
 func (p *ProofStore) CreateTables() error {
 	//create problems table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS problems(
+	_, err := p.db.Exec(`CREATE TABLE IF NOT EXISTS problems(
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,--primary key
 		ownerId INTEGER,--id of user who created this argument
 		proofName TEXT,--the name of the proof
@@ -104,10 +103,10 @@ func (p *ProofStore) CreateTables() error {
 		FOREIGN KEY(userId) REFERENCES users(id)
 	);`)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	//create solutions table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS solutions(
+	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS solutions(
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,--primary key
 		problemId INTEGER NOT NULL,--id of the problem this solves
 		userId INTEGER NOT NULL,--id of the user who created this solution
@@ -120,20 +119,20 @@ func (p *ProofStore) CreateTables() error {
 	);
 	`)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	//create users table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
+	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS users(
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,--uniquiqe user id 
 		email TEXT,--email of the user
 		name TEXT,--name of the user
 		permissions TEXT--the permissions this user has. example 'admin'
 	);`)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	//create problemSets table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS problemSets(
+	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS problemSets(
 		setId INTEGER NOT NULL,--the set that the problem is IN
 		problemId INTEGER NOT NULL,--the problem
 		name TEXT,--the name of the problem set
@@ -141,10 +140,10 @@ func (p *ProofStore) CreateTables() error {
 		PRIMARY KEY(setID,problemID)
 		);`)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	//create sections table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS sections(
+	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS sections(
 		id INTEGER NOT NULL,--the id of the section that the user belongs to
 		userId INTEGER NOT NULL,--the id of the user
 		name TEXT,-- the name of the section
@@ -153,10 +152,10 @@ func (p *ProofStore) CreateTables() error {
 		PRIMARY KEY(id,userId)
 	);`)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	//create assignments table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS assignments
+	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS assignments
 		problemSetId INTEGER NOT NULL,--the problem set that can be accessed by the section
 		sectionId INTEGER NOT NULL,--the section that can access the problem set
 		FOREIGN KEY(problemSetId) REFERENCES problemSets(setId),
@@ -164,26 +163,33 @@ func (p *ProofStore) CreateTables() error {
 		PRIMARY KEY(problemSetId, sectionId)
 	);`)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
-func (p *ProofStore) getUsersById(int id) []User, error{
-	stmt, err :=p.db.Prepare(`SELECT * FROM users WHERE users.id = ?`);
+func (p *ProofStore) getUsersById(id int) ([]User, error){
+	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.id = ?`);
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(id)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 	defer rows.Close()
 
-	
-	return rows;
+	var users []User
+	for rows.Next(){
+		var user User
+
+		rows.Scan(&user.id,&user.email,&user.name,&user.permissions)
+
+		users = append(users, user)
+	}
+	return users, nil;
 
 }
 
@@ -211,11 +217,11 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 	if err != nil {
 		return errors.New("Logic marshal error")
 	}
-	RulesJSON, err := json.Marshal(solutionoof.Rules)
+	RulesJSON, err := json.Marshal(solution.Rules)
 	if err != nil {
 		return errors.New("Rules marshal error")
 	}
-	_, err = stmt.Exec(solution.problemId, solution.UserId, LogicJSON, RulesJSON, solution.solutionStatus)
+	_, err = stmt.Exec(solution.ProblemId, solution.UserId, LogicJSON, RulesJSON, solution.SolutionStatus)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -224,35 +230,35 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 	return nil
 }
 
-func (p *ProofStore) GetSolutions(userId int, problemId int) ([]solution, error){
-	stmt, err = p.db.prepare(`SELECT * FROM solutions WHERE solutions.userId=? AND solutions.problemId=?`)
+func (p *ProofStore) GetSolutions(userId int, problemId int) ([]Solution, error){
+	stmt, err := p.db.Prepare(`SELECT * FROM solutions WHERE solutions.userId=? AND solutions.problemId=?`)
 	if err != nil{
 		return nil, err
 	}
 
 	rows, err := stmt.Query(userId,problemId)
 	if err != nil{
-		return err
+		return nil, err
 	}
-	defer rows.close()
+	defer rows.Close()
 	
-	solutions []solution
+	var solutions []Solution
 	for rows.Next(){
-		s solution
-		var LogicJSON
-		var RulesJSON
+		var s Solution
+		var LogicJSON string
+		var RulesJSON string
 
-		err := rows.Scan(&s.id, &s.problemId, &s.userId, &logicJSON, &rulesJSON, &s.solutionStatus, &s.timeSubmitted)
+		err := rows.Scan(&s.Id, &s.ProblemId, &s.UserId, &LogicJSON, &RulesJSON, &s.SolutionStatus, &s.TimeSubmitted)
 		if err != nil{
 			return nil, err
 		}
 
-		err = json.Unmarshal([]byte(logicJSON), &s.logic)
+		err = json.Unmarshal([]byte(LogicJSON), &s.Logic)
 		if err != nil{
 			return nil, err
 		}
 
-		err = json.Unmarshal([]byte(rulesJSON), &s.rules)
+		err = json.Unmarshal([]byte(RulesJSON), &s.Rules)
 		if err != nil{
 			return nil, err
 		}
@@ -270,17 +276,17 @@ func (p *ProofStore) DbPostTest(problem Problem) error{
 	}
 
 	stmt, err := tx.Prepare(`INSERT INTO problems(ownerId, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
-	defer stmt.close()
+	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 
-	premiseJSON, err := json.Marshal(problem.premise)
+	premiseJSON, err := json.Marshal(problem.Premise)
 	if err != nil {
 		return errors.New("Premise marshal error")
 	}
 
-	_, err = stmt.Exec(p.OwnerId, p.ProofName, p.ProofType, premiseJSON, p.Conclusion)
+	_, err = stmt.Exec(problem.OwnerId, problem.ProofName, problem.ProofType, premiseJSON, problem.Conclusion)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -289,28 +295,31 @@ func (p *ProofStore) DbPostTest(problem Problem) error{
 	return nil
 }
 
-func (p *ProofStore) DbGetTest() (Problem, error){
-	rows, err = db.Exec("SELECT * FROM problems")
+func (p *ProofStore) DbGetTest() ([]Problem, error){
+	rows, err := p.db.Query("SELECT * FROM problems")
 	if err != nil{
 		return nil, err
 	}
-	defer rows.close()
+	defer rows.Close()
+	
+	var problems []Problem
 
-	for rows.next(){
-		p Problem
-		var PremiseJSON
+	for rows.Next(){
+		var problem Problem
+		var PremiseJSON string
 
-		rows.Scan(&p.Id, &p.OwnerId, &p.ProofName, &p.ProofType, &PremiseJSON, &p.Conclusion)
+		rows.Scan(&problem.Id, &problem.OwnerId, &problem.ProofName, &problem.ProofType, &PremiseJSON, &problem.Conclusion)
 
 		err = json.Unmarshal([]byte(PremiseJSON), &PremiseJSON)
 		if(err !=nil){
 			return nil, err
 		}
 
-		return p, nil
+		problems = append(problems, problem)
+		return problems, nil
 	}
 
-	return problem, nil
+	return problems, nil
 }
 /*
 func (p *ProofStore) Empty() error {
