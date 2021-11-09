@@ -68,35 +68,34 @@ function handleCredentialResponse(response) {
 ///////
 ////
 
-
 /**
  * This function is called by the Google Sign-in Button
  * @param {*} googleUser 
  */
 
-//******Updated onSignin function*******//
+//Updated onSignin function
 function onSignIn(googleUser) {
    console.log("onSignIn", googleUser);
 
-   //*****new addition to function.(for migration process, test later.) **//
+   //new addition to function.(for migration process, test later.) **//
    google.accounts.id.initialize({
       client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com',
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
-   //******//
-   
-
+   //make signout button visible on signin.
+   document.getElementById("signOutButton").style.display = "none";
    // This response will be cached after the first page load
       new User(googleUser)
 	 .initializeDisplay()
-	 .loadProofs();
+	 .loadProofs();   
 }
 
 //onSignOut function for user.
-// function onSignOut(googleUser) {
-
-// }
+//call the method google.accounts.id.disableAutoSelect to record the status in cookies. 
+function onSignOut() {
+   google.accounts.id.disableAutoSelect();
+}
 
 /**
  * Class for functionality specific to user sign-in/authentication
@@ -191,12 +190,12 @@ class User {
    }
 
    // Get a newly issued token (returns a promise)
-   //INCOMPLETE
-   static refreshToken() {
-      //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
-      //RESEARCH how to refresh token using JWT.
-      this.profile.reloadAuthResponse();
-   }
+   //reloadAuthResponse is unsupported, remove as an ID token has replaced OAuth2 access tokens and scopes.
+   // static refreshToken() {
+   //    //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
+   //    //RESEARCH how to refresh token using JWT.
+   //    this.profile.reloadAuthResponse();
+   // }
 }
 
 // Verifies signed in and valid token, then calls authenticatedBackendPOST
