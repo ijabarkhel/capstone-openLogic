@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- standard metadata -->
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- web icon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/assets/logicproofchecker.png">
+
+    <title>Proof Checker</title>
+
+    <!-- CSS & Fonts, third-party -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/lib/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" />
+    <!--    <link rel="stylesheet" href="assets/lib/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" /> -->
+    <link rel="stylesheet" href="assets/lib/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" />
+
+    <!-- CSS, local -->
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="stylesheet" type="text/css" href="proofs.css" />
+
+    <!-- Scripts, third-party -->
+    <script src="assets/lib/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="></script>
+    <script src="assets/lib/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI="></script>
+
+    <!-- Scripts, local -->
+    <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
+    <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
+    <script type="text/javascript" src="admin.js"></script>
+  </head>
+
+  <body>
+    <div id="top-menu" class="ui menu" style="height: 60px;">
+      <div class="header item">
+        <h1 id="title"><a href="index.html">Proof Checker</a></h1>
+      </div>
+      <a href="rules.html" class="item">
+        Proof Rules
+      </a>
+      <a href="references.html" class="item">
+        Credits
+      </a>
+      <a href="help.html" class="item">
+        Help
+      </a>
+      <a href="admin.html" class="item">
+        Admin
+      </a>
+    </div>
+
+
+    <div class="ui container segment" id="rulesContainer">
+      <h3 id="imageHeader" class="ui header">
+	Welcome to the administration page
+      </h3>
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showAddAdmin()">Add admins/instructors</a><br>
+      <div id="addAdmin" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <label>Enter admin email:</label>
+        <div class="ui input" >
+          <input id="adminEmail" type="text" placeholder="admin email" data-content="adding someone as admin would be able to do all the operations in this page 👍🏽">
+          <button type="button" class="newAdminBtn" style="margin-left: 20px;">Add admin</button>
+	</div>
+      </div>
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showAddStudent()">Assign and unassign students from the section</a><br>
+      <div id="addOrDeleteStudent" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <label>Enter student email:</label>
+        <div class="ui input" >
+          <input id="studentEmail" type="text" placeholder="student email" data-content="adding student to section would be able to see all the problems in section 👍🏽">
+	</div>
+	<label>Enter section name:</label>
+        <div class="ui input" >
+          <input id="sectionName" type="text" placeholder="section name" data-content="adding section name will add student to this section name 👍🏽">
+          <button type="button" class="addStudentBtn" style="margin-left: 20px;">Add student</button>
+          <button type="button" class="deleteStudentBtn" style="margin-left: 20px;">Delete student</button>
+	</div>
+      </div>
+
+      <p style="margin-left: 40px"><a href="javascript:void(0);" onclick="showSection()">Create or delete section</a><br>
+      <div id="addOrDeleteSection" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <label>Enter section name:</label>
+        <div class="ui input" >
+          <input id="sectionName2" type="text" placeholder="section name" data-content="adding section name will either create or delete section 👍🏽">
+          <button type="button" class="addSectionBtn" style="margin-left: 20px;">Add section</button>
+          <button type="button" class="deleteSectionBtn" style="margin-left: 20px;">Delete section</button>
+	</div>
+      </div>
+
+      <p style="margin-left: 40px"><a href = "javascript:void(0);" onclick="showSummary();">Display a summary of the section</a><br>
+      <div id="displaySummary" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+	<label>Summary of the section</label>
+	<div class="ui input" >
+          <input id="sectionName3" type="text" placeholder="section name" data-content="adding section name will display the summary of students 👍🏽">
+          <button type="button" class="displaySummaryBtn" style="margin-left: 20px;">Display summary</button> 
+	</div><br>
+      </div>
+      <div id="displaySummaryTable" style="padding-bottom: 14px; margin-left: 60px; display: none;">
+        <table border="1" width="400" height="100">
+	  <thead>
+	    <tr>
+	      <th>ProblemName</th>
+	      <th>FirstStudent </th>
+	      <th>SecondStudent </th>
+	      <th>ThirdStudent </th>
+	      <th>..... </th>
+	      <th>LastStudent </th>
+	    </tr>
+	  </thead>
+ 	  <tr>
+	    <td>Problem 1.1</td>
+	    <td>Submitted</td>
+	    <td>In progress</td>
+	    <td>Unstarted</td>
+	    <td>.....</td>
+	    <td>Submitted</td>
+	  <tr>
+        </table>
+      </div>
+    </div>
+
+
+    <hr style="margin-bottom: 15px;">
+    <div class="bottom">
+      <p>This site based on the <a href="https://github.com/OpenLogicProject/fitch-checker">Open Logic Project</a> proof checker. </p>
+      Modifications by students and faculty at Cal. State University, Montery Bay. See <a href="references.html" class="item">Credits</a> for details.</p>
+      <p>Site Version: 108ed1d24e5e6ec3166d50518c55752d6e9677d4</p>
+    </div>
+</div>
+
+<!-- Administration Interface -->
+<div class="ui modal">
+  <i class="close icon"></i>
+  <div class="header">
+    Administrator Options
+  </div>
+  <div class="content">
+    <button class="downloadCSV">Download Student Problems as CSV</button>
+  </div>
+  <div class="actions">
+    <div class="ui black deny button">
+      Close
+    </div>
+  </div>
+</div>
+</body>
+</html>

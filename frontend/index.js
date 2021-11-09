@@ -41,7 +41,15 @@ let adminUsers = [];
 //   "jti": "abc161803398874def"
 // }
  /////////
- function handleCredentialResponse(response) {
+
+function show() {
+    console.log("I am in");
+    // document.getElementById("addAdmin").style.display ="block";
+    $('#addAdmin').show();
+}
+
+
+function handleCredentialResponse(response) {
    // decodeJwtResponse() is a custom function defined by you
    // to decode the credential response.
    const responsePayload = decodeJwtResponse(response.credential);
@@ -60,31 +68,29 @@ let adminUsers = [];
 ///////
 ////
 
-//******Updated onSignin function*******
+
+/**
+ * This function is called by the Google Sign-in Button
+ * @param {*} googleUser 
+ */
+
+//******Updated onSignin function*******//
 function onSignIn(googleUser) {
    console.log("onSignIn", googleUser);
 
-   //*****new addition to function.(for migration process, test later.)
+   //*****new addition to function.(for migration process, test later.) **//
    google.accounts.id.initialize({
-      client_id: '266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com',
+      client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com',
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
-   //******
+   //******//
    
 
    // This response will be cached after the first page load
-   $.getJSON('/backend/admins', (admins) => {
-      try {
-	 adminUsers = admins['Admins'];
-      } catch(e) {
-	 console.error('Unable to load admin users', e);
-      }
-
       new User(googleUser)
 	 .initializeDisplay()
 	 .loadProofs();
-   });
 }
 
 //onSignOut function for user.
@@ -106,6 +112,8 @@ class User {
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
+      this.emailVerified = googleَUser.email_verified;
+      this.expiration = googleUser.exp;
 
       if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
@@ -145,7 +153,7 @@ class User {
       //what is being used to determine a user's signin status?
       //Plausible solution: use JWT's user ID and attach signInListener().
       //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
-      googleUser.sub.isSignedIn.listen(this.signInChangeListener);
+      this.profile.isSignedIn.listen(this.signInChangeListener);
       //this.profile.signInChangeListener();
       return this;
    }
@@ -158,7 +166,7 @@ class User {
    static isSignedIn() {
       //return gapi.auth2.getAuthInstance().isSignedIn.get();
       //return true if signed in, return false if not signed in.
-      if(googleUser.email_verified == "true" && googleUser.hd == "csumb.edu"){
+      if(this.emailVerified == "true" && this.domain == "csumb.edu"){
          return true;
       }else{
          return false;
@@ -167,19 +175,19 @@ class User {
 
    static isAdministrator() {
       //return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
-      return adminUsers.indexOf(googleUser.sub.getEmail()) > -1;
+      return adminUsers.indexOf(this.profile.getEmail()) > -1;
    }
 
    // Check if the current time (in unix timestamp) is after the token's expiration
    static isTokenExpired() {
       //return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
-      return  + new Date() > googleUser.exp;
+      return  + new Date() > this.expiration;
    }
 
    // Retrieve the last cached token
    static getIdToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-      return googleUser.sub;
+      return this.profile;
    }
 
    // Get a newly issued token (returns a promise)
@@ -187,7 +195,7 @@ class User {
    static refreshToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
       //RESEARCH how to refresh token using JWT.
-      googleUser.reloadAuthResponse();
+      this.profile.reloadAuthResponse();
    }
 }
 
@@ -347,7 +355,13 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-
+   $('.dbTest').click(function(){
+      $.get('/dbgettest',function(data,status){
+         console.log(status);
+         console.log(data)
+      })
+   });
+   
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
       console.log(event, event.detail, event.detail.proofdata);
@@ -367,7 +381,7 @@ $(document).ready(function() {
 
       let proofName = $('.proofNameSpan').text() || "n/a";
       let repoProblem = $('#repoProblem').val() || "false";
-      let proofType = predicateSettings ? "fol" : "prop";
+      let proofType = predicateSettings ? "fol" : "prop";//first order logic or propositional logic
 
       let proofCompleted = event.detail.proofCompleted;
       let conclusion = event.detail.wantedConc;
@@ -470,7 +484,7 @@ $(document).ready(function() {
    // get the proof name, premises, and conclusion from the document
    $("#createProb").click( function() {
       // predicateSettings is a global var defined in syntax_upstream.js
-      predicateSettings = (document.getElementById("folradio").checked);
+      predicateSettings = (document.getElementById("folradio").checked);//checks if the proof is propositional or first order
       let premisesString = document.getElementById("probpremises").value;
       let conclusionString = document.getElementById("probconc").value;
       let proofName = document.getElementById('proofName').value;
@@ -500,6 +514,9 @@ $(document).ready(function() {
    // End admin modal
 });
 
+/**
+ * clears all the elements related to the creation or display of a proof
+ */
 function resetProofUI() {
    $('#proofName').val('');			// clear name
    $('#tflradio').prop('checked', true);	// set to Propositional
@@ -513,9 +530,15 @@ function resetProofUI() {
    $('#load-container select option:nth-child(1)').prop('selected', true);
 }
 
-// predicateSettings = (document.getElementById("folradio").checked);
-// var pstr = document.getElementById("probpremises").value;
-// var conc = fixWffInputStr(document.getElementById("probconc").value);
+/**
+ * This function is called when the create  problem button is pressed.
+ * This button is on the unmoddifed index.html
+ * @param {*} proofName The human readable name of the proof
+ * @param {*} premisesString a string containing all the premises example: P->Q,P. all premises should be well formed formulas
+ * @param {*} conclusionString the wff that is the conclusion for the argument
+ * @description this is used when the user creates a new problem. The function makes sure it is valid.
+ * The function then hides the problem creation interface and shows the problem solving interface
+ */
 function createProb(proofName, premisesString, conclusionString) {
 
    // verify the premises are well-formed
@@ -569,10 +592,10 @@ function createProb(proofName, premisesString, conclusionString) {
       }
    }
 
-   $('.createProof').slideUp();
+   $('.createProof').slideUp();//hide the element and child elements for displaying the create proof interface
    resetProofUI();
-   $('.proofContainer').show();
-   $('.proofNameSpan').text(proofName);
+   $('.proofContainer').show();//show the element and child elements for displaying the proof and proof solving interface
+   $('.proofNameSpan').text(proofName);//set the proof name to say the name of the proof
 
    // set the argument (premises/conclusion)  string
    var probstr = '';
@@ -585,6 +608,8 @@ function createProb(proofName, premisesString, conclusionString) {
    document.getElementById("proofdetails").innerHTML = "Construct a proof for the argument: " + probstr + " ∴ " +  wffToString(cw, true);
 
    var tp = document.getElementById("theproof");
+   //make proof will display the problem as a table in the element with id theproof
+   //this function is implemented in proofs.js
    makeProof(tp, proofdata, wffToString(cw, false));
    return true;
 }

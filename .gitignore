@@ -4,4 +4,4 @@ vendor
 *.swp
 backend/backend
 untracked
-db.sqlite3*
+*db.sqlite3*

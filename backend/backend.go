@@ -20,8 +20,10 @@ var (
 	// Client-side client ID from your Google Developer Console
 	// Same as in the front-end index.php
 	authorized_client_ids = []string{
-		"49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com",
-  }
+		"684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com",
+		//"49611062474-h65v7vphkti1k1lnbfp4it0nn9omikss.apps.googleusercontent.com",
+		//"266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com",
+	}
 
 	admin_users = map[string]bool{
         "sislam@csumb.edu":   true,
@@ -40,26 +42,6 @@ type userWithEmail interface {
 type Env struct {
 	ds datastore.IProofStore
 }
-
-// //cookie management using g_state cookie.
-// // Cookies parses and returns the HTTP cookies sent with the request.
-// func (r *Request) Cookies() []*Cookie {
-// 	return readCookies(r.Header, "")
-// }
-
-// // ErrNoCookie is returned by Request's Cookie method when a cookie is not found.
-// var ErrNoCookie = errors.New("http: named cookie not present")
-
-// // Cookie returns the named cookie provided in the request or
-// // ErrNoCookie if not found.
-// // If multiple cookies match the given name, only one cookie will
-// // be returned.
-// func (r *Request) Cookie(name string) (*Cookie, error) {
-// 	for _, c := range readCookies(r.Header, name) {
-// 		return c, nil
-// 	}
-// 	return nil, ErrNoCookie
-// }
 
 func getAdmins(w http.ResponseWriter, req *http.Request) {
 	type adminUsers struct {
@@ -80,11 +62,12 @@ func getAdmins(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, string(output))
 }
 
+
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	var user userWithEmail
 	user = req.Context().Value("tok").(userWithEmail)
 	
-	var submittedProof datastore.Proof
+	var submittedProof datastore.FrontEndData
 
 	// read the JSON-encoded value from the HTTP request and store it in submittedProof
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
@@ -101,9 +84,17 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Replace submitted email (if any) with the email from the token
-	submittedProof.UserSubmitted = user.GetEmail()
+	//submittedProof.UserSubmitted = user.GetEmail()
 
-	if err := env.ds.Store(submittedProof); err != nil {
+	//change old front end data to new format
+	var solution = Database.Solution
+	solution.ProblemId = submittedProof.id
+	solution.UserId = user.GetEmail()//
+	solution.Logic = submittedProof.Logic
+	solution.Rules = submittedProof.Rules
+	solution.SolutionStatus = submittedProof.ProofCompleted
+
+	if err := env.ds.StoreSolution(solution); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -111,6 +102,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	io.WriteString(w, `{"success": "true"}`)
 }
+
 
 func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	user := req.Context().Value("tok").(userWithEmail)
@@ -218,28 +210,30 @@ func (env *Env) populateTestData() {
 	}
 }
 
-//function to get cookie state.
-func cookieState(w http.ResponseWriter, req *http.Request){
-	c, err := req.Cookie("g_state")
-	if err != nil {
-	   http.Error(w, http.StatusText(400), http.StatusBadRequest)
-	   return
-	}
-	log.Println(w, "YOUR COOKIE:", c)
+func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
+	testData := env.DbGetTest()
+	json.NewEncoder(w).Encode(testData)
+}
 
+func (env *Env) dbPostTest(W)(w http.ResponseWriter, req *http.Request){
+	var problem Problem
+	json.NewDecoder(r.body).Decode(&problem)
+	env.DbPostTest(problem)
 
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
 }
 
 func main() {
 	log.Println("Server initializing")
-	//current cookie being used is set to the path""/", therefore call function on "/"
-	//http.HandleFunc("/", cookieState)
 
 	ds, err := datastore.New(database_uri)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ds.Close()
+	//create the tables if they do not exist
+	ds.CreateTables();
 
 	// Add the admin users to the database for use in queries
 	ds.UpdateAdmins(admin_users)
@@ -258,10 +252,17 @@ func main() {
 		Env.populateTestData()
 	}
 
+	var problem Problem
+	Problem.OwnerId = 1
+	Problem.ProofName = "Test"
+	Problem.ProofType = "prop"
+	Problem.Premise = JSON.Marshal("P")
+	Problem.Conclusion = "P"
+	env.DbPostTest(problem)
+
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
-
 
 	// method saveproof : POST : JSON <- id_token, proof
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
@@ -269,9 +270,12 @@ func main() {
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
 
+	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
+	http.Hanlde("/dbposttest", http.HanlerFunc(Env.dbPostTest))
+
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
-	log.Println("Server started")
+	log.Println("Server started on: 127.0.0.1:8080" )
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }
