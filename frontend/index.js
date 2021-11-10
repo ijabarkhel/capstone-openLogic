@@ -355,7 +355,8 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-   $('.dbTest').click(function(){
+   $('#dbTest').click(function(){
+      console.log(dbGetTest)
       $.get('/dbgettest',function(data,status){
          console.log(status);
          console.log(data)
