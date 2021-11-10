@@ -197,6 +197,9 @@ func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 	if err != nil{
 		log.Fatal(err)
 	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(testData)
 }
 
@@ -214,6 +217,7 @@ func main() {
 
 	ds, err := datastore.New(database_uri)
 	if err != nil {
+		log.Println("database connection failed to initialize")
 		log.Fatal(err)
 	}
 	defer ds.Close()
