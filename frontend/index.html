@@ -45,9 +45,9 @@
     <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
     <script type="text/javascript" src="index.js"></script>
     <!-- scripts, bootstrap -->
-    <script>src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"</script>
+    <!-- <script>src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"</script>
     <script>src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"</script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
   </head>
 
   <body>
@@ -71,9 +71,7 @@
         <div class="header item"><a id="user-email" class="item"></a></div>
         <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
         <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
-        <button type="button" id="signOutButton" style="visibility: hidden" onclick="onSignOut()" class="btn btn-default btn-sm">
-          <span class="glyphicon glyphicon-log-out"></span> Sign Out
-        </button>
+        <button type="button" id="signOutButton" style="display: none" onclick="onSignOut()">Sign Out</button>
       </div>
     </div>
 

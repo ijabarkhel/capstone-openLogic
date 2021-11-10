@@ -95,6 +95,7 @@ function onSignIn(googleUser) {
 //call the method google.accounts.id.disableAutoSelect to record the status in cookies. 
 function onSignOut() {
    google.accounts.id.disableAutoSelect();
+   document.getElementById("signOutButton").style.display = "none";
 }
 
 /**
