@@ -42,13 +42,6 @@ let adminUsers = [];
 // }
  /////////
 
-function show() {
-    console.log("I am in");
-    // document.getElementById("addAdmin").style.display ="block";
-    $('#addAdmin').show();
-}
-
-
 function handleCredentialResponse(response) {
    // decodeJwtResponse() is a custom function defined by you
    // to decode the credential response.
@@ -84,7 +77,8 @@ function onSignIn(googleUser) {
    });
    google.accounts.id.prompt();
    //make signout button visible on signin.
-   document.getElementById("signOutButton").style.display = "block";
+   //document.getElementById("signOutButton").style.display = "block";
+   $('#signOutButton').show();
    // This response will be cached after the first page load
       new User(googleUser)
 	 .initializeDisplay()
@@ -95,7 +89,8 @@ function onSignIn(googleUser) {
 //call the method google.accounts.id.disableAutoSelect to record the status in cookies. 
 function onSignOut() {
    google.accounts.id.disableAutoSelect();
-   document.getElementById("signOutButton").style.display = "none";
+   //document.getElementById("signOutButton").style.display = "none";
+   $('#signOutButton').hide();
 }
 
 /**
