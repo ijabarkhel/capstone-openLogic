@@ -84,7 +84,7 @@ function onSignIn(googleUser) {
    });
    google.accounts.id.prompt();
    //make signout button visible on signin.
-   document.getElementById("signOutButton").style.display = "none";
+   document.getElementById("signOutButton").style.display = "block";
    // This response will be cached after the first page load
       new User(googleUser)
 	 .initializeDisplay()
