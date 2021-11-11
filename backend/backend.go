@@ -47,25 +47,25 @@ type Env struct {
 }
 
 func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
-	var user userWithEmail
-	user = req.Context().Value("tok").(userWithEmail)
+	//var user userWithEmail
+	//user = req.Context().Value("tok").(userWithEmail)
 
-	var user datastore.User
+	var userData datastore.User
 
-	if err := json.NewDecoder(req.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&userData); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", user)
+	log.Printf("%+v", userData)
 
-	if len(user) == 0 {
+	if len(userData.email) == 0 {
                 http.Error(w, "enter email to add admin", 400)
                 return
         }
 
-	if err := env.ds.Store(user); err != nil {
+	if err := env.ds.addAdmin(userData); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }

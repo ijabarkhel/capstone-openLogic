@@ -82,6 +82,7 @@ type IProofStore interface {
 	GetSolutions(userId int, problemId int) ([]Solution, error)
 	DbPostTest(problem Problem) error
 	DbGetTest() ([]Problem, error)
+	addAdmin(userData User) error
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -191,6 +192,32 @@ func (p *ProofStore) getUsersById(id int) ([]User, error){
 	}
 	return users, nil;
 
+}
+
+func (p *ProofStore) addAdmin(userData User) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+	stmt, err := tx.Prepare(`INSERT INTO users (
+							email,
+							name,
+							permissions,)
+				 VALUES (?, ?, ?)`)
+	defer stmt.Close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	_, err = stmt.Exec(userData.email, userData.name, userData.permissions)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
 }
 
 func (p *ProofStore) StoreSolution(solution Solution) error{
