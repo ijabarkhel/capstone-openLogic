@@ -93,11 +93,12 @@ func getAdmins(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, string(output))
 }
 
+
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
-	var user userWithEmail
-	user = req.Context().Value("tok").(userWithEmail)
+	//var user userWithEmail
+	//user = req.Context().Value("tok").(userWithEmail)
 	
-	var submittedProof datastore.Proof
+	var submittedProof datastore.FrontEndData
 
 	// read the JSON-encoded value from the HTTP request and store it in submittedProof
 	if err := json.NewDecoder(req.Body).Decode(&submittedProof); err != nil {
@@ -114,9 +115,17 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Replace submitted email (if any) with the email from the token
-	submittedProof.UserSubmitted = user.GetEmail()
+	//submittedProof.UserSubmitted = user.GetEmail()
 
-	if err := env.ds.Store(submittedProof); err != nil {
+	//change old front end data to new format
+	var solution datastore.Solution
+	solution.ProblemId = submittedProof.Id
+	solution.UserId = 0//
+	solution.Logic = submittedProof.Logic
+	solution.Rules = submittedProof.Rules
+	solution.SolutionStatus = submittedProof.ProofCompleted
+
+	if err := env.ds.StoreSolution(solution); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -124,6 +133,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	io.WriteString(w, `{"success": "true"}`)
 }
+
 
 func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	user := req.Context().Value("tok").(userWithEmail)
@@ -157,9 +167,9 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 	log.Printf("USER: %q", user)
 
 	var err error
-	var proofs []datastore.Proof
-
+	var proofs []datastore.FrontEndData
 	switch requestData.Selection {
+	/*
 	case "user":
 		log.Println("user selection")
 		err, proofs = env.ds.GetUserProofs(user)
@@ -179,7 +189,7 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		err, proofs = env.ds.GetAllAttemptedRepoProofs()
-
+	*/
 	default:
 		http.Error(w, "invalid selection", 400)
 		return
@@ -205,30 +215,29 @@ func (env *Env) getProofs(w http.ResponseWriter, req *http.Request) {
 }
 
 // This will delete all rows, but not reset the auto_increment id
+/*
 func (env *Env) clearDatabase() {
 	if err := env.ds.Empty(); err != nil {
 		log.Fatal(err)
 	}
 }
+*/
 
-func (env *Env) populateTestData() {
-	err := env.ds.Store(datastore.Proof{
-		EntryType: "proof",
-		UserSubmitted: "gbruns@csumb.edu",
-		ProofName: "Repository - Problem 2",
-		ProofType: "prop",
-		Premise: []string{"P", "P -> Q", "Q -> R", "R -> S", "S -> T", "T -> U", "V -> W", "W -> X", "X -> Y", "Y -> X"},
-		Logic: []string{},
-		Rules: []string{},
-		ProofCompleted: "false",
-		Conclusion: "Y",
-		TimeSubmitted: "2019-04-29T01:45:44.452+0000",
-		RepoProblem: "true",
-	})
-
-	if err != nil {
+func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
+	testData, err := env.ds.DbGetTest()
+	if err != nil{
 		log.Fatal(err)
 	}
+	json.NewEncoder(w).Encode(testData)
+}
+
+func (env *Env) dbPostTest(w http.ResponseWriter, req *http.Request){
+	var problem datastore.Problem
+	json.NewDecoder(req.Body).Decode(&problem)
+	env.ds.DbPostTest(problem)
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
 }
 
 func main() {
@@ -239,16 +248,20 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ds.Close()
+	//create the tables if they do not exist
+	ds.CreateTables();
 
 	// Add the admin users to the database for use in queries
-	ds.UpdateAdmins(admin_users)
+	//ds.UpdateAdmins(admin_users)
 	
 	Env := &Env{ds} // Put the instance into a struct to share between threads
-
+	
+	portPtr := flag.String("port", "8080", "Port to listen on")
+	/*
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")
-	portPtr := flag.String("port", "8080", "Port to listen on")
-
+	
+	
 	flag.Parse() // Check for command-line arguments
 	if *doClearDatabase {
 		Env.clearDatabase()
@@ -256,6 +269,14 @@ func main() {
 	if *doPopulateDatabase {
 		Env.populateTestData()
 	}
+	*/
+	var problem datastore.Problem
+	problem.OwnerId = 1
+	problem.ProofName = "Test"
+	problem.ProofType = "prop"
+	problem.Premise = []string{"P"}
+	problem.Conclusion = "P"
+	Env.ds.DbPostTest(problem)
 
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
@@ -269,6 +290,9 @@ func main() {
 
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
+
+	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
+	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
 
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
