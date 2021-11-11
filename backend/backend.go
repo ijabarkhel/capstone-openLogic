@@ -26,9 +26,12 @@ var (
 	}
 
 	admin_users = map[string]bool{
-        "sislam@csumb.edu":   true,
+	        "sislam@csumb.edu":   true,
 		"gbruns@csumb.edu":   true,
 		"cohunter@csumb.edu": true,
+		"ijabarkhel@csumb.edu": true,
+		"dediriweera@csumb.edu": true,
+		"whayden@csumb.edu": true,
 	}
 
 	// When started via systemd, WorkingDirectory is set to one level above the public_html directory

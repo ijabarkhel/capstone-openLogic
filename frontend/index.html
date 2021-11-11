@@ -60,22 +60,22 @@
       <a href="help.html" class="item">
         Help
       </a>
-      <a href="admin.html" class="item">
+      <a id="adminLink" href="admin.html" class="item" style="display: none">
         Admin
       </a>
       <div class="right menu">
+        <div class="header item" id="signOutContainer" style="display: none;">
+          <a href="javascript:void(0)" id="signOutButton" onclick="onSignOut()">Sign Out</a>
+        </div>
 
-        <div class="header item"><a id="user-email" class="item"></a></div>
+        <!-- <div class="header item"><a id="user-email" class="item"></a></div> -->
         <div id="g_id_onload"
           data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com"
           data-callback="handleCredentialResponse">
         </div>
 
-        <div class="g_id_signin" data-onsuccess="onSignIn()" data-type="standard"></div>      
+        <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
         <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
-        <div id="signOutContainer" style="display: none">
-          <button type="button" id="signOutButton" onclick="onSignOut()">Sign Out</button>
-        </div>
       </div>
     </div>
 

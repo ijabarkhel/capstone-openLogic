@@ -76,6 +76,15 @@ function onSignIn(googleUser) {
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
+
+   $.getJSON('/backend/admins', (admins) => {
+     try {
+	adminUsers = admins['Admins'];
+     } catch(e) {
+	console.error('Unable to load admin users', e);
+     }
+
+   });
    //make signout button visible on signin.
    //document.getElementById("signOutButton").style.display = "block";
    $('#signOutContainer').show();
@@ -129,7 +138,6 @@ class User {
 
    showAdminFunctionality() {
       $('#adminLink').show();
-
       return this;
    }
 
