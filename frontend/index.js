@@ -76,6 +76,7 @@ function onSignIn(googleUser) {
       callback: handleCredentialResponse
    });
    google.accounts.id.prompt();
+   console.log("I am in");
    //make signout button visible on signin.
    //document.getElementById("signOutButton").style.display = "block";
    $('#signOutContainer').show();
