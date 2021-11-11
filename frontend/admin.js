@@ -34,7 +34,9 @@ function showSummary() {
 function addAdmin() {
     let adminEmail = $('#adminEmail').text();
     if (adminEmail) {
-       backendPost('addAdmin', adminEmail).then(
+       let userData = new User(adminEmail, adminName, "admin");
+
+       backendPost('addAdmin', userData).then(
 	(data) => {
 	  console.log('admin added', data);
 	}, console.log)

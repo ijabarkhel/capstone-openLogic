@@ -46,6 +46,34 @@ type Env struct {
 	ds datastore.IProofStore
 }
 
+func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
+	var user userWithEmail
+	user = req.Context().Value("tok").(userWithEmail)
+
+	var user datastore.User
+
+	if err := json.NewDecoder(req.Body).Decode(&user); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", user)
+
+	if len(user) == 0 {
+                http.Error(w, "enter email to add admin", 400)
+                return
+        }
+
+	if err := env.ds.Store(user); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
 func getAdmins(w http.ResponseWriter, req *http.Request) {
 	type adminUsers struct {
 		Admins []string
@@ -236,12 +264,16 @@ func main() {
 	// method saveproof : POST : JSON <- id_token, proof
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
+	// method addAdmin : POST : JSON <- id_token, admin
+	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.addAdmin)))
+
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
 
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
+	
 	log.Println("Server started on: 127.0.0.1:8080" )
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }
