@@ -43,26 +43,6 @@ type Env struct {
 	ds datastore.IProofStore
 }
 
-func getAdmins(w http.ResponseWriter, req *http.Request) {
-	type adminUsers struct {
-		Admins []string
-	}
-	var admins adminUsers
-	for adminEmail := range admin_users {
-		admins.Admins = append(admins.Admins, adminEmail)
-	}
-	output, err := json.Marshal(admins)
-	if err != nil {
-		http.Error(w, "Error returning admin users.", 500)
-		return
-	}
-
-	// Allow browsers and intermediaries to cache this response for up to a day (86400 seconds)
-	w.Header().Set("Cache-Control", "public, max-age=86400")
-	io.WriteString(w, string(output))
-}
-
-
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
 	//user = req.Context().Value("tok").(userWithEmail)
@@ -191,6 +171,9 @@ func (env *Env) clearDatabase() {
 	}
 }
 */
+func handlerTest(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("Hello world"))
+}
 
 func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 	testData, err := env.ds.DbGetTest()
@@ -263,10 +246,8 @@ func main() {
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
+	http.Handle("/test",http.HandlerFunc(handlerTest))
 
-	// Get admin users -- this is a public endpoint, no token required
-	// Can be changed to require token, but would reduce cacheability
-	http.Handle("/admins", http.HandlerFunc(getAdmins))
 	log.Println("Server started on: 127.0.0.1:8080" )
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }
