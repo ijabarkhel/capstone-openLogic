@@ -78,7 +78,7 @@ type IProofStore interface {
 	Close() error
 	CreateTables() error
 	StoreSolution(solution Solution) error
-	GetSolutions(userEmail int, problemId int) ([]Solution, error)
+	GetSolutions(userEmail string, problemId int) ([]Solution, error)
 	DbPostTest(problem Problem) error
 	DbGetTest() ([]Problem, error)
 	//Empty() error
@@ -168,26 +168,26 @@ func (p *ProofStore) CreateTables() error {
 
 
 func (p *ProofStore) getUserByEmail(userEmail string) (User, error){
+	var user User
 	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.email = ?`);
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(userEmail)
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	defer rows.Close()
 
 	for rows.Next(){
-		var user User
 
-		rows.Scan(&user.email,&user.name,&user.permissions)
+		rows.Scan(&user.Email,&user.Name,&user.Permissions)
 
 		return user, nil
 	}
-	return nil, erros.New("No user found in table users");
+	return user, errors.New("No user found in table users");
 
 }
 
@@ -219,7 +219,7 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 	if err != nil {
 		return errors.New("Rules marshal error")
 	}
-	_, err = stmt.Exec(solution.ProblemId, solution.UserId, LogicJSON, RulesJSON, solution.SolutionStatus)
+	_, err = stmt.Exec(solution.ProblemId, solution.UserEmail, LogicJSON, RulesJSON, solution.SolutionStatus)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -246,7 +246,7 @@ func (p *ProofStore) GetSolutions(userEmail string, problemId int) ([]Solution, 
 		var LogicJSON string
 		var RulesJSON string
 
-		err := rows.Scan(&s.Id, &s.ProblemId, &s.userEmail, &LogicJSON, &RulesJSON, &s.SolutionStatus, &s.TimeSubmitted)
+		err := rows.Scan(&s.Id, &s.ProblemId, &s.UserEmail, &LogicJSON, &RulesJSON, &s.SolutionStatus, &s.TimeSubmitted)
 		if err != nil{
 			return nil, err
 		}
@@ -284,7 +284,7 @@ func (p *ProofStore) DbPostTest(problem Problem) error{
 		return errors.New("Premise marshal error")
 	}
 
-	_, err = stmt.Exec(problem.OwnerId, problem.ProofName, problem.ProofType, premiseJSON, problem.Conclusion)
+	_, err = stmt.Exec(problem.UserEmail, problem.ProofName, problem.ProofType, premiseJSON, problem.Conclusion)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -306,7 +306,7 @@ func (p *ProofStore) DbGetTest() ([]Problem, error){
 		var problem Problem
 		var PremiseJSON string
 
-		rows.Scan(&problem.Id, &problem.OwnerId, &problem.ProofName, &problem.ProofType, &PremiseJSON, &problem.Conclusion)
+		rows.Scan(&problem.Id, &problem.UserEmail, &problem.ProofName, &problem.ProofType, &PremiseJSON, &problem.Conclusion)
 
 		err = json.Unmarshal([]byte(PremiseJSON), &PremiseJSON)
 		if(err !=nil){

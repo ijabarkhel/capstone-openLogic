@@ -89,7 +89,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//change old front end data to new format
 	var solution datastore.Solution
 	solution.ProblemId = submittedProof.Id
-	solution.UserId = 0//
+	solution.UserEmail = "whayden@csumb.edu"//
 	solution.Logic = submittedProof.Logic
 	solution.Rules = submittedProof.Rules
 	solution.SolutionStatus = submittedProof.ProofCompleted
@@ -244,7 +244,7 @@ func main() {
 	}
 	*/
 	var problem datastore.Problem
-	problem.OwnerId = 1
+	problem.UserEmail = "whayden@csumb.edu"
 	problem.ProofName = "Test"
 	problem.ProofType = "prop"
 	problem.Premise = []string{"P"}
