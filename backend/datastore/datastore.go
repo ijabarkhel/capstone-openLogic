@@ -25,7 +25,7 @@ type FrontEndData struct {
 
 type Problem struct {
 	Id				int
-	OwnerId			int
+	UserEmail		string
 	ProofName		string
 	ProofType		string
 	Premise			[]string
@@ -35,7 +35,7 @@ type Problem struct {
 type Solution struct {
 	Id				int
 	ProblemId		int
-	UserId 			int
+	UserEmail		string
 	Logic			[]string
 	Rules			[]string
 	SolutionStatus	string
@@ -43,28 +43,27 @@ type Solution struct {
 }
 
 type User struct{
-	id				int
-	email			string
-	name			string
-	permissions		string
+	Email			string
+	Name			string
+	Permissions		string
 }
 
 type ProblemSet struct{
-	id				int
-	problemId 		int
-	name			string
+	Id				int
+	ProblemId 		int
+	Name			string
 }
 
 type Section struct{
-	id 				int
-	userId			int
-	name			string
-	role			string//the user's role in the section
+	Id 				int
+	UserEmail		string
+	Name			string
+	Role			string//the user's role in the section
 }
 
 type Assignment struct {
-	problemSetId	int
-	sectionId		int
+	ProblemSetId	int
+	SectionId		int
 }
 
 //type UserWithEmail interface {
@@ -95,7 +94,7 @@ func (p *ProofStore) CreateTables() error {
 	//create problems table
 	_, err := p.db.Exec(`CREATE TABLE IF NOT EXISTS problems(
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,--primary key
-		ownerId INTEGER,--id of user who created this argument
+		userEmail TEXT,--user email of the user who created this problem
 		proofName TEXT,--the name of the proof
 		proofType TEXT,--Either 'prop' (propositional/tfl) or 'fol' (first order logic)
 		premise TEXT,--array of premise strings stored as JSON strings
@@ -109,7 +108,7 @@ func (p *ProofStore) CreateTables() error {
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS solutions(
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,--primary key
 		problemId INTEGER NOT NULL,--id of the problem this solves
-		userId INTEGER NOT NULL,--id of the user who created this solution
+		userEmail TEXT NOT NULL,--email of the user who created this solution
 		logic TEXT,--Array of logic strings stored as JSON
 		rules TEXT,--Array of rules strings stored as JSON
 		solutionStatus TEXT,--stores the result of the solution: correct, incorrect, error
@@ -123,8 +122,7 @@ func (p *ProofStore) CreateTables() error {
 	}
 	//create users table
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS users(
-		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,--uniquiqe user id 
-		email TEXT,--email of the user
+		email TEXT PRIMARY KEY,-- the user's email and unique identifer
 		name TEXT,--name of the user
 		permissions TEXT--the permissions this user has. example 'admin'
 	);`)
@@ -145,7 +143,7 @@ func (p *ProofStore) CreateTables() error {
 	//create sections table
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS sections(
 		id INTEGER NOT NULL,--the id of the section that the user belongs to
-		userId INTEGER NOT NULL,--the id of the user
+		userEmail TEXT NOT NULL,--the email of the user who is a part of the section
 		name TEXT,-- the name of the section
 		role TEXT,--describes the users role in the section, professor, student, ta
 		FOREIGN KEY(userId) REFERENCES users(Id),
