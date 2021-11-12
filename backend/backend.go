@@ -89,7 +89,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//change old front end data to new format
 	var solution datastore.Solution
 	solution.ProblemId = submittedProof.Id
-	solution.UserId = 0//
+	solution.UserEmail = "whayden@csumb.edu"//
 	solution.Logic = submittedProof.Logic
 	solution.Rules = submittedProof.Rules
 	solution.SolutionStatus = submittedProof.ProofCompleted
@@ -197,6 +197,9 @@ func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 	if err != nil{
 		log.Fatal(err)
 	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(testData)
 }
 
@@ -214,6 +217,7 @@ func main() {
 
 	ds, err := datastore.New(database_uri)
 	if err != nil {
+		log.Println("database connection failed to initialize")
 		log.Fatal(err)
 	}
 	defer ds.Close()
@@ -240,7 +244,7 @@ func main() {
 	}
 	*/
 	var problem datastore.Problem
-	problem.OwnerId = 1
+	problem.UserEmail = "whayden@csumb.edu"
 	problem.ProofName = "Test"
 	problem.ProofType = "prop"
 	problem.Premise = []string{"P"}
