@@ -212,22 +212,21 @@ func main() {
 	
 	Env := &Env{ds} // Put the instance into a struct to share between threads
 	
-	portPtr := flag.String("port", "8080", "Port to listen on")
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")
-	log.Println(*doClearDatabase) 
-	log.Println(*doPopulateDatabase)
-	
+	portPtr := flag.String("port", "8080", "Port to listen on")
+
 	flag.Parse() // Check for command-line arguments
-	/*	
-	
 	if *doClearDatabase {
-		Env.clearDatabase()
+		log.Println("cleardb")
+		//Env.clearDatabase()
 	}
 	if *doPopulateDatabase {
-		Env.populateTestData()
+		log.Println("popdb")
+		//Env.populateTestData()
 	}
-	*/
+
+
 	var problem datastore.Problem
 	problem.UserEmail = "whayden@csumb.edu"
 	problem.ProofName = "Test"
