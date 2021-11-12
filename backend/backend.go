@@ -60,12 +60,12 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", userData)
 
-	if len(userData.email) == 0 {
+	if len(userData.Email) == 0 {
                 http.Error(w, "enter email to add admin", 400)
                 return
         }
 
-	if err := env.ds.addAdmin(userData); err != nil {
+	if err := env.ds.AddAdmin(userData); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }

@@ -63,9 +63,8 @@
       <a id="adminLink" href="admin.html" class="item" style="display: none">
         Admin
       </a>
-      <button class="item" id='dbTest'>db test</button>
       <div class="right menu">
-        <div class="header item" id="signOutContainer" style="display: none;">
+        <div class="header item" id="signOutContainer">
           <a href="javascript:void(0)" id="signOutButton" onclick="onSignOut()">Sign Out</a>
         </div>
 
@@ -75,8 +74,8 @@
           data-callback="handleCredentialResponse">
         </div>
 
-        <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
-        <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
+        <div class="g_id_signin" data-callback="onSignIn" data-type="standard"></div>      
+        <!-- <div class="g-signin2 item" data-callback="onSignIn"></div> -->
       </div>
     </div>
 

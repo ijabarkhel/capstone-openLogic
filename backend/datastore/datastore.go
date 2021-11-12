@@ -43,28 +43,28 @@ type Solution struct {
 }
 
 type User struct{
-	id				int
-	email			string
-	name			string
-	permissions		string
+	Id				int
+	Email			string
+	Name			string
+	Permissions		string
 }
 
 type ProblemSet struct{
-	id				int
-	problemId 		int
-	name			string
+	Id				int
+	ProblemId 		int
+	Name			string
 }
 
 type Section struct{
-	id 				int
-	userId			int
-	name			string
-	role			string//the user's role in the section
+	Id 				int
+	UserId			int
+	Name			string
+	Role			string//the user's role in the section
 }
 
 type Assignment struct {
-	problemSetId	int
-	sectionId		int
+	ProblemSetId	int
+	SectionId		int
 }
 
 //type UserWithEmail interface {
@@ -82,7 +82,7 @@ type IProofStore interface {
 	GetSolutions(userId int, problemId int) ([]Solution, error)
 	DbPostTest(problem Problem) error
 	DbGetTest() ([]Problem, error)
-	addAdmin(userData User) error
+	AddAdmin(userData User) error
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -170,7 +170,7 @@ func (p *ProofStore) CreateTables() error {
 }
 
 func (p *ProofStore) getUsersById(id int) ([]User, error){
-	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.id = ?`);
+	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.Id = ?`);
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (p *ProofStore) getUsersById(id int) ([]User, error){
 	for rows.Next(){
 		var user User
 
-		rows.Scan(&user.id,&user.email,&user.name,&user.permissions)
+		rows.Scan(&user.Id,&user.Email,&user.Name,&user.Permissions)
 
 		users = append(users, user)
 	}
@@ -194,7 +194,7 @@ func (p *ProofStore) getUsersById(id int) ([]User, error){
 
 }
 
-func (p *ProofStore) addAdmin(userData User) error{
+func (p *ProofStore) AddAdmin(userData User) error{
 	//start a database transaction
 	tx, err := p.db.Begin()
 	if err != nil {
@@ -211,7 +211,7 @@ func (p *ProofStore) addAdmin(userData User) error{
 		return errors.New("Transaction prepare error")
 	}
 
-	_, err = stmt.Exec(userData.email, userData.name, userData.permissions)
+	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
