@@ -274,10 +274,10 @@ func (p *ProofStore) DbPostTest(problem Problem) error{
 	}
 
 	stmt, err := tx.Prepare(`INSERT INTO problems(ownerId, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
-	}
+	}	
+	defer stmt.Close()
 
 	premiseJSON, err := json.Marshal(problem.Premise)
 	if err != nil {
