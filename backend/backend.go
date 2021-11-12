@@ -213,12 +213,14 @@ func main() {
 	Env := &Env{ds} // Put the instance into a struct to share between threads
 	
 	portPtr := flag.String("port", "8080", "Port to listen on")
-	/*
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")
-	
+	log.Println(*doClearDatabase) 
+	log.Println(*doPopulateDatabase)
 	
 	flag.Parse() // Check for command-line arguments
+	/*	
+	
 	if *doClearDatabase {
 		Env.clearDatabase()
 	}
@@ -248,6 +250,6 @@ func main() {
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
 	http.Handle("/test",http.HandlerFunc(handlerTest))
 
-	log.Println("Server started on: 127.0.0.1:8080" )
+	log.Println("Server started on: 127.0.0.1:"+(*portPtr) )
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }
