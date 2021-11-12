@@ -78,7 +78,7 @@ type IProofStore interface {
 	Close() error
 	CreateTables() error
 	StoreSolution(solution Solution) error
-	GetSolutions(userId int, problemId int) ([]Solution, error)
+	GetSolutions(userEmail int, problemId int) ([]Solution, error)
 	DbPostTest(problem Problem) error
 	DbGetTest() ([]Problem, error)
 	//Empty() error
@@ -99,7 +99,7 @@ func (p *ProofStore) CreateTables() error {
 		proofType TEXT,--Either 'prop' (propositional/tfl) or 'fol' (first order logic)
 		premise TEXT,--array of premise strings stored as JSON strings
 		conclusion TEXT,--string representing the conclusion of the proof
-		FOREIGN KEY(userId) REFERENCES users(id)
+		FOREIGN KEY(userEmail) REFERENCES users(id)
 	);`)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func (p *ProofStore) CreateTables() error {
 		solutionStatus TEXT,--stores the result of the solution: correct, incorrect, error
 		timeSubmitted DATETIME,--Time the solution was submitted to the server
 		FOREIGN KEY (problemID) REFERENCES problems(id),
-		FOREIGN KEY(userId) REFERENCES users(id)
+		FOREIGN KEY(userEmail) REFERENCES users(id)
 	);
 	`)
 	if err != nil {
@@ -146,8 +146,8 @@ func (p *ProofStore) CreateTables() error {
 		userEmail TEXT NOT NULL,--the email of the user who is a part of the section
 		name TEXT,-- the name of the section
 		role TEXT,--describes the users role in the section, professor, student, ta
-		FOREIGN KEY(userId) REFERENCES users(Id),
-		PRIMARY KEY(id,userId)
+		FOREIGN KEY(userEmail) REFERENCES users(Id),
+		PRIMARY KEY(id,userEmail)
 	);`)
 	if err != nil {
 		return err
@@ -166,28 +166,28 @@ func (p *ProofStore) CreateTables() error {
 	return nil
 }
 
-func (p *ProofStore) getUsersById(id int) ([]User, error){
-	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.id = ?`);
+
+func (p *ProofStore) getUserByEmail(userEmail string) (User, error){
+	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.email = ?`);
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(id)
+	rows, err := stmt.Query(userEmail)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []User
 	for rows.Next(){
 		var user User
 
-		rows.Scan(&user.id,&user.email,&user.name,&user.permissions)
+		rows.Scan(&user.email,&user.name,&user.permissions)
 
-		users = append(users, user)
+		return user, nil
 	}
-	return users, nil;
+	return nil, erros.New("No user found in table users");
 
 }
 
@@ -200,7 +200,7 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 
 	stmt, err := tx.Prepare(`INSERT INTO solutions (
 							ProblemId,
-							UserID,
+							userEmail,
 							Logic,
 							Rules,
 							SolutionStatus,
@@ -228,13 +228,13 @@ func (p *ProofStore) StoreSolution(solution Solution) error{
 	return nil
 }
 
-func (p *ProofStore) GetSolutions(userId int, problemId int) ([]Solution, error){
-	stmt, err := p.db.Prepare(`SELECT * FROM solutions WHERE solutions.userId=? AND solutions.problemId=?`)
+func (p *ProofStore) GetSolutions(userEmail string, problemId int) ([]Solution, error){
+	stmt, err := p.db.Prepare(`SELECT * FROM solutions WHERE solutions.userEmail=? AND solutions.problemId=?`)
 	if err != nil{
 		return nil, err
 	}
 
-	rows, err := stmt.Query(userId,problemId)
+	rows, err := stmt.Query(userEmail,problemId)
 	if err != nil{
 		return nil, err
 	}
@@ -246,7 +246,7 @@ func (p *ProofStore) GetSolutions(userId int, problemId int) ([]Solution, error)
 		var LogicJSON string
 		var RulesJSON string
 
-		err := rows.Scan(&s.Id, &s.ProblemId, &s.UserId, &LogicJSON, &RulesJSON, &s.SolutionStatus, &s.TimeSubmitted)
+		err := rows.Scan(&s.Id, &s.ProblemId, &s.userEmail, &LogicJSON, &RulesJSON, &s.SolutionStatus, &s.TimeSubmitted)
 		if err != nil{
 			return nil, err
 		}
