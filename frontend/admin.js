@@ -3,16 +3,16 @@
 function showAddAdmin() {
     $('#addOrDeleteSection').hide();
     $('#addOrDeleteStudent').hide();
+    $('#displaySummary').hide();
     $('#displaySummaryTable').hide();
-    $('#displayTable').show();
     $('#addAdmin').show();
 }
 
 function showAddStudent() {
     $('#addOrDeleteSection').hide();
     $('#addAdmin').hide();
+    $('#displaySummary').hide();
     $('#displaySummaryTable').hide();
-    $('#displayTable').show();
     $('#addOrDeleteStudent').show();
 }
 
@@ -20,7 +20,7 @@ function showSection() {
     $('#addOrDeleteStudent').hide();
     $('#addAdmin').hide();
     $('#displaySummaryTable').hide();
-    $('#displayTable').show();
+    $('#displaySummary').hide();
     $('#addOrDeleteSection').show();
 }
 

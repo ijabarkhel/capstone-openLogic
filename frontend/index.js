@@ -139,6 +139,7 @@ class User {
 
    showAdminFunctionality() {
       $('#adminLink').show();
+      $('#adminSignIn').show();
       return this;
    }
 
