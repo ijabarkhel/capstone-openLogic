@@ -31,11 +31,7 @@
 
     <!-- updated api call for signin -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <div id="g_id_onload"
-        data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse">
-    </div>
-
+    
 
     <!-- Sign in with Google Client ID -->
     <!-- <meta name="google-signin-client_id" content="266670200080-to3o173goghk64b6a0t0i04o18nt2r3i.apps.googleusercontent.com"> -->
@@ -44,6 +40,10 @@
     <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
     <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
     <script type="text/javascript" src="index.js"></script>
+    <!-- scripts, bootstrap -->
+    <!-- <script>src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"</script>
+    <script>src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"</script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
   </head>
 
   <body>
@@ -60,14 +60,22 @@
       <a href="help.html" class="item">
         Help
       </a>
-      <a href="admin.html" class="item">
+      <a id="adminLink" href="admin.html" class="item" style="display: none">
         Admin
       </a>
-      <button class="item" id='dbTest'>db test</button>
       <div class="right menu">
-        <div class="header item"><a id="user-email" class="item"></a></div>
-        <div class="g_id_signin" data-onsuccess="onSignIn" data-type="standard"></div>      
-        <!-- <div class="g-signin2 item" data-onsuccess="onSignIn"></div> -->
+        <div class="header item" id="signOutContainer">
+          <a href="javascript:void(0)" id="signOutButton" onclick="onSignOut()">Sign Out</a>
+        </div>
+
+        <!-- <div class="header item"><a id="user-email" class="item"></a></div> -->
+        <div id="g_id_onload"
+          data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse">
+        </div>
+
+        <div class="g_id_signin" data-callback="onSignIn" data-type="standard"></div>      
+        <!-- <div class="g-signin2 item" data-callback="onSignIn"></div> -->
       </div>
     </div>
 

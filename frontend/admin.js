@@ -31,6 +31,19 @@ function showSummary() {
     $('#displaySummary').show();
 }
 
+function addAdmin() {
+    let adminEmail = $('#adminEmail').text();
+    if (adminEmail) {
+       let userData = new User(adminEmail, adminName, "admin");
+
+       backendPost('addAdmin', userData).then(
+	(data) => {
+	  console.log('admin added', data);
+	}, console.log)
+
+    }
+}
+
 
 $(document).ready(function () {
 
