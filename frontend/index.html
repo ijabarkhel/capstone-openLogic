@@ -64,17 +64,17 @@
         Admin
       </a>
       <div class="right menu">
-        <div class="header item" id="signOutContainer">
+        <div class="header item" id="signOutContainer" style="display: none">
           <a href="javascript:void(0)" id="signOutButton" onclick="onSignOut()">Sign Out</a>
         </div>
 
         <!-- <div class="header item"><a id="user-email" class="item"></a></div> -->
         <div id="g_id_onload"
           data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com"
-          data-callback="handleCredentialResponse">
+          data-callback="onSignIn">
         </div>
 
-        <div class="g_id_signin" data-callback="onSignIn" data-type="standard"></div>      
+        <div class="g_id_signin" data-type="standard"></div>      
         <!-- <div class="g-signin2 item" data-callback="onSignIn"></div> -->
       </div>
     </div>
@@ -203,20 +203,5 @@
     </div>
 </div>
 
-<!-- Administration Interface -->
-<div class="ui modal">
-  <i class="close icon"></i>
-  <div class="header">
-    Administrator Options
-  </div>
-  <div class="content">
-    <button class="downloadCSV">Download Student Problems as CSV</button>
-  </div>
-  <div class="actions">
-    <div class="ui black deny button">
-      Close
-    </div>
-  </div>
-</div>
 </body>
 </html>
