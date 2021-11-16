@@ -294,7 +294,7 @@ func main() {
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
 	// method addAdmin : POST : JSON <- id_token, admin
-	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.addAdmin)))
+	http.Handle("/addAdmin", tokenauth.WithValidToken(http.HandlerFunc(Env.addAdmin)))
 
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
