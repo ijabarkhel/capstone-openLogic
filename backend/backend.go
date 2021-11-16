@@ -120,7 +120,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//change old front end data to new format
 	var solution datastore.Solution
 	solution.ProblemId = submittedProof.Id
-	solution.UserId = 0//
+	solution.UserEmail = "whayden@csumb.edu"//
 	solution.Logic = submittedProof.Logic
 	solution.Rules = submittedProof.Rules
 	solution.SolutionStatus = submittedProof.ProofCompleted
@@ -222,12 +222,18 @@ func (env *Env) clearDatabase() {
 	}
 }
 */
+func handlerTest(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("Hello world"))
+}
 
 func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 	testData, err := env.ds.DbGetTest()
 	if err != nil{
 		log.Fatal(err)
 	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(testData)
 }
 
@@ -245,6 +251,7 @@ func main() {
 
 	ds, err := datastore.New(database_uri)
 	if err != nil {
+		log.Println("database connection failed to initialize")
 		log.Fatal(err)
 	}
 	defer ds.Close()
@@ -256,22 +263,23 @@ func main() {
 	
 	Env := &Env{ds} // Put the instance into a struct to share between threads
 	
-	portPtr := flag.String("port", "8080", "Port to listen on")
-	/*
 	doClearDatabase := flag.Bool("cleardb", false, "Remove all proofs from the database")
 	doPopulateDatabase := flag.Bool("populate", false, "Add sample data to the public repository.")
-	
-	
+	portPtr := flag.String("port", "8080", "Port to listen on")
+
 	flag.Parse() // Check for command-line arguments
 	if *doClearDatabase {
-		Env.clearDatabase()
+		log.Println("cleardb")
+		//Env.clearDatabase()
 	}
 	if *doPopulateDatabase {
-		Env.populateTestData()
+		log.Println("popdb")
+		//Env.populateTestData()
 	}
-	*/
+
+
 	var problem datastore.Problem
-	problem.OwnerId = 1
+	problem.UserEmail = "whayden@csumb.edu"
 	problem.ProofName = "Test"
 	problem.ProofType = "prop"
 	problem.Premise = []string{"P"}
@@ -293,11 +301,12 @@ func main() {
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
+	http.Handle("/test",http.HandlerFunc(handlerTest))
 
+	log.Println("Server started on: 127.0.0.1:"+(*portPtr) )
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
 	
-	log.Println("Server started on: 127.0.0.1:8080" )
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }

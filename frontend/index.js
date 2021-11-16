@@ -4,7 +4,7 @@ const repositoryData = {
    'userProofs': [],
    'repoProofs': [],
    'completedUserProofs': []
-}
+};
 
 let adminUsers = [];
 
@@ -113,7 +113,7 @@ class User {
       // this.domain = googleUser.getHostedDomain();
       // this.email = this.profile.getEmail();
       // this.name = this.profile.getName();
-      this.profile = googleUser.sub //sub contains the unique ID of the google user.
+      this.profile = googleUser.sub; //sub contains the unique ID of the google user.
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
@@ -244,7 +244,7 @@ function authenticatedBackendPOST(path_str, data_obj, id_token) {
       (jqXHR, textStatus, errorThrown) => {
 	 console.error(textStatus, errorThrown);
       }
-   )
+   );
 }
 
 // For administrators only - backend requires valid admin token
@@ -359,7 +359,13 @@ function loadUserCompletedProofs() {
 }
 
 $(document).ready(function() {
-   
+   $('#dbTest').click(function(){
+      console.log("dbGetTest");
+      $.get('/backend/dbgettest',function(data,status){
+         console.log(status);
+         console.log(data);
+      })
+   });
    
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
