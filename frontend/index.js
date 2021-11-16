@@ -7,7 +7,6 @@ const repositoryData = {
 };
 
 let adminUsers = [];
-
 /**
  * This function is called by the Google Sign-in Button
  * @param {*} googleUser 
@@ -41,13 +40,25 @@ let adminUsers = [];
 //   "jti": "abc161803398874def"
 // }
  /////////
+function decodeJwtResponse(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+};
+
+
 
 function handleCredentialResponse(response) {
    // decodeJwtResponse() is a custom function defined by you
    // to decode the credential response.
-   //const responsePayload = decodeJwtResponse(response.credential);
-   const responsePayload = response.credential;
-   console.log(responsePayLoad);
+   const responsePayload = decodeJwtResponse(response.credential);
+
+   //const responsePayload = response.credential;
+   console.log(responsePayload);
    console.log("ID: " + responsePayload.sub);
    console.log("Hosted Domain: " + responsePayload.hd);
    console.log('Full Name: ' + responsePayload.name);
@@ -55,9 +66,6 @@ function handleCredentialResponse(response) {
    console.log('Family Name: ' + responsePayload.family_name);
    console.log("Image URL: " + responsePayload.picture);
    console.log("Email: " + responsePayload.email);
-   new User(responsePayload)
-      .initializeDisplay()
-      .loadProofs();
 }
 ///////
 ////
@@ -68,31 +76,28 @@ function handleCredentialResponse(response) {
  */
 
 //Updated onSignin function
-function onSignIn(googleUser) {
+function onSignIn(response) {
+   console.log("onSignIn", response);
+   const googleUser = decodeJwtResponse(response.credential);
    console.log("onSignIn", googleUser);
-
-   //new addition to function.(for migration process, test later.) **//
-   google.accounts.id.initialize({
-      client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com',
-      callback: handleCredentialResponse
-   });
-   google.accounts.id.prompt();
-
    $.getJSON('/backend/admins', (admins) => {
+     console.log(admins);
      try {
-	adminUsers = admins['Admins'];
+  	adminUsers = admins['Admins'];
      } catch(e) {
 	console.error('Unable to load admin users', e);
      }
-
    });
-   //make signout button visible on signin.
-   //document.getElementById("signOutButton").style.display = "block";
-   $('#signOutContainer').show();
-   // This response will be cached after the first page load
+
+   setTimeout( function () {
       new User(googleUser)
 	 .initializeDisplay()
-	 .loadProofs();   
+	 .loadProofs();
+      location.reload();
+   }, 1000);
+   //make signout button visible on signin.
+   //document.getElementById("signOutButton").style.display = "block";
+   // This response will be cached after the first page load
 }
 
 //onSignOut function for user.
@@ -101,6 +106,8 @@ function onSignOut() {
    google.accounts.id.disableAutoSelect();
    //document.getElementById("signOutButton").style.display = "none";
    $('#signOutContainer').hide();
+   localStorage.removeItem("adminLogin");
+   localStorage.removeItem("userSignedIn");
 }
 
 /**
@@ -117,14 +124,16 @@ class User {
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
-      this.emailVerified = googleَUser.email_verified;
+      //this.emailVerified = googleَUser.email_verified;
       this.expiration = googleUser.exp;
 
+      console.log(this.profile);
       if (adminUsers.indexOf(this.email) > -1) {
 	 console.log('Logged in as an administrator.');
 	 this.showAdminFunctionality();
+         localStorage.setItem("adminLogin", true);
       }
-
+      localStorage.setItem("userSignedIn", true);
       this.attachSignInChangeListener();
       return this;
    }
@@ -367,7 +376,16 @@ $(document).ready(function() {
          console.log(data);
       })
    });
-   
+
+   if (localStorage.getItem("adminLogin")) {
+      $('#adminLink').show();
+      $('#adminSignIn').show();
+   }
+
+   if (localStorage.getItem("userSignedIn")) {
+      $('#signOutContainer').show();
+   }
+
    // store proof when check button is clicked
    $('.proofContainer').on('checkProofEvent', (event) => {
       console.log(event, event.detail, event.detail.proofdata);
