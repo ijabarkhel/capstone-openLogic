@@ -26,9 +26,12 @@ var (
 	}
 
 	admin_users = map[string]bool{
-        "sislam@csumb.edu":   true,
+	        "sislam@csumb.edu":   true,
 		"gbruns@csumb.edu":   true,
 		"cohunter@csumb.edu": true,
+		"ijabarkhel@csumb.edu": true,
+		"dediriweera@csumb.edu": true,
+		"whayden@csumb.edu": true,
 	}
 
 	// When started via systemd, WorkingDirectory is set to one level above the public_html directory
@@ -42,6 +45,54 @@ type userWithEmail interface {
 type Env struct {
 	ds datastore.IProofStore
 }
+
+func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
+	//var user userWithEmail
+	//user = req.Context().Value("tok").(userWithEmail)
+
+	var userData datastore.User
+
+	if err := json.NewDecoder(req.Body).Decode(&userData); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", userData)
+
+	if len(userData.Email) == 0 {
+                http.Error(w, "enter email to add admin", 400)
+                return
+        }
+
+	if err := env.ds.AddAdmin(userData); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
+func getAdmins(w http.ResponseWriter, req *http.Request) {
+	type adminUsers struct {
+		Admins []string
+	}
+	var admins adminUsers
+	for adminEmail := range admin_users {
+		admins.Admins = append(admins.Admins, adminEmail)
+	}
+	output, err := json.Marshal(admins)
+	if err != nil {
+		http.Error(w, "Error returning admin users.", 500)
+		return
+	}
+
+	// Allow browsers and intermediaries to cache this response for up to a day (86400 seconds)
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	io.WriteString(w, string(output))
+}
+
 
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
@@ -242,6 +293,9 @@ func main() {
 	// method saveproof : POST : JSON <- id_token, proof
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
+	// method addAdmin : POST : JSON <- id_token, admin
+	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.addAdmin)))
+
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
 
@@ -250,5 +304,9 @@ func main() {
 	http.Handle("/test",http.HandlerFunc(handlerTest))
 
 	log.Println("Server started on: 127.0.0.1:"+(*portPtr) )
+	// Get admin users -- this is a public endpoint, no token required
+	// Can be changed to require token, but would reduce cacheability
+	http.Handle("/admins", http.HandlerFunc(getAdmins))
+	
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }

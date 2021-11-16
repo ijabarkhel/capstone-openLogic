@@ -81,6 +81,7 @@ type IProofStore interface {
 	GetSolutions(userEmail string, problemId int) ([]Solution, error)
 	DbPostTest(problem Problem) error
 	DbGetTest() ([]Problem, error)
+	AddAdmin(userData User) error
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -166,10 +167,10 @@ func (p *ProofStore) CreateTables() error {
 	return nil
 }
 
-
 func (p *ProofStore) getUserByEmail(userEmail string) (User, error){
 	var user User
 	stmt, err := p.db.Prepare(`SELECT * FROM users WHERE users.email = ?`);
+
 	if err != nil {
 		return user, err
 	}
@@ -182,13 +183,37 @@ func (p *ProofStore) getUserByEmail(userEmail string) (User, error){
 	defer rows.Close()
 
 	for rows.Next(){
-
 		rows.Scan(&user.Email,&user.Name,&user.Permissions)
-
 		return user, nil
 	}
 	return user, errors.New("No user found in table users");
 
+}
+
+func (p *ProofStore) AddAdmin(userData User) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+	stmt, err := tx.Prepare(`INSERT INTO users (
+							email,
+							name,
+							permissions,)
+				 VALUES (?, ?, ?)`)
+	defer stmt.Close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
 }
 
 func (p *ProofStore) StoreSolution(solution Solution) error{
