@@ -26,7 +26,7 @@ var (
 	}
 
 	admin_users = map[string]bool{
-	        "sislam@csumb.edu":   true,
+	    "sislam@csumb.edu":   true,
 		"gbruns@csumb.edu":   true,
 		"cohunter@csumb.edu": true,
 		"ijabarkhel@csumb.edu": true,
@@ -284,8 +284,11 @@ func main() {
 	problem.ProofType = "prop"
 	problem.Premise = []string{"P"}
 	problem.Conclusion = "P"
-	Env.ds.DbPostTest(problem)
-
+	err = Env.ds.DbPostTest(problem)
+	if err != nil {
+		log.Println("db insertion test failed")
+		log.Pritln(err)
+	}
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
