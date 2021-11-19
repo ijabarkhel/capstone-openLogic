@@ -200,7 +200,7 @@ func (p *ProofStore) AddAdmin(userData User) error{
 	stmt, err := tx.Prepare(`INSERT INTO users (
 							email,
 							name,
-							permissions,)
+							permissions)
 				 VALUES (?, ?, ?)`)
 	defer stmt.Close()
 	if err != nil {
@@ -297,8 +297,14 @@ func (p *ProofStore) DbPostTest(problem Problem) error{
 	if err != nil{
 		return err
 	}
-
-	stmt, err := tx.Prepare(`INSERT INTO problems(ownerId, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
+	/*
+	problem.UserEmail = "whayden@csumb.edu"
+	problem.ProofName = "Test"
+	problem.ProofType = "prop"
+	problem.Premise = []string{"P"}
+	problem.Conclusion = "P"
+	*/
+	stmt, err := tx.Prepare(`INSERT INTO problems(userEmail, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}	
