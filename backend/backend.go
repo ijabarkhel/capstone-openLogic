@@ -173,7 +173,8 @@ func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Reques
 }
 
 func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
-
+	user := req.Context().Value("tok").(userWithEmail)
+	var sectionData datastore.Section
 	var sectionName string
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
@@ -189,7 +190,11 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
                 return
         }
 
-	if err := env.ds.CreateSection(sectionName); err != nil {
+	sectionData.UserEmail = user.GetEmail()
+	sectionData.Name = sectionName
+	sectionData.Role = "Admin"
+
+	if err := env.ds.CreateSection(sectionData); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -248,7 +253,7 @@ func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(SectionData)
+	json.NewEncoder(w).Encode(sectionData)
 
 }
 
@@ -476,28 +481,28 @@ func main() {
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
 	// method addAdmin : POST : JSON <- id_token, admin
-	http.Handle("/addAdmin", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.addAdmin)))
+	http.Handle("/addAdmin", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.addAdmin), admin_users))
 
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
 
 	// method deleteAdmin : POST : JSON <- id_token, admin
-	http.Handle("/deleteAdmin", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteAdmin)))
+	http.Handle("/deleteAdmin", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteAdmin), admin_users))
 
 	// method addStudentToSection : POST : JSON <- id_token, admin
-	http.Handle("/addStudentToSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.addStudentToSection)))
+	http.Handle("/addStudentToSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.addStudentToSection), admin_users))
 
 	// method deleteStudentFromSection : POST : JSON <- id_token, admin
-	http.Handle("/deleteStudentFromSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteStudentFromSection)))
+	http.Handle("/deleteStudentFromSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteStudentFromSection), admin_users))
 
 	// method createSection : POST : JSON <- id_token, admin
-	http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection)))
+	http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection), admin_users))
 
 	// method deleteSection : POST : JSON <- id_token, admin
-	http.Handle("/deleteSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteSection)))
+	http.Handle("/deleteSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteSection), admin_users))
 
 	// method getSectionData : POST : JSON <- id_token, admin
-	http.Handle("/getSectionData", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.getSectionData)))
+	http.Handle("/getSectionData", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.getSectionData), admin_users))
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))

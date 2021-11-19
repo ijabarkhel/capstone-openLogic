@@ -229,7 +229,7 @@ func (p *ProofStore) DeleteAdmin(userData string) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`DELETE FROM users WHERE users.email = ?`)
+	stmt, err := tx.Prepare(`DELETE FROM users WHERE users.email = ? AND users.permissions = 'Admin'`)
 	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
@@ -278,7 +278,7 @@ func (p *ProofStore) DeleteStudentFromSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ?`)
+	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ? AND sections.role = 'Student'`)
 	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
@@ -352,19 +352,18 @@ func (p *ProofStore) GetSectionData(sectionName string) ([]Section, error){
 
 	for rows.Next(){
 		var section Section
-		var PremiseJSON string
 
-		rows.Scan(&section.userEmail, &section.Name)
+		rows.Scan(&section.UserEmail, &section.Name)
 
 		if(err !=nil){
 			return nil, err
 		}
 
-		sections = append(sectionss, section)
-		return sectionss, nil
+		sections = append(sections, section)
+		return sections, nil
 	}
 
-	return sectionss, nil
+	return sections, nil
 }
 
 func (p *ProofStore) StoreSolution(solution Solution) error{

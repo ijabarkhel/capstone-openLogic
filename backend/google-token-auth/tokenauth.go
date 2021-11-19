@@ -97,7 +97,7 @@ func Verify(token string) (TokenData, bool) {
 
 // Verify a Google-issued JWT token
 // return the token data and whether it is admin and valid
-func VerifyAdmin(token string) (TokenData, bool) {
+func VerifyAdmin(token string, admin_users map[string]bool) (TokenData, bool) {
 	tok_cached, err := getFromCache(token)
 	if err == nil {
 		// Return data and validity from cache (does not respect expiration)
@@ -110,7 +110,7 @@ func VerifyAdmin(token string) (TokenData, bool) {
 		return tok, false
 	}
 
-	valid := isAdmin(tok)
+	valid := isAdmin(tok, admin_users)
 
 	go addToCache(token, tok, valid)
 
@@ -142,7 +142,7 @@ func WithValidToken(next http.Handler) http.Handler {
 
 // Middleware to validate a Google-issued JWT before processing the request
 // Assumes the request is NOT cross-origin, and so does not send CORS headers
-func WithValidAdminToken(next http.Handler) http.Handler {
+func WithValidAdminToken(next http.Handler, admin_users map[string]bool) http.Handler {
 	return http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" || req.Body == nil {
 			http.Error(w, "Request not authorized.", 401);
@@ -151,7 +151,7 @@ func WithValidAdminToken(next http.Handler) http.Handler {
 
 		log.Println(req.Header.Get("X-Auth-Token"))
 		
-		tok, valid := VerifyAdmin(req.Header.Get("X-Auth-Token"))
+		tok, valid := VerifyAdmin(req.Header.Get("X-Auth-Token"), admin_users)
 		if !valid {
 			http.Error(w, "Token not valid.", 401)
 			return
