@@ -145,7 +145,7 @@ function deleteSection() {
 
        /*backendPost('deleteSection', sectionName).then(
 	(data) => {
-	  console.log('section created', data);
+	  console.log('section deleted', data);
 	}, console.log)
 	*/
     } else {
