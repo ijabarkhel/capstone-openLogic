@@ -167,7 +167,7 @@ class User {
       //what is being used to determine a user's signin status?
       //Plausible solution: use JWT's user ID and attach signInListener().
       //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
-      this.profile.isSignedIn.listen(this.signInChangeListener);
+      this.profile.isSignedIn().listen(this.signInChangeListener);
       //this.profile.signInChangeListener();
       return this;
    }
