@@ -82,6 +82,12 @@ type IProofStore interface {
 	DbPostTest(problem Problem) error
 	DbGetTest() ([]Problem, error)
 	AddAdmin(userData User) error
+	DeleteAdmin(userData string) error
+	AddStudentToSection(sectionData Section) error
+	DeleteStudentFromSection(sectionData Section) error
+	CreateSection(sectionData Section) error
+	DeleteSection(sectionName string) error
+	GetSectionData(sectionName string) ([]Section, error)
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -200,20 +206,165 @@ func (p *ProofStore) AddAdmin(userData User) error{
 	stmt, err := tx.Prepare(`INSERT INTO users (
 							email,
 							name,
-							permissions,)
+							permissions)
 				 VALUES (?, ?, ?)`)
 	defer stmt.Close()
+	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 
-	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
 	tx.Commit()
 
 	return nil
+}
+
+func (p *ProofStore) DeleteAdmin(userData string) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+	stmt, err := tx.Prepare(`DELETE FROM users WHERE users.email = ?`)
+	defer stmt.Close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	_, err = stmt.Exec(userData)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
+}
+
+func (p *ProofStore) AddStudentToSection(sectionData Section) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+
+	stmt, err := tx.Prepare(`INSERT INTO sections (
+							userEmail,
+							name,
+							role,)
+				 VALUES (?, ?, ?)`)
+	defer stmt.Close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
+}
+
+func (p *ProofStore) DeleteStudentFromSection(sectionData Section) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ?`)
+	defer stmt.Close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
+}
+
+func (p *ProofStore) CreateSection(sectionData Section) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+	stmt, err := tx.Prepare(`INSERT INTO section (
+							userEmail,
+							name,
+							role)
+				 VALUES (?, ?, ?)`)
+	defer stmt.Close()
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
+}
+
+func (p *ProofStore) DeleteSection(sectionName string) error{
+	//start a database transaction
+	tx, err := p.db.Begin()
+	if err != nil {
+		return errors.New("Database transaction begin error")
+	}
+
+	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.name = ?`)
+	defer stmt.Close()
+	if err != nil {
+		return errors.New("Transaction prepare error")
+	}
+
+	_, err = stmt.Exec(sectionName)
+	if err != nil {
+		return errors.New("Statement exec error")
+	}
+	tx.Commit()
+
+	return nil
+}
+
+func (p *ProofStore) GetSectionData(sectionName string) ([]Section, error){
+	rows, err := p.db.Query("SELECT * FROM sections WHERE sections.Name = ?", sectionName)
+	if err != nil{
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var sections []Section
+
+	for rows.Next(){
+		var section Section
+		var PremiseJSON string
+
+		rows.Scan(&section.userEmail, &section.Name)
+
+		if(err !=nil){
+			return nil, err
+		}
+
+		sections = append(sectionss, section)
+		return sectionss, nil
+	}
+
+	return sectionss, nil
 }
 
 func (p *ProofStore) StoreSolution(solution Solution) error{
@@ -298,9 +449,10 @@ func (p *ProofStore) DbPostTest(problem Problem) error{
 		return err
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO problems(ownerId, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
+	stmt, err := tx.Prepare(`INSERT INTO problems(userEmail, proofName, proofType, premise, conclusion) VALUES(?,?,?,?,?)`)
 	if err != nil {
-		return errors.New("Transaction prepare error")
+		return err
+		//return errors.New("Transaction prepare error")
 	}	
 	defer stmt.Close()
 

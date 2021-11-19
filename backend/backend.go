@@ -65,6 +65,12 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
                 return
         }
 
+
+	if len(userData.Name) == 0 {
+                http.Error(w, "enter fullname to add admin", 400)
+                return
+        }
+
 	if err := env.ds.AddAdmin(userData); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
@@ -72,6 +78,178 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	io.WriteString(w, `{"success": "true"}`)
+}
+
+
+func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
+	//var user userWithEmail
+	//user = req.Context().Value("tok").(userWithEmail)
+
+	var userData string
+
+	if err := json.NewDecoder(req.Body).Decode(&userData); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", userData)
+
+	if len(userData) == 0 {
+                http.Error(w, "enter email to delete admin", 400)
+                return
+        }
+
+	if err := env.ds.DeleteAdmin(userData); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
+
+func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
+
+	var sectionData datastore.Section
+
+	if err := json.NewDecoder(req.Body).Decode(&sectionData); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", sectionData)
+
+	if len(sectionData.UserEmail) == 0 {
+                http.Error(w, "enter email for user to add it to section", 400)
+                return
+        }
+
+	if len(sectionData.Name) == 0 {
+                http.Error(w, "enter section name to add a student in it", 400)
+                return
+        }
+
+	if err := env.ds.AddStudentToSection(sectionData); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
+func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Request) {
+
+	var sectionData datastore.Section
+
+	if err := json.NewDecoder(req.Body).Decode(&sectionData); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", sectionData)
+
+	if len(sectionData.UserEmail) == 0 {
+                http.Error(w, "enter email for user to delete it from section", 400)
+                return
+        }
+
+	if len(sectionData.Name) == 0 {
+                http.Error(w, "enter section name to delete a student", 400)
+                return
+        }
+
+	if err := env.ds.DeleteStudentFromSection(sectionData); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
+func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
+
+	var sectionName string
+
+	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", sectionName)
+
+	if len(sectionName) == 0 {
+                http.Error(w, "enter section name to create section", 400)
+                return
+        }
+
+	if err := env.ds.CreateSection(sectionName); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
+func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
+
+	var sectionName string
+
+	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", sectionName)
+
+	if len(sectionName) == 0 {
+                http.Error(w, "enter section name to delete section", 400)
+                return
+        }
+
+	if err := env.ds.DeleteSection(sectionName); err != nil {
+                http.Error(w, err.Error(), 500)
+                return
+        }
+
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"success": "true"}`)
+}
+
+func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
+
+	var sectionName string
+
+	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
+                log.Println(err)
+                http.Error(w, err.Error(), 400)
+                return
+        }
+
+	log.Printf("%+v", sectionName)
+
+	if len(sectionName) == 0 {
+                http.Error(w, "enter section name to create section", 400)
+                return
+        }
+
+	sectionData, err := env.ds.GetSectionData(sectionName)
+	if err != nil{
+		log.Fatal(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(SectionData)
+
 }
 
 func getAdmins(w http.ResponseWriter, req *http.Request) {
@@ -284,7 +462,11 @@ func main() {
 	problem.ProofType = "prop"
 	problem.Premise = []string{"P"}
 	problem.Conclusion = "P"
-	Env.ds.DbPostTest(problem)
+	err = Env.ds.DbPostTest(problem)
+	if err != nil{
+		log.Println("db insertion test failed")
+		log.Println(err)
+	}
 
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
@@ -294,10 +476,28 @@ func main() {
 	http.Handle("/saveproof", tokenauth.WithValidToken(http.HandlerFunc(Env.saveProof)))
 
 	// method addAdmin : POST : JSON <- id_token, admin
-	http.Handle("/addAdmins", tokenauth.WithValidToken(http.HandlerFunc(Env.addAdmin)))
+	http.Handle("/addAdmin", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.addAdmin)))
 
 	// method user : POST : JSON -> [proof, proof, ...]
 	http.Handle("/proofs", tokenauth.WithValidToken(http.HandlerFunc(Env.getProofs)))
+
+	// method deleteAdmin : POST : JSON <- id_token, admin
+	http.Handle("/deleteAdmin", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteAdmin)))
+
+	// method addStudentToSection : POST : JSON <- id_token, admin
+	http.Handle("/addStudentToSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.addStudentToSection)))
+
+	// method deleteStudentFromSection : POST : JSON <- id_token, admin
+	http.Handle("/deleteStudentFromSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteStudentFromSection)))
+
+	// method createSection : POST : JSON <- id_token, admin
+	http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection)))
+
+	// method deleteSection : POST : JSON <- id_token, admin
+	http.Handle("/deleteSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteSection)))
+
+	// method getSectionData : POST : JSON <- id_token, admin
+	http.Handle("/getSectionData", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.getSectionData)))
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
