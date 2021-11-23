@@ -93,13 +93,12 @@ function onSignIn(response) {
       new User(googleUser)
 	 .initializeDisplay()
 	 .loadProofs();
-      location.reload();
    }, 1000);
    //make signout button visible on signin.
    //document.getElementById("signOutButton").style.display = "block";
    // This response will be cached after the first page load
 }
-
+/*
 //onSignOut function for user.
 //call the method google.accounts.id.disableAutoSelect to record the status in cookies. 
 function onSignOut() {
@@ -109,7 +108,7 @@ function onSignOut() {
    localStorage.removeItem("adminLogin");
    localStorage.removeItem("userSignedIn");
 }
-
+*/
 /**
  * Class for functionality specific to user sign-in/authentication
  */
@@ -167,14 +166,13 @@ class User {
       //what is being used to determine a user's signin status?
       //Plausible solution: use JWT's user ID and attach signInListener().
       //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
-      this.profile.isSignedIn().listen(this.signInChangeListener);
+      //this.profile.isSignedIn().listen(this.signInChangeListener);
       //this.profile.signInChangeListener();
       return this;
    }
    
    signInChangeListener(loggedIn) {
       console.log('Sign in status changed', loggedIn);
-      window.location.reload();
    }
 
    static isSignedIn() {

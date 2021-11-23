@@ -95,6 +95,28 @@ func Verify(token string) (TokenData, bool) {
 	return tok, valid
 }
 
+// Verify a Google-issued JWT token
+// return the token data and whether it is admin and valid
+func VerifyAdmin(token string, admin_users map[string]bool) (TokenData, bool) {
+	tok_cached, err := getFromCache(token)
+	if err == nil {
+		// Return data and validity from cache (does not respect expiration)
+		return tok_cached.data, tok_cached.valid
+	}
+
+	tok, err := decodeByApi(token)
+	if err != nil {
+		log.Println("token decode error", err)
+		return tok, false
+	}
+
+	valid := isAdmin(tok, admin_users)
+
+	go addToCache(token, tok, valid)
+
+	return tok, valid
+}
+
 // Middleware to validate a Google-issued JWT before processing the request
 // Assumes the request is NOT cross-origin, and so does not send CORS headers
 func WithValidToken(next http.Handler) http.Handler {
@@ -107,6 +129,29 @@ func WithValidToken(next http.Handler) http.Handler {
 		log.Println(req.Header.Get("X-Auth-Token"))
 		
 		tok, valid := Verify(req.Header.Get("X-Auth-Token"))
+		if !valid {
+			http.Error(w, "Token not valid.", 401)
+			return
+		}
+
+		ctx := context.WithValue(req.Context(), "tok", tok)
+
+		next.ServeHTTP(w, req.WithContext(ctx))
+	})
+}
+
+// Middleware to validate a Google-issued JWT before processing the request
+// Assumes the request is NOT cross-origin, and so does not send CORS headers
+func WithValidAdminToken(next http.Handler, admin_users map[string]bool) http.Handler {
+	return http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
+		if req.Method != "POST" || req.Body == nil {
+			http.Error(w, "Request not authorized.", 401);
+			return
+		}
+
+		log.Println(req.Header.Get("X-Auth-Token"))
+		
+		tok, valid := VerifyAdmin(req.Header.Get("X-Auth-Token"), admin_users)
 		if !valid {
 			http.Error(w, "Token not valid.", 401)
 			return
@@ -213,4 +258,17 @@ func isValid(td TokenData) bool {
 	}
 
 	return true
+}
+
+// Check token data for validity and adminship
+// https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
+// Returns true (valid token) or false (invalid)
+func isAdmin(td TokenData, admin_users map[string]bool ) bool {
+	// validate admin
+	if !admin_users[td.Email] {
+		log.Printf("Unauthorized admin: %#v", td.Email)
+		return false
+	}
+
+	return isValid(td)
 }

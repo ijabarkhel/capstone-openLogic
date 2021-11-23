@@ -1,5 +1,49 @@
 'use strict';
 
+// Verifies signed in and valid token, then calls authenticatedBackendPOST
+// Returns a promise which resolves to the response body or undefined
+function backendPOST(path_str, data_obj) {
+   //needs to be changed, cannot use isSignedIn(), it is no longer supported.
+   if (!User.isSignedIn()) {
+      console.warn('Cannot send POST request to backend from unknown user.');
+      if (sessionStorage.getItem('loginPromptShown') == null) {
+         alert('You are not signed in.\nTo save your work, please sign in and then try again, or refresh the page.');
+         sessionStorage.setItem('loginPromptShown', "true");
+      }
+
+      return Promise.reject( 'Unauthenticated user' );
+   }
+
+   if (User.isTokenExpired()) {
+      console.warn('Token expired; attempting to refresh token.');
+      return User.refreshToken().then(
+         (googleUser) => authenticatedBackendPOST(path_str, data_obj, googleUser.id_token));
+   } else {
+      return authenticatedBackendPOST(path_str, data_obj, User.getIdToken());
+   }
+}
+
+// Send a POST request to the backend, with auth token included
+function authenticatedBackendPOST(path_str, data_obj, id_token) {
+   return $.ajax({
+      url: '/backend/' + path_str,
+      method: 'POST',
+      data: JSON.stringify(data_obj),
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8',
+      headers: {
+         'X-Auth-Token': id_token
+      }
+   }).then(
+      (data, textStatus, jqXHR) => {
+         return data;
+      },
+      (jqXHR, textStatus, errorThrown) => {
+         console.error(textStatus, errorThrown);
+      }
+   );
+}
+
 function showAddAdmin() {
     $('#addOrDeleteSection').hide();
     $('#addOrDeleteStudent').hide();
@@ -50,7 +94,7 @@ function addAdmin() {
       }  else {
 	 $('#showError').text('Error: check admin or instructor');
       }
-      backendPost('addAdmin', userData).then(
+      backendPOST('addAdmin', userData).then(
 	(data) => {
 	  console.log('admin or instructor added', data);
 	}, console.log)
@@ -82,7 +126,7 @@ function addStudentToSection() {
 
       let sectionObject = new Section(studentEmail, sectionName, "student");
 
-      backendPost('addStudentToSection', sectionObject).then(
+      backendPOST('addStudentToSection', sectionObject).then(
 	(data) => {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
@@ -99,7 +143,7 @@ function deleteStudentFromSection() {
 
        let sectionObject = new Section(studentEmail, sectionName, "student");
 
-       backendPost('deleteStudentFromSection', sectionObject).then(
+       backendPOST('deleteStudentFromSection', sectionObject).then(
 	(data) => {
 	  console.log('student deleted from deleted', data);
 	}, console.log)
@@ -115,7 +159,7 @@ function createSection() {
 
       let sectionObject = new Section(studentEmail, sectionName, "student");
 
-      backendPost('createSection', sectionName).then(
+      backendPOST('createSection', sectionName).then(
 	(data) => {
 	  console.log('section created', data);
 	}, console.log)
@@ -129,7 +173,7 @@ function deleteSection() {
     if (sectionName) {
       $('#showError3').text('');
 
-      backendPost('deleteSection', sectionName).then(
+      backendPOST('deleteSection', sectionName).then(
 	(data) => {
 	  console.log('section deleted', data);
 	}, console.log)
@@ -143,7 +187,7 @@ function displaySummary() {
     if (sectionName) {
       $('#showError4').text('');
 
-      backendPost('getSectionData', sectionName).then(
+      backendPOST('getSectionData', sectionName).then(
 	(data) => {
 	  console.log('section data received', data);
 	}, console.log)
