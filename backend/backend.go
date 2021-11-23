@@ -405,10 +405,6 @@ func (env *Env) clearDatabase() {
 	}
 }
 */
-func handlerTest(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("Hello world"))
-}
-
 func serveFile(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, "/admin.html");
 }
@@ -419,6 +415,9 @@ func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 		log.Fatal(err)
 	}
 	
+	w.Write([]byte("Hello world"))
+	return;
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(testData)
@@ -474,7 +473,7 @@ func main() {
 	err = Env.ds.DbPostTest(problem)
 	if err != nil {
 		log.Println("db insertion test failed")
-		log.Pritln(err)
+		log.Println(err)
 	}
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
@@ -508,7 +507,6 @@ func main() {
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
-	http.Handle("/test",http.HandlerFunc(handlerTest))
 
 	log.Println("Server started on: 127.0.0.1:"+(*portPtr) )
 	// Get admin users -- this is a public endpoint, no token required
