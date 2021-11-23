@@ -123,7 +123,7 @@ class User {
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
-      //this.emailVerified = googleَUser.email_verified;
+      this.emailVerified = googleUser.email_verified;
       this.expiration = googleUser.exp;
 
       console.log(this.profile);
@@ -165,7 +165,6 @@ class User {
    attachSignInChangeListener() {
       //what is being used to determine a user's signin status?
       //Plausible solution: use JWT's user ID and attach signInListener().
-      //gapi.auth2.getAuthInstance() as well as isSignedIn is no longer supported.
       //this.profile.isSignedIn().listen(this.signInChangeListener);
       //this.profile.signInChangeListener();
       return this;
@@ -204,11 +203,11 @@ class User {
 
    // Get a newly issued token (returns a promise)
    //reloadAuthResponse is unsupported, remove as an ID token has replaced OAuth2 access tokens and scopes.
-   // static refreshToken() {
-   //    //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
-   //    //RESEARCH how to refresh token using JWT.
-   //    this.profile.reloadAuthResponse();
-   // }
+   static refreshToken() {
+      //return gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse();
+      //RESEARCH how to refresh token using JWT.
+      this.profile.reloadAuthResponse();
+   }
 }
 
 // Verifies signed in and valid token, then calls authenticatedBackendPOST
