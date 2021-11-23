@@ -93,13 +93,12 @@ function onSignIn(response) {
       new User(googleUser)
 	 .initializeDisplay()
 	 .loadProofs();
-      location.reload();
    }, 1000);
    //make signout button visible on signin.
    //document.getElementById("signOutButton").style.display = "block";
    // This response will be cached after the first page load
 }
-
+/*
 //onSignOut function for user.
 //call the method google.accounts.id.disableAutoSelect to record the status in cookies. 
 function onSignOut() {
@@ -109,7 +108,7 @@ function onSignOut() {
    localStorage.removeItem("adminLogin");
    localStorage.removeItem("userSignedIn");
 }
-
+*/
 /**
  * Class for functionality specific to user sign-in/authentication
  */
@@ -174,7 +173,6 @@ class User {
    
    signInChangeListener(loggedIn) {
       console.log('Sign in status changed', loggedIn);
-      window.location.reload();
    }
 
    static isSignedIn() {
