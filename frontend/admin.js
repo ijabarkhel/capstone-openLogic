@@ -1,10 +1,22 @@
 'use strict';
 
+function decodeJwtResponse(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+};
+
 // Verifies signed in and valid token, then calls authenticatedBackendPOST
 // Returns a promise which resolves to the response body or undefined
 function backendPOST(path_str, data_obj) {
+   let user = new User(decodeJwtResponse(localStorage.getItem('userToken')));
    //needs to be changed, cannot use isSignedIn(), it is no longer supported.
-   if (!User.isSignedIn()) {
+   console.log(user);
+   if (!user.isSignedIn()) {
       console.warn('Cannot send POST request to backend from unknown user.');
       if (sessionStorage.getItem('loginPromptShown') == null) {
          alert('You are not signed in.\nTo save your work, please sign in and then try again, or refresh the page.');
@@ -14,12 +26,12 @@ function backendPOST(path_str, data_obj) {
       return Promise.reject( 'Unauthenticated user' );
    }
 
-   if (User.isTokenExpired()) {
+   if (user.isTokenExpired()) {
       console.warn('Token expired; attempting to refresh token.');
-      return User.refreshToken().then(
+      return user.refreshToken().then(
          (googleUser) => authenticatedBackendPOST(path_str, data_obj, googleUser.id_token));
    } else {
-      return authenticatedBackendPOST(path_str, data_obj, User.getIdToken());
+      return authenticatedBackendPOST(path_str, data_obj, user.getIdToken());
    }
 }
 
@@ -45,38 +57,83 @@ function authenticatedBackendPOST(path_str, data_obj, id_token) {
 }
 
 function showAddAdmin() {
-    $('#addOrDeleteSection').hide();
-    $('#addOrDeleteStudent').hide();
+    $('#addSection').hide();
+    $('#deleteSection').hide();
+    $('#addStudent').hide();
+    $('#deleteStudent').hide();
     $('#displaySummary').hide();
+    $('#deleteAdmin').hide();
     $('#displaySummaryTable').hide();
     $('#addAdmin').show();
 }
 
-function showAddStudent() {
-    $('#addOrDeleteSection').hide();
-    $('#addAdmin').hide();
+function showDeleteAdmin() {
+    $('#addSection').hide();
+    $('#deleteSection').hide();
+    $('#addStudent').hide();
+    $('#deleteStudent').hide();
     $('#displaySummary').hide();
     $('#displaySummaryTable').hide();
-    $('#addOrDeleteStudent').show();
+    $('#addAdmin').hide();
+    $('#deleteAdmin').show();
 }
 
-function showSection() {
-    $('#addOrDeleteStudent').hide();
+function showAddStudent() {
+    $('#addSection').hide();
+    $('#deleteSection').hide();
     $('#addAdmin').hide();
+    $('#deleteAdmin').hide();
+    $('#displaySummary').hide();
+    $('#displaySummaryTable').hide();
+    $('#deleteStudent').hide();
+    $('#addStudent').show();
+}
+
+function showDeleteStudent() {
+    $('#addAdmin').hide();
+    $('#addSection').hide();
+    $('#deleteSection').hide();
+    $('#deleteAdmin').hide();
+    $('#displaySummary').hide();
+    $('#displaySummaryTable').hide();
+    $('#addStudent').hide();
+    $('#deleteStudent').show();
+}
+
+function showAddSection() {
+    $('#deleteSection').hide();
+    $('#addStudent').hide();
+    $('#deleteStudent').hide();
+    $('#addAdmin').hide();
+    $('#deleteAdmin').hide();
     $('#displaySummaryTable').hide();
     $('#displaySummary').hide();
-    $('#addOrDeleteSection').show();
+    $('#addSection').show();
+}
+
+function showDeleteSection() {
+    $('#addSection').hide();
+    $('#addStudent').hide();
+    $('#deleteStudent').hide();
+    $('#addAdmin').hide();
+    $('#deleteAdmin').hide();
+    $('#displaySummaryTable').hide();
+    $('#displaySummary').hide();
+    $('#deleteSection').show();
 }
 
 function showSummary() {
-    $('#addOrDeleteStudent').hide();
+    $('#addSection').hide();
+    $('#deleteSection').hide();
+    $('#addStudent').hide();
+    $('#deleteStudent').hide();
     $('#addAdmin').hide();
-    $('#addOrDeleteSection').hide();
+    $('#deleteAdmin').hide();
     $('#displaySummary').show();
 }
 
 function addAdmin() {
-    let userData;
+    let dataObject;
     let adminEmail = $('#adminEmail').val();
     let adminName = $('#adminName').val();
     let addAsAdmin = $('#checkAdmin').val();
@@ -85,16 +142,14 @@ function addAdmin() {
     if (adminEmail && adminName) {
       if ($('#checkAdmin').is(":checked")){
 	 $('#showError').text('');
-         userData = new User(adminEmail, adminName, addAsAdmin);
-         console.log(addAsAdmin);
+         dataObject = {'adminEmail': adminEmail, 'adminName': adminName, 'addAs': addAsAdmin};
       } else if ($('#checkInstructor').is(":checked")) {
 	 $('#showError').text('');
-         userData = new User(adminEmail, adminName, addAsInstructor);
-         console.log(addAsInstructor);
+         dataObject = {'adminEmail': adminEmail, 'adminName': adminName, 'addAs': addAsInstructor};
       }  else {
 	 $('#showError').text('Error: check admin or instructor');
       }
-      backendPOST('addAdmin', userData).then(
+      backendPOST('addAdmin', dataObject).then(
 	(data) => {
 	  console.log('admin or instructor added', data);
 	}, console.log)
@@ -103,18 +158,18 @@ function addAdmin() {
     }
 }
 function deleteAdmin() {
-    let adminEmail = $('#adminEmail').val();
+    let adminEmail = $('#adminEmail2').val();
     if (adminEmail) {
-      $('#showError').text('');
+      $('#showError2').text('');
 
-      //let userData = new User(adminEmail, adminName, "admin");
+      let dataObject = { 'adminEmail' : adminEmail };
 
-       backendPost('deleteAdmin', adminEmail).then(
+       backendPOST('deleteAdmin', dataObject).then(
 	(data) => {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
     } else {
-	 $('#showError').text('Error: enter admin or instructor email to delete');
+	 $('#showError2').text('Error: enter admin or instructor email to delete');
     }
 }
 
@@ -122,87 +177,84 @@ function addStudentToSection() {
     let studentEmail = $('#studentEmail').val();
     let sectionName = $('#sectionName').val();
     if (studentEmail && sectionName) {
-      $('#showError2').text('');
+      $('#showError3').text('');
 
-      let sectionObject = new Section(studentEmail, sectionName, "student");
+      let dataObject = { 'studentEmail': studentEmail, 'sectionName': sectionName, 'role': "student" };
 
-      backendPOST('addStudentToSection', sectionObject).then(
+      backendPOST('addStudentToSection', dataObject).then(
 	(data) => {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
     } else {
-	 $('#showError2').text('Error: enter student email and section name to add');
+	 $('#showError3').text('Error: enter student email and section name to add');
     }
 }
 
 function deleteStudentFromSection() {
-    let studentEmail = $('#studentEmail').val();
-    let sectionName = $('#sectionName').val();
+    let studentEmail = $('#studentEmail2').val();
+    let sectionName = $('#sectionName2').val();
     if (studentEmail && sectionName) {
-      $('#showError2').text('');
+      $('#showError4').text('');
 
-       let sectionObject = new Section(studentEmail, sectionName, "student");
+      let dataObject = { 'studentEmail': studentEmail, 'sectionName': sectionName, 'role': "student" };
 
-       backendPOST('deleteStudentFromSection', sectionObject).then(
+      backendPOST('deleteStudentFromSection', dataObject).then(
 	(data) => {
 	  console.log('student deleted from deleted', data);
 	}, console.log)
     } else {
-	 $('#showError2').text('Error: enter student email and section name to delete');
+	 $('#showError4').text('Error: enter student email and section name to delete');
     }
 }
 
 function createSection() {
-    let sectionName = $('#sectionName2').val();
+    let sectionName = $('#sectionName3').val();
     if (sectionName) {
-      $('#showError3').text('');
-
-      let sectionObject = new Section(studentEmail, sectionName, "student");
-
-      backendPOST('createSection', sectionName).then(
+      $('#showError5').text('');
+      let dataObject = { 'sectionName' : sectionName };
+      backendPOST('createSection', dataObject).then(
 	(data) => {
 	  console.log('section created', data);
 	}, console.log)
     } else {
-	 $('#showError3').text('Error: enter section name to add');
+	 $('#showError5').text('Error: enter section name to add');
     }
 }
 
 function deleteSection() {
-    let sectionName = $('#sectionName2').val();
+    let sectionName = $('#sectionName4').val();
     if (sectionName) {
-      $('#showError3').text('');
-
-      backendPOST('deleteSection', sectionName).then(
+      $('#showError6').text('');
+      let dataObject = { 'sectionName' : sectionName };
+      backendPOST('deleteSection', dataObject).then(
 	(data) => {
 	  console.log('section deleted', data);
 	}, console.log)
     } else {
-	 $('#showError3').text('Error: enter section name to delete');
+	 $('#showError6').text('Error: enter section name to delete');
     }
 }
 
 function displaySummary() {
-    let sectionName = $('#sectionName3').val();
+    let sectionName = $('#sectionName5').val();
     if (sectionName) {
-      $('#showError4').text('');
-
-      backendPOST('getSectionData', sectionName).then(
+      $('#showError7').text('');
+      let dataObject = { 'sectionName' : sectionName };
+      backendPOST('getSectionData', dataObject).then(
 	(data) => {
 	  console.log('section data received', data);
 	}, console.log)
     } else {
-	 $('#showError4').text('Error: enter section name to display summary of the section');
+	 $('#showError7').text('Error: enter section name to display summary of the section');
     }
 }
 
 $(document).ready(function () {
-
+  console.log(localStorage.getItem('userToken'));
   $('.displaySummaryBtn').click( () =>  {
     console.log("Iam in");
     $('#displaySummaryTable').show();
   });
   $('#adminSignIn').show();
-
 });
 
