@@ -184,7 +184,7 @@ function addStudentToSection() {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
     } else {
-	 $('#showError3').text('Error: enter student email and section name to add');
+	 $('#showError3').text('Error: enter student email and section name to assign');
     }
 }
 
@@ -201,7 +201,7 @@ function deleteStudentFromSection() {
 	  console.log('student deleted from deleted', data);
 	}, console.log)
     } else {
-	 $('#showError4').text('Error: enter student email and section name to delete');
+	 $('#showError4').text('Error: enter student email and section name to unassign');
     }
 }
 
