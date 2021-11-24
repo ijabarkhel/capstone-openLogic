@@ -142,10 +142,10 @@ function addAdmin() {
     if (adminEmail && adminName) {
       if ($('#checkAdmin').is(":checked")){
 	 $('#showError').text('');
-         dataObject = {'adminEmail': adminEmail, 'adminName': adminName, 'addAs': addAsAdmin};
+         dataObject = {'Email': adminEmail, 'Name': adminName, 'Permissions': addAsAdmin};
       } else if ($('#checkInstructor').is(":checked")) {
 	 $('#showError').text('');
-         dataObject = {'adminEmail': adminEmail, 'adminName': adminName, 'addAs': addAsInstructor};
+         dataObject = {'Email': adminEmail, 'Name': adminName, 'Permissions': addAsInstructor};
       }  else {
 	 $('#showError').text('Error: check admin or instructor');
       }
@@ -162,9 +162,7 @@ function deleteAdmin() {
     if (adminEmail) {
       $('#showError2').text('');
 
-      let dataObject = { 'adminEmail' : adminEmail };
-
-       backendPOST('deleteAdmin', dataObject).then(
+       backendPOST('deleteAdmin', adminEmail).then(
 	(data) => {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
@@ -179,7 +177,7 @@ function addStudentToSection() {
     if (studentEmail && sectionName) {
       $('#showError3').text('');
 
-      let dataObject = { 'studentEmail': studentEmail, 'sectionName': sectionName, 'role': "student" };
+      let dataObject = { 'UserEmail': studentEmail, 'Name': sectionName, 'Role': "student" };
 
       backendPOST('addStudentToSection', dataObject).then(
 	(data) => {
@@ -196,7 +194,7 @@ function deleteStudentFromSection() {
     if (studentEmail && sectionName) {
       $('#showError4').text('');
 
-      let dataObject = { 'studentEmail': studentEmail, 'sectionName': sectionName, 'role': "student" };
+      let dataObject = { 'UserEmail': studentEmail, 'Name': sectionName, 'Role': "student" };
 
       backendPOST('deleteStudentFromSection', dataObject).then(
 	(data) => {
@@ -211,8 +209,7 @@ function createSection() {
     let sectionName = $('#sectionName3').val();
     if (sectionName) {
       $('#showError5').text('');
-      let dataObject = { 'sectionName' : sectionName };
-      backendPOST('createSection', dataObject).then(
+      backendPOST('createSection', sectionName).then(
 	(data) => {
 	  console.log('section created', data);
 	}, console.log)
@@ -225,8 +222,7 @@ function deleteSection() {
     let sectionName = $('#sectionName4').val();
     if (sectionName) {
       $('#showError6').text('');
-      let dataObject = { 'sectionName' : sectionName };
-      backendPOST('deleteSection', dataObject).then(
+      backendPOST('deleteSection', sectionName).then(
 	(data) => {
 	  console.log('section deleted', data);
 	}, console.log)
@@ -239,8 +235,7 @@ function displaySummary() {
     let sectionName = $('#sectionName5').val();
     if (sectionName) {
       $('#showError7').text('');
-      let dataObject = { 'sectionName' : sectionName };
-      backendPOST('getSectionData', dataObject).then(
+      backendPOST('getSectionData', sectionName).then(
 	(data) => {
 	  console.log('section data received', data);
 	}, console.log)
