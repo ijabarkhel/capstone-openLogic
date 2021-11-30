@@ -414,7 +414,6 @@ func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 	type problemArray struct {
 		Problems	[]datastore.Problem
 	}
-	log.Println("getTest")
 	var problems problemArray
 	temp, err := env.ds.DbGetTest()
 	problems.Problems = temp
