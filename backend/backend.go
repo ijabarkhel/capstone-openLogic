@@ -50,28 +50,28 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
 	//user = req.Context().Value("tok").(userWithEmail)
 
-	var userData datastore.User
+	var user datastore.User
 
-	if err := json.NewDecoder(req.Body).Decode(&userData); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&user); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", userData)
+	log.Printf("%+v", user)
 
-	if len(userData.Email) == 0 {
+	if len(user.Email) == 0 {
                 http.Error(w, "enter email to add admin", 400)
                 return
         }
 
 
-	if len(userData.Name) == 0 {
+	if len(user.Name) == 0 {
                 http.Error(w, "enter fullname to add admin", 400)
                 return
         }
 
-	if err := env.ds.AddAdmin(userData); err != nil {
+	if err := env.ds.AddAdmin(user); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -80,27 +80,26 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, `{"success": "true"}`)
 }
 
-
 func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
 	//user = req.Context().Value("tok").(userWithEmail)
 
-	var userData string
+	var adminEmail string
 
-	if err := json.NewDecoder(req.Body).Decode(&userData); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&adminEmail); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", userData)
+	log.Printf("%+v", adminEmail)
 
-	if len(userData) == 0 {
+	if len(adminEmail) == 0 {
                 http.Error(w, "enter email to delete admin", 400)
                 return
         }
 
-	if err := env.ds.DeleteAdmin(userData); err != nil {
+	if err := env.ds.DeleteAdmin(adminEmail); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -112,27 +111,27 @@ func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
 
-	var sectionData datastore.Section
+	var section datastore.Section
 
-	if err := json.NewDecoder(req.Body).Decode(&sectionData); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&section); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", sectionData)
+	log.Printf("%+v", section)
 
-	if len(sectionData.UserEmail) == 0 {
+	if len(section.UserEmail) == 0 {
                 http.Error(w, "enter email for user to add it to section", 400)
                 return
         }
 
-	if len(sectionData.Name) == 0 {
+	if len(section.Name) == 0 {
                 http.Error(w, "enter section name to add a student in it", 400)
                 return
         }
 
-	if err := env.ds.AddStudentToSection(sectionData); err != nil {
+	if err := env.ds.AddStudentToSection(section); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -143,27 +142,26 @@ func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Request) {
 
-	var sectionData datastore.Section
+	var section datastore.Section
 
-	if err := json.NewDecoder(req.Body).Decode(&sectionData); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&section); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
+	log.Printf("%+v", section)
 
-	log.Printf("%+v", sectionData)
-
-	if len(sectionData.UserEmail) == 0 {
+	if len(section.UserEmail) == 0 {
                 http.Error(w, "enter email for user to delete it from section", 400)
                 return
         }
 
-	if len(sectionData.Name) == 0 {
+	if len(section.Name) == 0 {
                 http.Error(w, "enter section name to delete a student", 400)
                 return
         }
 
-	if err := env.ds.DeleteStudentFromSection(sectionData); err != nil {
+	if err := env.ds.DeleteStudentFromSection(section); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -174,7 +172,7 @@ func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Reques
 
 func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 	user := req.Context().Value("tok").(userWithEmail)
-	var sectionData datastore.Section
+	var section datastore.Section
 	var sectionName string
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
@@ -189,12 +187,11 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
                 http.Error(w, "enter section name to create section", 400)
                 return
         }
+	section.UserEmail = user.GetEmail()
+	section.Name = sectionName
+	section.Role = "Admin"
 
-	sectionData.UserEmail = user.GetEmail()
-	sectionData.Name = sectionName
-	sectionData.Role = "Admin"
-
-	if err := env.ds.CreateSection(sectionData); err != nil {
+	if err := env.ds.CreateSection(section); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -410,17 +407,22 @@ func serveFile(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
-	testData, err := env.ds.DbGetTest()
+	type problemArray struct {
+		Problems	[]datastore.Problem
+	}
+	log.Println("getTest")
+	var problems problemArray
+	temp, err := env.ds.DbGetTest()
+	problems.Problems = temp
 	if err != nil{
 		log.Fatal(err)
 	}
-	
-	w.Write([]byte("Hello world"))
-	return;
-
+	output, err := json.Marshal(problems.Problems)
+	if err != nil{
+		log.Fatal(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(testData)
+	w.Write(output)
 }
 
 func (env *Env) dbPostTest(w http.ResponseWriter, req *http.Request){
@@ -463,18 +465,6 @@ func main() {
 		//Env.populateTestData()
 	}
 
-
-	var problem datastore.Problem
-	problem.UserEmail = "whayden@csumb.edu"
-	problem.ProofName = "Test"
-	problem.ProofType = "prop"
-	problem.Premise = []string{"P"}
-	problem.Conclusion = "P"
-	err = Env.ds.DbPostTest(problem)
-	if err != nil {
-		log.Println("db insertion test failed")
-		log.Println(err)
-	}
 	// Initialize token auth/cache
 	tokenauth.SetAuthorizedDomains(authorized_domains)
 	tokenauth.SetAuthorizedClientIds(authorized_client_ids)
