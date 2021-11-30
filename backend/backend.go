@@ -80,7 +80,6 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, `{"success": "true"}`)
 }
 
-
 func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
 	//user = req.Context().Value("tok").(userWithEmail)
@@ -412,14 +411,22 @@ func serveFile(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
-	testData, err := env.ds.DbGetTest()
+	type problemArray struct {
+		Problems	[]datastore.Problem
+	}
+	log.Println("getTest")
+	var problems problemArray
+	temp, err := env.ds.DbGetTest()
+	problems.Problems = temp
 	if err != nil{
 		log.Fatal(err)
 	}
-	
+	output, err := json.Marshal(problems.Problems)
+	if err != nil{
+		log.Fatal(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(testData)
+	w.Write(output)
 }
 
 func (env *Env) dbPostTest(w http.ResponseWriter, req *http.Request){
@@ -460,19 +467,6 @@ func main() {
 	if *doPopulateDatabase {
 		log.Println("popdb")
 		//Env.populateTestData()
-	}
-
-
-	var problem datastore.Problem
-	problem.UserEmail = "whayden@csumb.edu"
-	problem.ProofName = "Test"
-	problem.ProofType = "prop"
-	problem.Premise = []string{"P"}
-	problem.Conclusion = "P"
-	err = Env.ds.DbPostTest(problem)
-	if err != nil{
-		log.Println("db insertion test failed")
-		log.Println(err)
 	}
 
 	// Initialize token auth/cache
