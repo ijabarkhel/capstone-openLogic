@@ -484,7 +484,7 @@ func (p *ProofStore) DbGetTest() ([]Problem, error){
 
 		rows.Scan(&problem.Id, &problem.UserEmail, &problem.ProofName, &problem.ProofType, &PremiseJSON, &problem.Conclusion)
 
-		err = json.Unmarshal([]byte(PremiseJSON), &PremiseJSON)
+		err = json.Unmarshal([]byte(PremiseJSON), &problem.Premise)
 		if(err !=nil){
 			return nil, err
 		}
