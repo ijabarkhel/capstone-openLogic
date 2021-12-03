@@ -55,8 +55,7 @@ type Env struct {
 }
 
 func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
-	//var user userWithEmail
-	//user = req.Context().Value("tok").(userWithEmail)
+	user = req.Context().Value("tok").(userWithEmail)
 
 	var user datastore.User
 
@@ -89,8 +88,7 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
-	//var user userWithEmail
-	//user = req.Context().Value("tok").(userWithEmail)
+	user = req.Context().Value("tok").(userWithEmail)
 
 	var adminEmail emailObject
 
@@ -118,7 +116,7 @@ func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 
 
 func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
-
+	user := req.Context().Value("tok").(userWithEmail)
 	var section datastore.Section
 
 	if err := json.NewDecoder(req.Body).Decode(&section); err != nil {
@@ -149,7 +147,7 @@ func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Request) {
-
+	user := req.Context().Value("tok").(userWithEmail)
 	var section datastore.Section
 
 	if err := json.NewDecoder(req.Body).Decode(&section); err != nil {
@@ -209,7 +207,7 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
-
+	user := req.Context().Value("tok").(userWithEmail)
 	var sectionName sectionObject
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
@@ -235,7 +233,7 @@ func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 }
 
 func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
-
+	user := req.Context().Value("tok").(userWithEmail)
 	var sectionName sectionObject
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {

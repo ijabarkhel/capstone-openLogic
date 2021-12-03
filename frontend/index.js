@@ -91,8 +91,9 @@ function onSignIn(response) {
 
    setTimeout( function () {
       new User(googleUser)
-	 .initializeDisplay()
-	 .loadProofs();
+	 .initializeDisplay();
+	 localStorage.setItem("userToken", response.credential);
+	 //.loadProofs();
    }, 1000);
    //make signout button visible on signin.
    //document.getElementById("signOutButton").style.display = "block";
@@ -123,7 +124,7 @@ class User {
       this.domain = googleUser.hd; //hd is hosted domain.
       this.email = googleUser.email; 
       this.name = googleUser.name;
-      //this.emailVerified = googleَUser.email_verified;
+      this.emailVerified = googleUser.email_verified;
       this.expiration = googleUser.exp;
 
       console.log(this.profile);
@@ -151,13 +152,13 @@ class User {
       return this;
    }
 
-   loadProofs() {
+   /*loadProofs() {
       loadUserProofs();
       loadRepoProofs();
       loadUserCompletedProofs();
 
       return this;
-   }
+   }*/
 
    //These need to be changed.
    //Remove any references to auth2.attachClickHandler() and its registered callback handlers.
@@ -175,29 +176,29 @@ class User {
       console.log('Sign in status changed', loggedIn);
    }
 
-   static isSignedIn() {
+   isSignedIn() {
       //return gapi.auth2.getAuthInstance().isSignedIn.get();
       //return true if signed in, return false if not signed in.
-      if(this.emailVerified == "true" && this.domain == "csumb.edu"){
+      if(this.emailVerified == true && this.domain == "csumb.edu"){
          return true;
       }else{
          return false;
       }
    }
 
-   static isAdministrator() {
+   isAdministrator() {
       //return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
       return adminUsers.indexOf(this.profile.getEmail()) > -1;
    }
 
    // Check if the current time (in unix timestamp) is after the token's expiration
-   static isTokenExpired() {
+   isTokenExpired() {
       //return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
       return  + new Date() > this.expiration;
    }
 
    // Retrieve the last cached token
-   static getIdToken() {
+   getIdToken() {
       //return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
       return this.profile;
    }
@@ -225,13 +226,13 @@ function backendPOST(path_str, data_obj) {
       return Promise.reject( 'Unauthenticated user' );
    }
 
-   if (User.isTokenExpired()) {
+   /*if (User.isTokenExpired()) {
       console.warn('Token expired; attempting to refresh token.');
       return User.refreshToken().then(
 	 (googleUser) => authenticatedBackendPOST(path_str, data_obj, googleUser.id_token));
-   } else {
-      return authenticatedBackendPOST(path_str, data_obj, User.getIdToken());
-   }
+   } else {*/
+   return authenticatedBackendPOST(path_str, data_obj, User.getIdToken());
+   //}
 }
 
 // Send a POST request to the backend, with auth token included
@@ -256,7 +257,7 @@ function authenticatedBackendPOST(path_str, data_obj, id_token) {
 }
 
 // For administrators only - backend requires valid admin token
-function getCSV() {
+/*function getCSV() {
    backendPOST('proofs', { selection: 'downloadrepo' }).then(
       (data) => {
 	 console.log("downloadRepo", data);
@@ -283,7 +284,7 @@ function getCSV() {
 	 downloadLink.target = '_blank';
 	 downloadLink.click();
       }, console.log);
-}
+}*/
 
 const prepareSelect = (selector, options) => {
    let elem = document.querySelector(selector);
@@ -307,7 +308,7 @@ const prepareSelect = (selector, options) => {
 }
 
 // load user's incomplete proofs
-function loadUserProofs() {
+/*function loadUserProofs() {
    backendPOST('proofs', { selection: 'user' }).then(
       (data) => {
 	 console.log("loadSelect", data);
@@ -364,7 +365,7 @@ function loadUserCompletedProofs() {
 	 $('#userCompletedProofSelect').data('repositoryDataKey', 'completedUserProofs')
       }, console.log
    );
-}
+} */
 
 $(document).ready(function() {
    $('#dbTest').click(function(){
