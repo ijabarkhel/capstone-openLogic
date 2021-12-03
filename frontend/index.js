@@ -416,14 +416,14 @@ $(document).ready(function() {
       backendPOST('saveproof', postData).then(
 	 (data) => {
 	    console.log('proof saved', data);
-	    
+	    /*
 	    if (postData.proofCompleted == "true") {
                loadUserCompletedProofs();
 	    } else {
                loadUserProofs();
 	    }
-		
-            loadRepoProofs();
+
+            loadRepoProofs(); */
 	 }, console.log)
    });
 
@@ -533,7 +533,7 @@ $(document).ready(function() {
       $('.ui.modal').modal('show');
    });
 
-   $('.downloadCSV').click( () => getCSV() );
+   //$('.downloadCSV').click( () => getCSV() );
    // End admin modal
 });
 
