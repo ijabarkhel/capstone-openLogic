@@ -42,6 +42,14 @@ type userWithEmail interface {
 	GetEmail() string
 }
 
+type emailObject struct {
+	adminEmail string
+}
+
+type sectionObject struct {
+	sectionName string
+}
+
 type Env struct {
 	ds datastore.IProofStore
 }
@@ -84,7 +92,7 @@ func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
 	//user = req.Context().Value("tok").(userWithEmail)
 
-	var adminEmail string
+	var adminEmail emailObject
 
 	if err := json.NewDecoder(req.Body).Decode(&adminEmail); err != nil {
                 log.Println(err)
@@ -94,12 +102,12 @@ func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", adminEmail)
 
-	if len(adminEmail) == 0 {
+	if len(adminEmail.adminEmail) == 0 {
                 http.Error(w, "enter email to delete admin", 400)
                 return
         }
 
-	if err := env.ds.DeleteAdmin(adminEmail); err != nil {
+	if err := env.ds.DeleteAdmin(adminEmail.adminEmail); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -173,7 +181,7 @@ func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Reques
 func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 	user := req.Context().Value("tok").(userWithEmail)
 	var section datastore.Section
-	var sectionName string
+	var sectionName sectionObject
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
                 log.Println(err)
@@ -183,12 +191,12 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", sectionName)
 
-	if len(sectionName) == 0 {
+	if len(sectionName.sectionName) == 0 {
                 http.Error(w, "enter section name to create section", 400)
                 return
         }
 	section.UserEmail = user.GetEmail()
-	section.Name = sectionName
+	section.Name = sectionName.sectionName
 	section.Role = "Admin"
 
 	if err := env.ds.CreateSection(section); err != nil {
@@ -202,7 +210,7 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 
-	var sectionName string
+	var sectionName sectionObject
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
                 log.Println(err)
@@ -212,12 +220,12 @@ func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", sectionName)
 
-	if len(sectionName) == 0 {
+	if len(sectionName.sectionName) == 0 {
                 http.Error(w, "enter section name to delete section", 400)
                 return
         }
 
-	if err := env.ds.DeleteSection(sectionName); err != nil {
+	if err := env.ds.DeleteSection(sectionName.sectionName); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -228,7 +236,7 @@ func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
 
-	var sectionName string
+	var sectionName sectionObject
 
 	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
                 log.Println(err)
@@ -238,12 +246,12 @@ func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("%+v", sectionName)
 
-	if len(sectionName) == 0 {
+	if len(sectionName.sectionName) == 0 {
                 http.Error(w, "enter section name to create section", 400)
                 return
         }
 
-	sectionData, err := env.ds.GetSectionData(sectionName)
+	sectionData, err := env.ds.GetSectionData(sectionName.sectionName)
 	if err != nil{
 		log.Fatal(err)
 	}

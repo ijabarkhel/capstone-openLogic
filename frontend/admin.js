@@ -1,5 +1,25 @@
 'use strict';
 
+class User{
+   constructor(email, name, permissions){
+      this.email = email
+      this.name = name
+      this.permissions = permissions
+   }
+}
+
+class Section{
+   constructor(userEmail, name, role){
+      this.userEmail = userEmail
+      this.name = name
+      this.role = role
+   }
+}
+
+
+
+
+
 function decodeJwtResponse(token) {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -26,13 +46,14 @@ function backendPOST(path_str, data_obj) {
       return Promise.reject( 'Unauthenticated user' );
    }
 
-   if (user.isTokenExpired()) {
+   /**if (user.isTokenExpired()) {
       console.warn('Token expired; attempting to refresh token.');
       return user.refreshToken().then(
          (googleUser) => authenticatedBackendPOST(path_str, data_obj, googleUser.id_token));
    } else {
-      return authenticatedBackendPOST(path_str, data_obj, user.getIdToken());
-   }
+   **/
+   return authenticatedBackendPOST(path_str, data_obj, user.getIdToken());
+   //}
 }
 
 // Send a POST request to the backend, with auth token included
@@ -142,10 +163,10 @@ function addAdmin() {
     if (adminEmail && adminName) {
       if ($('#checkAdmin').is(":checked")){
 	 $('#showError').text('');
-         dataObject = {'Email': adminEmail, 'Name': adminName, 'Permissions': addAsAdmin};
+         dataObject = new User(adminEmail, adminName, addAsAdmin);
       } else if ($('#checkInstructor').is(":checked")) {
 	 $('#showError').text('');
-         dataObject = {'Email': adminEmail, 'Name': adminName, 'Permissions': addAsInstructor};
+         dataObject = new User(adminEmail, adminName, addAsInstructor);
       }  else {
 	 $('#showError').text('Error: check admin or instructor');
       }
@@ -162,7 +183,7 @@ function deleteAdmin() {
     if (adminEmail) {
       $('#showError2').text('');
 
-       backendPOST('deleteAdmin', adminEmail).then(
+       backendPOST('deleteAdmin', {"adminEmail" : adminEmail } ).then(
 	(data) => {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
@@ -177,7 +198,7 @@ function addStudentToSection() {
     if (studentEmail && sectionName) {
       $('#showError3').text('');
 
-      let dataObject = { 'UserEmail': studentEmail, 'Name': sectionName, 'Role': "student" };
+      let dataObject = new Section (studentEmail, sectionName, "student" );
 
       backendPOST('addStudentToSection', dataObject).then(
 	(data) => {
@@ -194,7 +215,7 @@ function deleteStudentFromSection() {
     if (studentEmail && sectionName) {
       $('#showError4').text('');
 
-      let dataObject = { 'UserEmail': studentEmail, 'Name': sectionName, 'Role': "student" };
+      let dataObject = new Section ( studentEmail, sectionName, "student" );
 
       backendPOST('deleteStudentFromSection', dataObject).then(
 	(data) => {
@@ -209,7 +230,7 @@ function createSection() {
     let sectionName = $('#sectionName3').val();
     if (sectionName) {
       $('#showError5').text('');
-      backendPOST('createSection', sectionName).then(
+      backendPOST('createSection', { "sectionName": sectionName } ).then(
 	(data) => {
 	  console.log('section created', data);
 	}, console.log)
@@ -222,7 +243,7 @@ function deleteSection() {
     let sectionName = $('#sectionName4').val();
     if (sectionName) {
       $('#showError6').text('');
-      backendPOST('deleteSection', sectionName).then(
+      backendPOST('deleteSection',  { "sectionName": sectionName }).then(
 	(data) => {
 	  console.log('section deleted', data);
 	}, console.log)
@@ -235,7 +256,7 @@ function displaySummary() {
     let sectionName = $('#sectionName5').val();
     if (sectionName) {
       $('#showError7').text('');
-      backendPOST('getSectionData', sectionName).then(
+      backendPOST('getSectionData',  { "sectionName": sectionName }).then(
 	(data) => {
 	  console.log('section data received', data);
 	}, console.log)
@@ -247,7 +268,6 @@ function displaySummary() {
 $(document).ready(function () {
   console.log(localStorage.getItem('userToken'));
   $('.displaySummaryBtn').click( () =>  {
-    console.log("Iam in");
     $('#displaySummaryTable').show();
   });
   $('#adminSignIn').show();
