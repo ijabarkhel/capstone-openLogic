@@ -497,7 +497,8 @@ func main() {
 	http.Handle("/deleteStudentFromSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteStudentFromSection), admin_users))
 
 	// method createSection : POST : JSON <- id_token, admin
-	http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection), admin_users))
+	//http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection), admin_users))
+	http.Handle("/createSection", http.HandlerFunc(Env.createSection))
 
 	// method deleteSection : POST : JSON <- id_token, admin
 	http.Handle("/deleteSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteSection), admin_users))
