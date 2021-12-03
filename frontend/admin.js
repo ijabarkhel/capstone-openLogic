@@ -1,6 +1,6 @@
 'use strict';
 
-class User{
+class DBUser{
    constructor(email, name, permissions){
       this.email = email
       this.name = name
@@ -163,10 +163,10 @@ function addAdmin() {
     if (adminEmail && adminName) {
       if ($('#checkAdmin').is(":checked")){
 	 $('#showError').text('');
-         dataObject = new User(adminEmail, adminName, addAsAdmin);
+         dataObject = new DBUser(adminEmail, adminName, addAsAdmin);
       } else if ($('#checkInstructor').is(":checked")) {
 	 $('#showError').text('');
-         dataObject = new User(adminEmail, adminName, addAsInstructor);
+         dataObject = new DBUser(adminEmail, adminName, addAsInstructor);
       }  else {
 	 $('#showError').text('Error: check admin or instructor');
       }
