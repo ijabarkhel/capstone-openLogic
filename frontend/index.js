@@ -19,8 +19,6 @@ let adminUsers = [];
 
 //Updated onSignin function
 function onSignIn(googleUser) {
-   //console.log("onSignIn", googleUser);
-   //const googleUser = decodeJwtResponse(response.credential);
    console.log("onSignIn", googleUser);
    $.getJSON('/backend/admins', (admins) => {
      console.log(admins);
@@ -32,9 +30,10 @@ function onSignIn(googleUser) {
    });
 
    setTimeout( function () {
+
       new User(googleUser)
-	 .initializeDisplay();
-	 localStorage.setItem("userToken", "684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com");
+	.initializeDisplay();
+
 	 //.loadProofs();
    }, 1000);
 }
@@ -97,17 +96,17 @@ class User {
       return gapi.auth2.getAuthInstance().isSignedIn.get();
    }
 
-   isAdministrator() {
+   static isAdministrator() {
       return adminUsers.indexOf(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) > -1;
    }
 
    // Check if the current time (in unix timestamp) is after the token's expiration
-   isTokenExpired() {
+   static isTokenExpired() {
       return + new Date() > gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_at;
    }
 
    // Retrieve the last cached token
-   getIdToken() {
+   static getIdToken() {
       return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
    }
 

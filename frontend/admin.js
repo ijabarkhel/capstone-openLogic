@@ -16,27 +16,25 @@ class Section{
    }
 }
 
+/**
+var GoogleAuth;
 
+window.onLoadCallback = function(){
+  gapi.auth2.init({
+      client_id: '684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercontent.com'
+    }).then(function () {
+      GoogleAuth = gapi.auth2.getAuthInstance();
 
-
-
-function decodeJwtResponse(token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-
-    return JSON.parse(jsonPayload);
-};
-
+  });
+}
+**/
 // Verifies signed in and valid token, then calls authenticatedBackendPOST
 // Returns a promise which resolves to the response body or undefined
 function backendPOST(path_str, data_obj) {
-   let user = new User(decodeJwtResponse(localStorage.getItem('userToken')));
+   //let user = new User(GoogleAuth.currentUser['Mb']);
+
    //needs to be changed, cannot use isSignedIn(), it is no longer supported.
-   console.log(user);
-   if (!user.isSignedIn()) {
+   if (!User.isSignedIn()) {
       console.warn('Cannot send POST request to backend from unknown user.');
       if (sessionStorage.getItem('loginPromptShown') == null) {
          alert('You are not signed in.\nTo save your work, please sign in and then try again, or refresh the page.');
@@ -46,14 +44,13 @@ function backendPOST(path_str, data_obj) {
       return Promise.reject( 'Unauthenticated user' );
    }
 
-   /**if (user.isTokenExpired()) {
+   if (User.isTokenExpired()) {
       console.warn('Token expired; attempting to refresh token.');
-      return user.refreshToken().then(
+      return User.refreshToken().then(
          (googleUser) => authenticatedBackendPOST(path_str, data_obj, googleUser.id_token));
    } else {
-   **/
-   return authenticatedBackendPOST(path_str, data_obj, user.getIdToken());
-   //}
+      return authenticatedBackendPOST(path_str, data_obj, User.getIdToken());
+   }
 }
 
 // Send a POST request to the backend, with auth token included
@@ -266,7 +263,6 @@ function displaySummary() {
 }
 
 $(document).ready(function () {
-  console.log(localStorage.getItem('userToken'));
   $('.displaySummaryBtn').click( () =>  {
     $('#displaySummaryTable').show();
   });
