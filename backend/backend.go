@@ -177,7 +177,7 @@ func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Reques
 }
 
 func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
-	var user userWithEmail
+	//var user userWithEmail
 	user := req.Context().Value("tok").(userWithEmail)
 	var section datastore.Section
 	var sectionName sectionObject
