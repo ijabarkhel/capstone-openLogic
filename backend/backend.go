@@ -499,7 +499,7 @@ func main() {
 
 	// method createSection : POST : JSON <- id_token, admin
 	//http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection), admin_users))
-	http.Handle("/createSection", http.HandlerFunc(Env.createSection))
+	http.Handle("/createSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.createSection), admin_users))
 
 	// method deleteSection : POST : JSON <- id_token, admin
 	http.Handle("/deleteSection", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.deleteSection), admin_users))

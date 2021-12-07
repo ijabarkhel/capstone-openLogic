@@ -300,7 +300,7 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO section (
+	stmt, err := tx.Prepare(`INSERT INTO sections (
 							userEmail,
 							name,
 							role)
