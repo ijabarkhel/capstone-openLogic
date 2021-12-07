@@ -16,6 +16,18 @@ class Section{
    }
 }
 
+class Email{
+   constructor(adminEmail){
+      this.adminEmail = adminEmail
+   }
+}
+
+class SectionName{
+   constructor(sectionName){
+      this.sectionName = sectionName
+   }
+}
+
 /**
 var GoogleAuth;
 
@@ -179,8 +191,8 @@ function deleteAdmin() {
     let adminEmail = $('#adminEmail2').val();
     if (adminEmail) {
       $('#showError2').text('');
-
-       backendPOST('deleteAdmin', {"adminEmail" : adminEmail } ).then(
+       let dataObject = new Email(adminEmail);
+       backendPOST('deleteAdmin', dataObject).then(
 	(data) => {
 	  console.log('admin or instructor deleted', data);
 	}, console.log)
@@ -227,7 +239,8 @@ function createSection() {
     let sectionName = $('#sectionName3').val();
     if (sectionName) {
       $('#showError5').text('');
-      backendPOST('createSection', { "sectionName": sectionName } ).then(
+      let dataObject = new SectionName(sectionName);
+      backendPOST('createSection', dataObject).then(
 	(data) => {
 	  console.log('section created', data);
 	}, console.log)
@@ -240,7 +253,8 @@ function deleteSection() {
     let sectionName = $('#sectionName4').val();
     if (sectionName) {
       $('#showError6').text('');
-      backendPOST('deleteSection',  { "sectionName": sectionName }).then(
+      let dataObject = new SectionName(sectionName);
+      backendPOST('deleteSection',  dataObject).then(
 	(data) => {
 	  console.log('section deleted', data);
 	}, console.log)
@@ -253,7 +267,8 @@ function displaySummary() {
     let sectionName = $('#sectionName5').val();
     if (sectionName) {
       $('#showError7').text('');
-      backendPOST('getSectionData',  { "sectionName": sectionName }).then(
+      let dataObject = new SectionName(sectionName);
+      backendPOST('getSectionData', dataObject).then(
 	(data) => {
 	  console.log('section data received', data);
 	}, console.log)
