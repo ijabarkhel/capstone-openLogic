@@ -209,10 +209,11 @@ func (p *ProofStore) AddAdmin(userData User) error{
 							permissions)
 				 VALUES (?, ?, ?)`)
 	defer stmt.Close()
-	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+
+	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
 
 	if err != nil {
 		return errors.New("Statement exec error")
@@ -229,7 +230,7 @@ func (p *ProofStore) DeleteAdmin(userData string) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`DELETE FROM users WHERE users.email = ? AND users.permissions = 'Admin'`)
+	stmt, err := tx.Prepare(`DELETE FROM users WHERE users.email = ?`)
 	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
@@ -255,7 +256,7 @@ func (p *ProofStore) AddStudentToSection(sectionData Section) error{
 	stmt, err := tx.Prepare(`INSERT INTO sections (
 							userEmail,
 							name,
-							role,)
+							role)
 				 VALUES (?, ?, ?)`)
 	defer stmt.Close()
 	if err != nil {
@@ -278,7 +279,7 @@ func (p *ProofStore) DeleteStudentFromSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ? AND sections.role = 'Student'`)
+	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ?`)
 	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
@@ -306,10 +307,10 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 							role)
 				 VALUES (?, ?, ?)`)
 	defer stmt.Close()
-	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
 
 	if err != nil {
 		return errors.New("Statement exec error")
