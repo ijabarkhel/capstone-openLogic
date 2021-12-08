@@ -200,13 +200,12 @@ func pruneCache() {
 	defer token_cache.Unlock()
 
 	for _, cached_token := range token_cache.val {
-		/**if time.Now().After(time.Unix(cached_token.data.Exp, 0)) {
+		if time.Now().After(time.Unix(cached_token.data.Exp, 0)) {
 			log.Printf("Removing expired token: +%v", cached_token.data)
 			delete(token_cache.val, token)
-		} else {**/
-
-		log.Printf("Keeping unexpired token: %+v", cached_token.data)
-		//}
+		} else {
+			log.Printf("Keeping unexpired token: %+v", cached_token.data)
+		}
 	}
 }
 
