@@ -395,6 +395,7 @@ func (p *ProofStore) GetSectionNameById(sectionId string) (string, error){
 	if err != nil{
                 return "", err
         }
+	tx.Commit()
         return sectionName, nil
 }
 
