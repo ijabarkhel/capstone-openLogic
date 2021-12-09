@@ -55,7 +55,7 @@ type ProblemSet struct{
 }
 
 type Section struct{
-	//Id 				int
+	Id 				int
 	UserEmail		string
 	Name			string
 	Role			string//the user's role in the section
@@ -64,6 +64,14 @@ type Section struct{
 type Assignment struct {
 	ProblemSetId	int
 	SectionId		int
+}
+
+type Email struct {
+        AdminEmail string
+}
+
+type SectionName struct {
+        SectionName string
 }
 
 //type UserWithEmail interface {

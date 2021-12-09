@@ -42,14 +42,6 @@ type userWithEmail interface {
 	GetEmail() string
 }
 
-type emailObject struct {
-	adminEmail string
-}
-
-type sectionObject struct {
-	sectionName string
-}
-
 type Env struct {
 	ds datastore.IProofStore
 }
@@ -90,22 +82,22 @@ func (env *Env) addAdmin(w http.ResponseWriter, req *http.Request) {
 func (env *Env) deleteAdmin(w http.ResponseWriter, req *http.Request) {
 	//user = req.Context().Value("tok").(userWithEmail)
 
-	var adminEmail emailObject
+	var email datastore.Email
 
-	if err := json.NewDecoder(req.Body).Decode(&adminEmail); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&email); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", adminEmail)
+	log.Printf("%+v", email)
 
-	if len(adminEmail.adminEmail) == 0 {
+	if len(email.AdminEmail) == 0 {
                 http.Error(w, "enter email to delete admin", 400)
                 return
         }
 
-	if err := env.ds.DeleteAdmin(adminEmail.adminEmail); err != nil {
+	if err := env.ds.DeleteAdmin(email.AdminEmail); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -180,23 +172,25 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
 	user := req.Context().Value("tok").(userWithEmail)
 	var section datastore.Section
-	var sectionName sectionObject
+	var sName datastore.SectionName
 
-	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&sName); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", sectionName)
+	log.Printf("%+v", sName)
 
-	if len(sectionName.sectionName) == 0 {
+	if len(sName.SectionName) == 0 {
                 http.Error(w, "enter section name to create section", 400)
                 return
         }
 	section.UserEmail = user.GetEmail()
-	section.Name = sectionName.sectionName
+	section.Name = sName.SectionName
 	section.Role = "Admin"
+
+	log.Printf("%+v", section)
 
 	if err := env.ds.CreateSection(section); err != nil {
                 http.Error(w, err.Error(), 500)
@@ -209,22 +203,22 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 	//user := req.Context().Value("tok").(userWithEmail)
-	var sectionName sectionObject
+	var sName datastore.SectionName
 
-	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&sName); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", sectionName)
+	log.Printf("%+v", sName)
 
-	if len(sectionName.sectionName) == 0 {
+	if len(sName.SectionName) == 0 {
                 http.Error(w, "enter section name to delete section", 400)
                 return
         }
 
-	if err := env.ds.DeleteSection(sectionName.sectionName); err != nil {
+	if err := env.ds.DeleteSection(sName.SectionName); err != nil {
                 http.Error(w, err.Error(), 500)
                 return
         }
@@ -235,22 +229,22 @@ func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
 	//user := req.Context().Value("tok").(userWithEmail)
-	var sectionName sectionObject
+	var sName datastore.SectionName
 
-	if err := json.NewDecoder(req.Body).Decode(&sectionName); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&sName); err != nil {
                 log.Println(err)
                 http.Error(w, err.Error(), 400)
                 return
         }
 
-	log.Printf("%+v", sectionName)
+	log.Printf("%+v", sName)
 
-	if len(sectionName.sectionName) == 0 {
+	if len(sName.SectionName) == 0 {
                 http.Error(w, "enter section name to create section", 400)
                 return
         }
 
-	sectionData, err := env.ds.GetSectionData(sectionName.sectionName)
+	sectionData, err := env.ds.GetSectionData(sName.SectionName)
 	if err != nil{
 		log.Fatal(err)
 	}
