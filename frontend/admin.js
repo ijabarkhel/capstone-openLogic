@@ -9,7 +9,7 @@ class DBUser{
 }
 
 class Section{
-   constructor(userEmail, name, role){
+   constructor(id, userEmail, name, role){
       this.id = id
       this.userEmail = userEmail
       this.name = name

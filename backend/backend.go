@@ -289,7 +289,7 @@ func getAdmins(w http.ResponseWriter, req *http.Request) {
 
 func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//var user userWithEmail
-	//user = req.Context().Value("tok").(userWithEmail)
+	user = req.Context().Value("tok").(userWithEmail)
 	
 	var submittedProof datastore.FrontEndData
 
@@ -313,7 +313,7 @@ func (env *Env) saveProof(w http.ResponseWriter, req *http.Request) {
 	//change old front end data to new format
 	var solution datastore.Solution
 	solution.ProblemId = submittedProof.Id
-	solution.UserEmail = "whayden@csumb.edu"//
+	solution.UserEmail = user.GetEmail()
 	solution.Logic = submittedProof.Logic
 	solution.Rules = submittedProof.Rules
 	solution.SolutionStatus = submittedProof.ProofCompleted
