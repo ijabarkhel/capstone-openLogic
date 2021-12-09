@@ -125,7 +125,7 @@ func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
         }
 
 	if len(section.Id) == 0 {
-                http.Error(w, "enter section name to add a student in it", 400)
+                http.Error(w, "enter section id to add a student in it", 400)
                 return
         }
 
@@ -164,7 +164,7 @@ func (env *Env) deleteStudentFromSection(w http.ResponseWriter, req *http.Reques
         }
 
 	if len(section.Id) == 0 {
-                http.Error(w, "enter section name to delete a student", 400)
+                http.Error(w, "enter section id to delete a student", 400)
                 return
         }
 
@@ -226,7 +226,7 @@ func (env *Env) deleteSection(w http.ResponseWriter, req *http.Request) {
 	log.Printf("%+v", sId)
 
 	if len(sId.SectionId) == 0 {
-                http.Error(w, "enter section name to delete section", 400)
+                http.Error(w, "enter section id to delete section", 400)
                 return
         }
 
@@ -252,7 +252,7 @@ func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
 	log.Printf("%+v", sId)
 
 	if len(sId.SectionId) == 0 {
-                http.Error(w, "enter section name to create section", 400)
+                http.Error(w, "enter section id to create section", 400)
                 return
         }
 
