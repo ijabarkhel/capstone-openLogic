@@ -216,10 +216,10 @@ func (p *ProofStore) AddAdmin(userData User) error{
 							name,
 							permissions)
 				 VALUES (?, ?, ?)`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(userData.Email, userData.Name, userData.Permissions)
 
@@ -239,10 +239,10 @@ func (p *ProofStore) DeleteAdmin(userData string) error{
 	}
 
 	stmt, err := tx.Prepare(`DELETE FROM users WHERE users.email = ?`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(userData)
 	if err != nil {
@@ -266,10 +266,10 @@ func (p *ProofStore) AddStudentToSection(sectionData Section) error{
 							name,
 							role)
 				 VALUES (?, ?, ?)`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
 	if err != nil {
@@ -288,10 +288,10 @@ func (p *ProofStore) DeleteStudentFromSection(sectionData Section) error{
 	}
 
 	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ?`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name)
 	if err != nil {
@@ -314,10 +314,10 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 							name,
 							role)
 				 VALUES (?, ?, ?)`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
 
 	if err != nil {
@@ -336,10 +336,10 @@ func (p *ProofStore) DeleteSection(sectionName string) error{
 	}
 
 	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.name = ?`)
-	defer stmt.Close()
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(sectionName)
 	if err != nil {
