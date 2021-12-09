@@ -94,8 +94,8 @@ type IProofStore interface {
 	AddStudentToSection(sectionData Section) error
 	DeleteStudentFromSection(sectionData Section) error
 	CreateSection(sectionData Section) error
-	DeleteSection(sectionName string) error
-	GetSectionData(sectionName string) ([]Section, error)
+	DeleteSection(sectionId string) error
+	GetSectionData(sectionId string) ([]Section, error)
 	GetSectionNameById(sectionId string) (string, error)
 
 	//Empty() error
