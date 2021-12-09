@@ -130,7 +130,8 @@ func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
         }
 
 	if len(section.Name) == 0 {
-		if sectionName,err := env.ds.GetSectionNameById(section.Id); err != nil {
+		sectionName, err := env.ds.GetSectionNameById(section.Id)
+		if err != nil {
         	        http.Error(w, err.Error(), 500)
 	                return
         	}
@@ -187,7 +188,7 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
                 return
         }
 
-	log.Printf("%+v", sId)
+	log.Printf("%+v", section)
 
 	if len(section.Id) == 0 {
                 http.Error(w, "enter section Id to create section", 400)

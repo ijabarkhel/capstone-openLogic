@@ -55,7 +55,7 @@ type ProblemSet struct{
 }
 
 type Section struct{
-	Id 				int
+	Id 			string
 	UserEmail		string
 	Name			string
 	Role			string//the user's role in the section
@@ -159,7 +159,7 @@ func (p *ProofStore) CreateTables() error {
 	}
 	//create sections table
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS sections(
-		id INTEGER NOT NULL,--the id of the section that the user belongs to
+		id TEXT NOT NULL,--the id of the section that the user belongs to
 		userEmail TEXT NOT NULL,--the email of the user who is a part of the section
 		name TEXT,-- the name of the section
 		role TEXT,--describes the users role in the section, professor, student, ta
@@ -364,7 +364,7 @@ func (p *ProofStore) GetSectionData(sectionId string) ([]Section, error){
 	for rows.Next(){
 		var section Section
 
-		rows.Scan($section.Id, &section.UserEmail, &section.Name, $section.Role)
+		rows.Scan(&section.Id, &section.UserEmail, &section.Name, &section.Role)
 
 		if(err !=nil){
 			return nil, err
@@ -381,19 +381,19 @@ func (p *ProofStore) GetSectionData(sectionId string) ([]Section, error){
 func (p *ProofStore) GetSectionNameById(sectionId string) (string, error){
 	tx, err := p.db.Begin()
         if err != nil {
-                return errors.New("Database transaction begin error")
+                return "", errors.New("Database transaction begin error")
         }
 
         stmt, err := tx.Prepare(`SELECT distinct name FROM sections WHERE sections.id = ?`)
         if err != nil{
-                return nil, err
+                return "", err
         }
         defer stmt.Close()
 
         var sectionName string
-	err = stmt.QueryRow(sectionId).Scan($sectionName)
+	err = stmt.QueryRow(sectionId).Scan(&sectionName)
 	if err != nil{
-                return nil, err
+                return "", err
         }
         return sectionName, nil
 }
