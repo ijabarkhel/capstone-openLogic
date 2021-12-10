@@ -426,10 +426,6 @@ func handlerTest(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("Hello world"))
 }
 
-func serveFile(w http.ResponseWriter, req *http.Request) {
-	http.ServeFile(w, req, "/admin.html");
-}
-
 func (env *Env) dbGetTest(w http.ResponseWriter, req *http.Request){
 	type problemArray struct {
 		Problems	[]datastore.Problem
@@ -530,6 +526,5 @@ func main() {
 	// Get admin users -- this is a public endpoint, no token required
 	// Can be changed to require token, but would reduce cacheability
 	http.Handle("/admins", http.HandlerFunc(getAdmins))
-	http.Handle("/admin.html", tokenauth.WithValidAdminToken(http.HandlerFunc(serveFile), admin_users))
 	log.Fatal(http.ListenAndServe("127.0.0.1:"+(*portPtr), nil))
 }

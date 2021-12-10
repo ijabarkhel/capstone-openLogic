@@ -160,7 +160,7 @@ func (p *ProofStore) CreateTables() error {
 	}
 	//create sections table
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS sections(
-		id INTEGER NOT NULL AUTOINCREMENT,--the id of the section that the user belongs to
+		id INTEGER AUTOINCREMENT,--the id of the section that the user belongs to
 		userEmail TEXT NOT NULL,--the email of the user who is a part of the section
 		name TEXT,-- the name of the section
 		role TEXT,--describes the users role in the section, professor, student, ta
