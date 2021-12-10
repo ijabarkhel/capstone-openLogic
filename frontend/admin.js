@@ -9,8 +9,7 @@ class DBUser{
 }
 
 class Section{
-   constructor(id, userEmail, name, role){
-      this.id = id
+   constructor(userEmail, name, role){
       this.userEmail = userEmail
       this.name = name
       this.role = role
@@ -23,9 +22,9 @@ class Email{
    }
 }
 
-class SectionId{
-   constructor(sectionId){
-      this.sectionId = sectionId
+class SectionName{
+   constructor(sectionName){
+      this.sectionName = sectionName
    }
 }
 
@@ -204,11 +203,11 @@ function deleteAdmin() {
 
 function addStudentToSection() {
     let studentEmail = $('#studentEmail').val();
-    let sectionId = $('#sectionId1').val();
-    if (studentEmail && sectionId) {
+    let sectionName = $('#sectionName1').val();
+    if (studentEmail && sectionName) {
       $('#showError3').text('');
 
-      let dataObject = new Section (sectionId, studentEmail, "", "student" );
+      let dataObject = new Section (studentEmail, sectionName, "student" );
 
       backendPOST('addStudentToSection', dataObject).then(
 	(data) => {
@@ -221,11 +220,11 @@ function addStudentToSection() {
 
 function deleteStudentFromSection() {
     let studentEmail = $('#studentEmail2').val();
-    let sectionId = $('#sectionId2').val();
-    if (studentEmail && sectionId) {
+    let sectionName = $('#sectionName2').val();
+    if (studentEmail && sectionName) {
       $('#showError4').text('');
 
-      let dataObject = new Section (sectionId, studentEmail, "", "student" );
+      let dataObject = new Section (studentEmail, sectionName, "student" );
 
       backendPOST('deleteStudentFromSection', dataObject).then(
 	(data) => {
@@ -237,11 +236,10 @@ function deleteStudentFromSection() {
 }
 
 function createSection() {
-    let sectionName = $('#sectionName').val();
-    let sectionId = $('#sectionId3').val();
-    if (sectionName && sectionId) {
+    let sectionName = $('#sectionName3').val();
+    if (sectionName) {
       $('#showError5').text('');
-      let dataObject = new Section(sectionId, "", sectionName, "Admin");
+      let dataObject = new Section("", sectionName, "Admin");
       backendPOST('createSection', dataObject).then(
 	(data) => {
 	  console.log('section created', data);
@@ -252,10 +250,10 @@ function createSection() {
 }
 
 function deleteSection() {
-    let sectionId = $('#sectionId4').val();
-    if (sectionId) {
+    let sectionName = $('#sectionName4').val();
+    if (sectionName) {
       $('#showError6').text('');
-      let dataObject = new SectionId(sectionId);
+      let dataObject = new SectionName(sectionName);
       backendPOST('deleteSection',  dataObject).then(
 	(data) => {
 	  console.log('section deleted', data);
@@ -266,10 +264,10 @@ function deleteSection() {
 }
 
 function displaySummary() {
-    let sectionId = $('#sectionId5').val();
-    if (sectionId) {
+    let sectionName = $('#sectionName5').val();
+    if (sectionName) {
       $('#showError7').text('');
-      let dataObject = new SectionId(sectionId);
+      let dataObject = new SectionName(sectionName);
       backendPOST('getSectionData', dataObject).then(
 	(data) => {
 	  console.log('section data received', data);

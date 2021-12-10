@@ -55,7 +55,7 @@ type ProblemSet struct{
 }
 
 type Section struct{
-	Id 			string
+	Id 			int
 	UserEmail		string
 	Name			string
 	Role			string//the user's role in the section
@@ -70,8 +70,8 @@ type Email struct {
         AdminEmail string
 }
 
-type SectionId struct {
-        SectionId string
+type SectionName struct {
+        SectionName string
 }
 
 //type UserWithEmail interface {
@@ -96,8 +96,8 @@ type IProofStore interface {
 	CreateSection(sectionData Section) error
 	DeleteSection(sectionId string) error
 	GetSectionData(sectionId string) ([]Section, error)
-	GetSectionNameById(sectionId string) (string, error)
 
+	//GetSectionNameById(sectionId string) (string, error)
 	//Empty() error
 	//GetAllAttemptedRepoProofs() (error, []Proof)
 	//GetRepoProofs() (error, []Proof)
@@ -159,7 +159,7 @@ func (p *ProofStore) CreateTables() error {
 	}
 	//create sections table
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS sections(
-		id TEXT NOT NULL,--the id of the section that the user belongs to
+		id INTEGER NOT NULL AUTOINCREMENT,--the id of the section that the user belongs to
 		userEmail TEXT NOT NULL,--the email of the user who is a part of the section
 		name TEXT,-- the name of the section
 		role TEXT,--describes the users role in the section, professor, student, ta
@@ -263,17 +263,17 @@ func (p *ProofStore) AddStudentToSection(sectionData Section) error{
 	}
 
 
-	stmt, err := tx.Prepare(`INSERT INTO sections ( id,
+	stmt, err := tx.Prepare(`INSERT INTO sections (
 							userEmail,
 							name,
 							role)
-				 VALUES (?, ?, ?, ?)`)
+				 VALUES (?, ?, ?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(sectionData.Id, sectionData.UserEmail, sectionData.Name, sectionData.Role)
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -289,13 +289,13 @@ func (p *ProofStore) DeleteStudentFromSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.id = ?`)
+	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.userEmail = ? AND sections.name = ?`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Id)
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -311,16 +311,16 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO sections ( id,
+	stmt, err := tx.Prepare(`INSERT INTO sections (
 							userEmail,
 							name,
 							role)
-				 VALUES (?, ?, ?, ?)`)
+				 VALUES (?, ?, ?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(sectionData.Id, sectionData.UserEmail, sectionData.Name, sectionData.Role)
+	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
 
 	if err != nil {
 		return errors.New("Statement exec error")
@@ -330,20 +330,20 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 	return nil
 }
 
-func (p *ProofStore) DeleteSection(sectionId string) error{
+func (p *ProofStore) DeleteSection(sectionName string) error{
 	//start a database transaction
 	tx, err := p.db.Begin()
 	if err != nil {
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.id = ?`)
+	stmt, err := tx.Prepare(`DELETE FROM sections WHERE sections.name = ?`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(sectionId)
+	_, err = stmt.Exec(sectionName)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -352,8 +352,8 @@ func (p *ProofStore) DeleteSection(sectionId string) error{
 	return nil
 }
 
-func (p *ProofStore) GetSectionData(sectionId string) ([]Section, error){
-	rows, err := p.db.Query("SELECT * FROM sections WHERE sections.id = ?", sectionId)
+func (p *ProofStore) GetSectionData(sectionName string) ([]Section, error){
+	rows, err := p.db.Query("SELECT * FROM sections WHERE sections.name = ?", sectionName)
 	if err != nil{
 		return nil, err
 	}
@@ -364,9 +364,9 @@ func (p *ProofStore) GetSectionData(sectionId string) ([]Section, error){
 	for rows.Next(){
 		var section Section
 
-		rows.Scan(&section.Id, &section.UserEmail, &section.Name, &section.Role)
+		rows.Scan(&section.UserEmail, &section.Name, &section.Role)
 
-		if(err !=nil){
+		if(err != nil){
 			return nil, err
 		}
 
@@ -377,7 +377,7 @@ func (p *ProofStore) GetSectionData(sectionId string) ([]Section, error){
 	return sections, nil
 }
 
-
+/**
 func (p *ProofStore) GetSectionNameById(sectionId string) (string, error){
 	tx, err := p.db.Begin()
         if err != nil {
@@ -398,6 +398,7 @@ func (p *ProofStore) GetSectionNameById(sectionId string) (string, error){
 	tx.Commit()
         return sectionName, nil
 }
+**/
 
 func (p *ProofStore) StoreSolution(solution Solution) error{
 	//start a database transaction
