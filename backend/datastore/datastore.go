@@ -97,6 +97,7 @@ type IProofStore interface {
 	DeleteSection(sectionName string) error
 	GetSectionData(sectionName string) ([]Section, error)
 	GetSectionDataFromUserEmail(sectionName string) ([]Section, error)
+	GetNextSectionId() (int, error)
 
 	//GetSectionNameById(sectionId string) (string, error)
 	//Empty() error
@@ -263,18 +264,17 @@ func (p *ProofStore) AddStudentToSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-
 	stmt, err := tx.Prepare(`INSERT INTO sections ( id,
 							userEmail,
 							name,
 							role)
-				 VALUES (SELECT IFNULL(MAX(id), 0) + 1 FROM sections, ?, ?, ?)`)
+				 VALUES (?, ?, ?, ?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
+	_, err = stmt.Exec(sectionData.Id, sectionData.UserEmail, sectionData.Name, sectionData.Role)
 	if err != nil {
 		return errors.New("Statement exec error")
 	}
@@ -316,12 +316,12 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 							userEmail,
 							name,
 							role)
-				 VALUES (SELECT IFNULL(MAX(id), 0) + 1 FROM sections, ?, ?, ?)`)
+				 VALUES (?, ?, ?, ?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(sectionData.UserEmail, sectionData.Name, sectionData.Role)
+	_, err = stmt.Exec(sectionData.Id, sectionData.UserEmail, sectionData.Name, sectionData.Role)
 
 	if err != nil {
 		return errors.New("Statement exec error")
@@ -376,6 +376,27 @@ func (p *ProofStore) GetSectionData(sectionName string) ([]Section, error){
 	}
 
 	return sections, nil
+}
+
+func (p *ProofStore) GetNextSectionId() (int, error){
+        rows, err := p.db.Query("SELECT (IFNULL(MAX(id), 0) + 1)  FROM sections")
+        if err != nil{
+                return 0, err
+        }
+        defer rows.Close()
+        
+        var nextId int
+
+        for rows.Next(){
+                rows.Scan(&nextId)
+
+                if(err != nil){
+                        return 0, err
+                }
+                return nextId, nil
+        }
+
+        return nextId, nil
 }
 
 func (p *ProofStore) GetSectionDataFromUserEmail(email string) ([]Section, error){

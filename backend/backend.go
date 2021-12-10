@@ -117,8 +117,6 @@ func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
                 return
         }
 
-	log.Printf("%+v", section)
-
 	if len(section.UserEmail) == 0 {
                 http.Error(w, "enter email for user to add it to section", 400)
                 return
@@ -128,6 +126,16 @@ func (env *Env) addStudentToSection(w http.ResponseWriter, req *http.Request) {
                 http.Error(w, "enter section name to add a student in it", 400)
                 return
         }
+
+
+        nextId, err := env.ds.GetNextSectionId()
+        if err != nil {
+                log.Fatal(err)
+        }
+
+	section.Id = nextId
+
+	log.Printf("%+v", section)
 
 	if err := env.ds.AddStudentToSection(section); err != nil {
                 http.Error(w, err.Error(), 500)
@@ -183,6 +191,13 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
                 http.Error(w, "enter section Name to create section", 400)
                 return
         }
+
+        nextId, err := env.ds.GetNextSectionId()
+        if err != nil {
+                log.Fatal(err)
+        }
+
+	section.Id = nextId
 	section.UserEmail = user.GetEmail()
 	section.Role = "Admin"
 
