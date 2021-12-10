@@ -253,25 +253,17 @@ func (env *Env) getSectionData(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func (env *Env) GetSectionDataFromUserEmail(w http.ResponseWriter, req *http.Request) {
+func (env *Env) getSectionDataFromUserEmail(w http.ResponseWriter, req *http.Request) {
 	user := req.Context().Value("tok").(userWithEmail)
-	var email sectionObject
-	email = user.GetEmail()
 
-	if err := json.NewDecoder(req.Body).Decode(); err != nil {
-                log.Println(err)
-                http.Error(w, err.Error(), 400)
-                return
-        }
+	log.Printf("%+v", user)
 
-	log.Printf("%+v", email)
-
-	if len(email.email) == 0 {
+	if len(user.GetEmail()) == 0 {
                 http.Error(w, "Failed to retrieve email of user", 400)
                 return
         }
 
-	sectionData, err := env.ds.GetSectionDataFromUserEmail(email)
+	sectionData, err := env.ds.GetSectionDataFromUserEmail(user.GetEmail())
 	if err != nil{
 		log.Fatal(err)
 	}
@@ -527,8 +519,8 @@ func main() {
 
 	// method getSectionData : POST : JSON <- id_token, admin
 	http.Handle("/getSectionData", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.getSectionData), admin_users))
-	http.Handle("/getSectionDataFromUserEmail", tokenauth.WithValidAdminToken(http.HandlerFunc(Env.getSectionDataFromUserEmail), admin_users))
-	http.Handle("/getSectionDataFromUserEmail", tokenauth.WithValidToken(http.HandlerFunc(Env.getSectionDataFromUserEmail), admin_users))
+
+	http.Handle("/getSectionDataFromUserEmail", tokenauth.WithValidToken(http.HandlerFunc(Env.getSectionDataFromUserEmail)))
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))

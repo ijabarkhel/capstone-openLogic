@@ -94,8 +94,9 @@ type IProofStore interface {
 	AddStudentToSection(sectionData Section) error
 	DeleteStudentFromSection(sectionData Section) error
 	CreateSection(sectionData Section) error
-	DeleteSection(sectionId string) error
-	GetSectionData(sectionId string) ([]Section, error)
+	DeleteSection(sectionName string) error
+	GetSectionData(sectionName string) ([]Section, error)
+	GetSectionDataFromUserEmail(sectionName string) ([]Section, error)
 
 	//GetSectionNameById(sectionId string) (string, error)
 	//Empty() error
@@ -401,7 +402,7 @@ func (p *ProofStore) GetSectionDataFromUserEmail(email string) ([]Section, error
 
 	return sections, nil
 }
-
+/**
 func (p *ProofStore) GetSectionNameById(sectionId string) (string, error){
 	tx, err := p.db.Begin()
         if err != nil {
