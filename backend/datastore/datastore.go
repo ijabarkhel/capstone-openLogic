@@ -264,11 +264,11 @@ func (p *ProofStore) AddStudentToSection(sectionData Section) error{
 	}
 
 
-	stmt, err := tx.Prepare(`INSERT INTO sections ( (SELECT MAX(id) + 1 FROM sections),
+	stmt, err := tx.Prepare(`INSERT INTO sections ( id,
 							userEmail,
 							name,
 							role)
-				 VALUES (?, ?, ?)`)
+				 VALUES (SELECT IFNULL(MAX(id), 0) + 1 FROM sections, ?, ?, ?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}
@@ -312,11 +312,11 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO sections ( (SELECT MAX(id) + 1 FROM sections),
+	stmt, err := tx.Prepare(`INSERT INTO sections ( id,
 							userEmail,
 							name,
 							role)
-				 VALUES (?, ?, ?)`)
+				 VALUES (SELECT IFNULL(MAX(id), 0) + 1 FROM sections, ?, ?, ?)`)
 	if err != nil {
 		return errors.New("Transaction prepare error")
 	}

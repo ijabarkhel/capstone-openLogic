@@ -179,8 +179,6 @@ func (env *Env) createSection(w http.ResponseWriter, req *http.Request) {
                 return
         }
 
-	log.Printf("%+v", section)
-
 	if len(section.Name) == 0 {
                 http.Error(w, "enter section Name to create section", 400)
                 return
