@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- standard metadata -->
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- web icon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/assets/logicproofchecker.png">
+
+    <title>Proof Checker</title>
+
+    <!-- CSS & Fonts, third-party -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans" type="text/css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/lib/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" />
+    <!--    <link rel="stylesheet" href="assets/lib/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" /> -->
+    <link rel="stylesheet" href="assets/lib/semantic.min.css" integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" />
+
+    <!-- CSS, local -->
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="stylesheet" type="text/css" href="proofs.css" />
+
+    <!-- updated api call for signin 
+    <script src="https://accounts.google.com/gsi/client" async defer></script> -->
+
+    <!-- Scripts, third-party -->
+    <script src="assets/lib/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="></script>
+    <script src="assets/lib/semantic.min.js" integrity="sha256-t8GepnyPmw9t+foMh3mKNvcorqNHamSKtKRxxpUEgFI="></script>
+
+    <!-- Scripts, local -->
+    <script type="text/javascript" charset="utf-8" src="syntax.js"></script>
+    <script type="text/javascript" charset="utf-8" src="proofs.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
+    <!-- <script type="text/javascript" src="./admin.js"></script> -->
+    <script type="text/javascript" src="./sections.js"></script>
+  </head>
+
+  <body>
+    <div id="top-menu" class="ui menu" style="height: 60px;">
+      <div class="header item">
+        <h1 id="title"><a href="index.html">Proof Checker</a></h1>
+      </div>
+      <a href="rules.html" class="item">
+        Proof Rules
+      </a>
+      <a href="references.html" class="item">
+        Credits
+      </a>
+      <a href="help.html" class="item">
+        Help
+      </a>
+      <a href="sections.html" class="item">
+          Sections
+      </a>
+      <!--<div class="right menu">
+        <div id="g_id_onload"
+          data-client_id="684622091896-1fk7qevoclhjnhc252g5uhlo5q03mpdo.apps.googleusercont"
+          data-callback="onSignIn">
+        </div>
+        <div class="g_id_signin" data-type="standard"></div>
+      </div>-->
+    </div>
+
+
+    <div class="ui container segment" id="rulesContainer">
+      <h3 id="imageHeader" class="ui header">
+	Welcome to the sections page
+      </h3>
+
+      <div id="SectionsDisplay" style="display: none;" onload="DisplaySections()">
+        <!-- <p  style="margin-left: 40px;"><a href="javascript:void(0);" onclick="SectionsDisplay()">Display sections</a><br>  -->
+            <span id="DisplaySections" style="margin-left: 40px;"> 
+            </span>
+      </div>
+
+      <!-- <div id="AssignProblemsets">
+        <p  style="margin-left: 40px;"><a href="javascript:void(0);" onclick="AssignProblemsets()">Assign problemsets</a><br> 
+      </div>
+
+      <div id="GenerateReport">
+        <p  style="margin-left: 40px;"><a href="javascript:void(0);" onclick="GenerateReports()">Student reports</a><br> 
+      </div> -->
+
+    <hr style="margin-bottom: 15px;">
+    <div class="bottom">
+      <p>This site based on the <a href="https://github.com/OpenLogicProject/fitch-checker">Open Logic Project</a> proof checker. </p>
+      Modifications by students and faculty at Cal. State University, Montery Bay. See <a href="references.html" class="item">Credits</a> for details.</p>
+      <p>Site Version: 108ed1d24e5e6ec3166d50518c55752d6e9677d4</p>
+    </div>
+</div>
+
+</body>
+</html>
+

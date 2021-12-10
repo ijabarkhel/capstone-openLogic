@@ -377,6 +377,31 @@ func (p *ProofStore) GetSectionData(sectionId string) ([]Section, error){
 	return sections, nil
 }
 
+func (p *ProofStore) GetSectionDataFromUserEmail(email string) ([]Section, error){
+	rows, err := p.db.Query("SELECT * FROM sections WHERE sections.UserEmail = ?", email)
+	if err != nil{
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var sections []Section
+
+	for rows.Next(){
+		var section Section
+
+		rows.Scan(&section.UserEmail, &section.Name)
+
+		if(err !=nil){
+			return nil, err
+		}
+
+		sections = append(sections, section)
+		return sections, nil
+	}
+
+	return sections, nil
+}
+
 
 func (p *ProofStore) GetSectionNameById(sectionId string) (string, error){
 	tx, err := p.db.Begin()
