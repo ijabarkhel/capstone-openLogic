@@ -71,10 +71,6 @@ class User {
       return this;
    }
 
-   showSectionsFunctionality(){
-      $('sectionsLink').show();
-   }
-
    /*loadProofs() {
       loadUserProofs();
       loadRepoProofs();
