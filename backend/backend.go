@@ -462,6 +462,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ds.Close()
+
 	//create the tables if they do not exist
 	ds.CreateTables();
 
@@ -520,7 +521,7 @@ func main() {
 
 	http.Handle("/dbgettest", http.HandlerFunc(Env.dbGetTest))
 	http.Handle("/dbposttest", http.HandlerFunc(Env.dbPostTest))
-	http.Handle("/test",http.HandlerFunc(handlerTest))
+	//http.Handle("/test",http.HandlerFunc(handlerTest))
 
 	log.Println("Server started on: 127.0.0.1:"+(*portPtr) )
 	// Get admin users -- this is a public endpoint, no token required

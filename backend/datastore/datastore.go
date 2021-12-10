@@ -160,7 +160,7 @@ func (p *ProofStore) CreateTables() error {
 	}
 	//create sections table
 	_, err = p.db.Exec(`CREATE TABLE IF NOT EXISTS sections(
-		id INTEGER AUTOINCREMENT,--the id of the section that the user belongs to
+		id INTEGER NOT NULL,--the id of the section that the user belongs to
 		userEmail TEXT NOT NULL,--the email of the user who is a part of the section
 		name TEXT,-- the name of the section
 		role TEXT,--describes the users role in the section, professor, student, ta
@@ -264,7 +264,7 @@ func (p *ProofStore) AddStudentToSection(sectionData Section) error{
 	}
 
 
-	stmt, err := tx.Prepare(`INSERT INTO sections (
+	stmt, err := tx.Prepare(`INSERT INTO sections ( (SELECT MAX(id) + 1 FROM sections),
 							userEmail,
 							name,
 							role)
@@ -312,7 +312,7 @@ func (p *ProofStore) CreateSection(sectionData Section) error{
 		return errors.New("Database transaction begin error")
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO sections (
+	stmt, err := tx.Prepare(`INSERT INTO sections ( (SELECT MAX(id) + 1 FROM sections),
 							userEmail,
 							name,
 							role)
